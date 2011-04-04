@@ -560,9 +560,10 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            uint32 spellId = SPELL_BANANAS_FALL_TO_GROUND;
-            switch (urand(0, 3))
+            uint32 spellId = 0;
+            switch (urand(0, 2))
             {
+				case 0: spellId = SPELL_BANANAS_FALL_TO_GROUND; break;
                 case 1: spellId = SPELL_ORANGE_FALLS_TO_GROUND; break;
                 case 2: spellId = SPELL_PAPAYA_FALLS_TO_GROUND; break;
             }

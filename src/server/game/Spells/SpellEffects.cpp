@@ -1221,6 +1221,22 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->SendMessageToSet(&data,true);
                     return;
                 }
+				case 51840
+				{
+					// quest requires 2 bananas, 1 orange, 1 papaya
+					// give bananas about 2x the chance to fall
+					uint32 spell_id = 51836;                // Bananas Fall to Ground
+					switch (urand(0,3))
+					{
+					case 1: spell_id = 51837; break;        // Orange Falls to Ground
+					case 2: spell_id = 51839; break;        // Papaya Falls to Ground
+					}
+					// sometimes, if you're lucky, you get a dwarf
+					if (!urand(0,20)) spell_id = 52070;     // Summon Adventurous Dwarf 
+					m_caster->CastSpell(m_caster, spell_id, true, NULL);
+					return;
+				}
+			{
                 case 53808:                                 // Pygmy Oil
                 {
                     Aura *pAura = m_caster->GetAura(53806);
