@@ -758,6 +758,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case 61988: // Divine Shield exclude aura
                     return false;
                 case 30877: // Tag Murloc
+				case 62478: // Frozen Blows
                     return true;
                 default:
                     break;
