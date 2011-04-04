@@ -51,13 +51,20 @@ Vehicle::Vehicle(Unit *unit, VehicleEntry const *vehInfo, uint32 creatureEntry)
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK_DEST, true);
         case 158:
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_DISPEL, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_PERIODIC_HEAL, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_STUN, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_ROOT, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_DECREASE_SPEED, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_CONFUSE, true);
-            me->ApplySpellImmune(0, IMMUNITY_ID, 49560, true); // Death Grip jump effect
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHIELD, true);
+            me->ApplySpellImmune(0, IMMUNITY_ID, 13810, true); // Frost Trap
+            me->ApplySpellImmune(0, IMMUNITY_ID, 55741, true); // Desecration Rank 1
+            me->ApplySpellImmune(0, IMMUNITY_ID, 68766, true); // Desecration Rank 2
             break;
         default:
             break;
@@ -162,16 +169,27 @@ void Vehicle::RemoveAllPassengers()
 {
     sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::RemoveAllPassengers. Entry: %u, GuidLow: %u", m_creatureEntry, me->GetGUIDLow());
 
-    // Passengers always cast an aura with SPELL_AURA_CONTROL_VEHICLE on the vehicle
-    // We just remove the aura and the unapply handler will make the target leave the vehicle.
-    // We don't need to iterate over m_Seats
-    me->RemoveAurasByType(SPELL_AURA_CONTROL_VEHICLE);
+    for (SeatMap::iterator itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
+        if (Unit *passenger = ObjectAccessor::GetUnit(*GetBase(), itr->second.passenger))
+        {
+            ASSERT(passenger->IsInWorld());
+            ASSERT(passenger->IsOnVehicle(GetBase()));
+            ASSERT(GetSeatForPassenger(passenger));
+            sLog->outDebug(LOG_FILTER_VEHICLES, "Vehicle::RemoveAllPassengers. Entry: %u, GuidLow: %u", m_creatureEntry, me->GetGUIDLow());
 
-    // Following the above logic, this assertion should NEVER fail.
-    // Even in 'hacky' cases, there should at least be VEHICLE_SPELL_RIDE_HARDCODED on us.
-    SeatMap::const_iterator itr;
-    for (itr = m_Seats.begin(); itr != m_Seats.end(); ++itr)
-        ASSERT(!itr->second.passenger);
+            if (passenger->IsVehicle())
+                passenger->GetVehicleKit()->RemoveAllPassengers();
+
+            if (passenger->GetVehicle() != this)
+                sLog->outCrash("Vehicle %u has invalid passenger %u. Seat: %i", me->GetEntry(), passenger->GetEntry(), itr->first);
+
+            passenger->ExitVehicle();
+            if (itr->second.passenger)
+            {
+                sLog->outCrash("Vehicle %u cannot remove passenger %u. "UI64FMTD" is still on vehicle.", me->GetEntry(), passenger->GetEntry(), itr->second.passenger);
+                itr->second.passenger = 0;
+            }
+        }
 }
 
 bool Vehicle::HasEmptySeat(int8 seatId) const
@@ -360,7 +378,7 @@ bool Vehicle::AddPassenger(Unit *unit, int8 seatId)
                 me->ToCreature()->AI()->PassengerBoarded(unit, seat->first, true);
 
             // update all passenger's positions
-            RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
+            RelocatePassengers(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0);
         }
     }
 

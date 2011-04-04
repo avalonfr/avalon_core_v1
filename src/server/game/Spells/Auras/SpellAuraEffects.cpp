@@ -1953,6 +1953,23 @@ void AuraEffect::PeriodicDummyTick(Unit * target, Unit * caster) const
 
                 break;
             }
+			case 62038: // Biting Cold
+                if(target->isMoving() && target->GetAura(62039))
+                    target->GetAura(62039)->ModStackAmount(-1);
+                else if(target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    target->CastSpell(target,62039,true,0,0,caster->GetGUID());
+                    if(target->HasAura(62039) && caster->ToCreature() && target->GetAura(62039)->GetStackAmount() > 2)
+                        caster->ToCreature()->AI()->DoAction(1);
+                }
+                break;
+            case 62039: //Biting cold
+            {
+                uint8 stackAmount = target->GetAura(62039)->GetStackAmount();
+                int32 damage = (int32)(ceil(200 * pow(2.0,stackAmount)));
+                target->CastCustomSpell(target,62188,&damage,0,0,true);
+                break;
+            }
             case 62292: // Blaze (Pool of Tar)
                 // should we use custom damage?
                 target->CastSpell((Unit*)NULL, m_spellProto->EffectTriggerSpell[m_effIndex], true);
@@ -1970,6 +1987,26 @@ void AuraEffect::PeriodicDummyTick(Unit * target, Unit * caster) const
                 {
                     target->CastSpell(target, 64774, true, NULL, NULL, GetCasterGUID());
                     target->RemoveAura(64821);
+                }
+                break;
+			case 63802: // Brain Link
+                if (caster)
+                {
+                    std::list<Unit*> unitList;
+                    target->GetRaidMember(unitList, 80);
+                    for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end(); ++itr)
+                    {
+                        Unit* pUnit = *itr;
+                        if (!pUnit || pUnit == target || !pUnit->HasAura(63802))
+                            continue;
+
+                        // Afflicted targets suffer Shadow damage whenever they are more than 20 yards apart
+                        if (target->IsWithinDist(pUnit, 20))
+                            target->CastSpell(pUnit, 63804, true, 0, 0);
+                        else
+                            target->CastSpell(pUnit, 63803, true, 0, 0);
+                        return;
+                    }
                 }
                 break;
         }
@@ -5845,6 +5882,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                     break;
                 case 63322: // Saronite Vapors
                 {
+					target->RemoveAura(62692);
                     int32 mana = int32(GetAmount() * pow(2.0f, GetBase()->GetStackAmount())); // mana restore - bp * 2^stackamount
                     int32 damage = mana * 2; // damage
                     caster->CastCustomSpell(target, 63337, &mana, NULL, NULL, true);
