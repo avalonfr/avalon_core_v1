@@ -438,6 +438,24 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         break;
                     }
 
+					//Touch the Nightmare
+					case 50341:
+					{
+						if (effect_idx == 2)
+							damage = uniTarget->GetMaxHealth() * 0.3f;
+							break;
+					}
+					// Lightning Nova
+					case 65279:
+					{
+						// Guessed: exponential diminution until max range of spell (100yd)
+						float distance = m_caster->GetDistance2d(unitTarget);
+						if (distance > 100)
+							damage = 0;
+						else
+							damage *= pow(1.0f - distance / 100.0f, 2);
+						break
+					}
                     // Loken Pulsing Shockwave
                     case 59837:
                     case 52942:
