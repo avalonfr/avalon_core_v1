@@ -437,14 +437,6 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
-
-					//Touch the Nightmare
-					case 50341:
-					{
-						if (effect_idx == 2)
-							damage = uniTarget->GetMaxHealth() * 0.3f;
-							break;
-					}
 					// Lightning Nova
 					case 65279:
 					{
@@ -454,7 +446,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 							damage = 0;
 						else
 							damage *= pow(1.0f - distance / 100.0f, 2);
-						break
+						break;
 					}
                     // Loken Pulsing Shockwave
                     case 59837:
@@ -1221,15 +1213,15 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->SendMessageToSet(&data,true);
                     return;
                 }
-				case 51840
+				case 51840:
 				{
 					// quest requires 2 bananas, 1 orange, 1 papaya
 					// give bananas about 2x the chance to fall
 					uint32 spell_id = 51836;                // Bananas Fall to Ground
 					switch (urand(0,3))
 					{
-					case 1: spell_id = 51837; break;        // Orange Falls to Ground
-					case 2: spell_id = 51839; break;        // Papaya Falls to Ground
+						case 1: spell_id = 51837; break;        // Orange Falls to Ground
+						case 2: spell_id = 51839; break;        // Papaya Falls to Ground
 					}
 					// sometimes, if you're lucky, you get a dwarf
 					if (!urand(0,20)) spell_id = 52070;     // Summon Adventurous Dwarf 
