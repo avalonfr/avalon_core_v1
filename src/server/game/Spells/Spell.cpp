@@ -938,6 +938,9 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
 
     // Check for effect immune skip if immuned
     bool immuned = pVictim->IsImmunedToSpellEffect(m_spellInfo, effIndex);
+	// Saronite Vapors Hack
+    if (m_spellInfo->Id == 63337)
+        immuned = false;
 
     uint64 targetGUID = pVictim->GetGUID();
 
@@ -2566,7 +2569,12 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                                 }
                             }
                             break;
-
+						case 62834: // Boom (Boombot)
+                        case 64320: // Rune of Power (Assembly of Iron)
+                        case 28374: // Decimate (Gluth)
+                        case 54426:
+                            SearchAreaTarget(unitList, radius, pushType, SPELL_TARGETS_ANY);
+                            break;
                         default:
                             sLog->outDebug(LOG_FILTER_SPELLS_AURAS, "Spell (ID: %u) (caster Entry: %u) does not have type CONDITION_SOURCE_TYPE_SPELL_SCRIPT_TARGET record in `conditions` table.", m_spellInfo->Id, m_caster->GetEntry());
 

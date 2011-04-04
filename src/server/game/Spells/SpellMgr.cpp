@@ -756,6 +756,7 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case 34700: // Allergic Reaction
                 case 61987: // Avenging Wrath Marker
                 case 61988: // Divine Shield exclude aura
+				case 63322: // Saronite Vapors
                     return false;
                 case 30877: // Tag Murloc
 				case 62478: // Frozen Blows
@@ -771,7 +772,12 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Ignite
             if (spellproto->SpellIconID == 45)
                 return true;
-            break;
+			break;
+        case SPELLFAMILY_WARRIOR:
+			// Shockwave
+			if (spellId == 46968)
+				return false;
+			break;
         case SPELLFAMILY_PRIEST:
             switch (spellId)
             {
@@ -2874,6 +2880,9 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             // Repentance
             if (spellproto->SpellFamilyFlags[0] & 0x4)
                 return DIMINISHING_POLYMORPH;
+			// Judgement of Justice
+			if (spellproto->SpellFamilyFlags[0] & 0x100000)
+				return DIMINISHING_LIMITONLY;
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
@@ -3602,6 +3611,8 @@ void SpellMgr::LoadSpellCustomAttr()
             count++;
             break;
         case 49838: // Stop Time
+		case 50526: // Wandering Plague
+		case 52916: // Honor Among Thieves
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             count++;
             break;
@@ -3853,20 +3864,29 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         // some dummy spell only has dest, should push caster in this case
         case 62324: // Throw Passenger
-            spellInfo->Targets |= TARGET_FLAG_UNIT_CASTER;
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             count++;
             break;
-		case 62713: // Ironbranch's Essence
-		case 62968: // Brightleaf's Essence
-			spellInfo->DurationIndex = 39;
-			count++;
-			break;
-		case 62661: // Searing Flames
-		case 61915: // Lightning Whirl 10
-		case 63483: // Lightning Whirl 25
-			spellInfo->InterruptFlags = 47;
-			count++;
-			break;
+        case 66665: // Burning Breath
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
+            break;
+        case 62907: // Freya's Ward
+        case 62947:
+            spellInfo->DurationIndex = 0;
+            count++;
+            break;
+        case 62713: // Ironbranch's Essence
+        case 62968: // Brightleaf's Essence
+            spellInfo->DurationIndex = 39;
+            count++;
+            break;
+        case 62661: // Searing Flames
+        case 61915: // Lightning Whirl 10
+        case 63483: // Lightning Whirl 25
+            spellInfo->InterruptFlags = 47;
+            count++;
+            break;
         case 16834: // Natural shapeshifter
         case 16835:
             spellInfo->DurationIndex = 21;
@@ -3981,6 +4001,33 @@ void SpellMgr::LoadSpellCustomAttr()
         //
         case 63342: // Focused Eyebeam Summon Trigger
             spellInfo->MaxAffectedTargets = 1;
+            count++;
+            break;
+		case 64145: // Diminish Power
+        case 63882: // Death Ray Warning Visual
+        case 63886: // Death Ray Damage Visual
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
+            count++;
+            break;
+        case 64172: // Titanic Storm
+            spellInfo->excludeTargetAuraSpell = 65294; // Empowered
+            count++;
+            break;
+        case 63830: // Malady of the Mind
+        case 63881: // Malady of the Mind proc
+        case 63795: // Psychosis
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_TARGET_ANY;
+            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_TARGET_ANY;
+            count++;
+            break;
+        case 63802: // Brain Link
+            spellInfo->MaxAffectedTargets = 2;
+            spellInfo->EffectRadiusIndex[0] = 12; // 100 yard
+            count++;
+            break;
+        case 63050: // Sanity
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
             count++;
             break;
         // ENDOF ULDUAR SPELLS
@@ -4105,6 +4152,70 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->MaxAffectedTargets = 1;
             count++;
             break;
+			+        case 49224: // Magic Suppression
+        case 49611:
+        case 57935: // Twilight Torment
+            spellInfo->procCharges = 0;
+            count++;
+            break;
+        case 45524: // Chains of Ice
+            spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+            count++;
+            break;
+        case 18754: // Improved Seduction
+        case 18755:
+        case 18756:
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+            count++;
+            break;
+        case 20467: // Judgement of Command
+            spellInfo->EffectBasePoints[1] = 19;
+            count++;
+            break;
+        case 59630:
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+            count++;
+            break;
+        case 64936:
+            spellInfo->EffectBasePoints[0] = 99;
+            count++;
+            break;
+        case 29175: // Ribbon Dance Customization
+            spellInfo->AttributesEx3 |= SPELL_ATTR3_DEATH_PERSISTENT;
+            spellInfo->Effect[0] = 6;
+            spellInfo->Effect[1] = 6;
+            spellInfo->EffectApplyAuraName[0] = SPELL_AURA_MOD_XP_PCT;
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_XP_QUEST_PCT;
+            spellInfo->EffectBasePoints[0] = 10;
+            spellInfo->EffectBasePoints[1] = 10;
+            spellInfo->EffectImplicitTargetA[0] = 1;
+            spellInfo->EffectImplicitTargetA[1] = 1;
+            spellInfo->EffectImplicitTargetB[0] = 0;
+            spellInfo->EffectImplicitTargetB[1] = 0;
+            spellInfo->EffectRadiusIndex[0] = 0;
+            spellInfo->EffectRadiusIndex[1] = 0;
+            spellInfo->StackAmount = 5;
+            spellInfo->DurationIndex = 30;
+            count++;
+            break;
+        case 53480: // Roar of Sacrifice Split damage
+            spellInfo->Effect[1] = SPELL_EFFECT_APPLY_AURA;
+            spellInfo->EffectApplyAuraName[1] = SPELL_AURA_SPLIT_DAMAGE_PCT;
+            spellInfo->EffectMiscValue[1] = 127;
+            count++;
+            break;
+        case 23126: // World Enlarger
+            spellInfo->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_SPELL_ATTACK;
+            count++;
+            break;
+        case 70890: // Scourge Strike Triggered
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_TRIGGERED_CAN_TRIGGER;
+            count++;
+            break;
+        case 49206: // Summon Gargoyle
+            spellInfo->DurationIndex = 587;
+            count++;
+            break;
         default:
             break;
         }
@@ -4129,6 +4240,12 @@ void SpellMgr::LoadSpellCustomAttr()
                 // Roar
                 else if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     mSpellCustomAttr[i] |= SPELL_ATTR0_CU_AURA_CC;
+				// Entangling Roots
+                else if (spellInfo->SpellFamilyFlags[0] & 0x200 && spellInfo->Attributes & SPELL_ATTR0_CASTABLE_WHILE_SITTING)
+                    spellInfo->CastingTimeIndex = 1;
+                // Rake
+                else if (spellInfo->SpellFamilyFlags[0] & 0x1000)
+                    mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 else
                     break;
                 count++;
