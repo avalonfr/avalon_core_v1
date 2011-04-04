@@ -2603,6 +2603,40 @@ public:
     }
 };
 
+/*######
+## npc_ghost_of_azuregos
+######*/
+class npc_ghost_of_azuregos : public CreatureScript
+{
+public:
+    npc_ghost_of_azuregos() : CreatureScript("npc_ghost_of_azuregos") { }
+
+    bool OnGossipHello (Player *player, Creature *pCreature)
+    {
+        if (player->GetQuestStatus(8575) == QUEST_STATUS_NONE && !player->HasItemCount(20949, 1))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Do you want the Magical Ledger?", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(pCreature), pCreature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+    {
+            ItemPosCountVec dest;
+            uint8 canStoreNewItem = pPlayer->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 20949, 1);
+            if (canStoreNewItem == EQUIP_ERR_OK)
+            {
+                Item *newItem = NULL;
+                newItem = pPlayer->StoreNewItem(dest, 20949, 1, true);
+                pPlayer->SendNewItem(newItem, 1, true, false);
+            } else
+                pCreature->MonsterSay("No place!", LANG_UNIVERSAL, pPlayer->GetGUID());
+
+            return true;
+    }
+};
+
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -2633,5 +2667,6 @@ void AddSC_npcs_special()
     new npc_locksmith;
     new npc_tabard_vendor;
     new npc_experience;
+	new npc_ghost_of_azuregos; // update creature_template set scriptname = 'npc_ghost_of_azuregos' where entry = 15481;
 }
 
