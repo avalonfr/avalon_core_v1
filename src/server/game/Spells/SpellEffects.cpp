@@ -1228,7 +1228,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 					m_caster->CastSpell(m_caster, spell_id, true, NULL);
 					return;
 				}
-			{
+			//{
                 case 53808:                                 // Pygmy Oil
                 {
                     Aura *pAura = m_caster->GetAura(53806);
