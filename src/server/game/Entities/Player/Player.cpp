@@ -70,6 +70,7 @@
 #include "CharacterDatabaseCleaner.h"
 #include "InstanceScript.h"
 #include <cmath>
+#include "OutdoorPvPWG.h"
 
 #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
 
@@ -112,6 +113,7 @@ enum CharacterFlags
     CHARACTER_FLAG_UNK22                = 0x00200000,
     CHARACTER_FLAG_UNK23                = 0x00400000,
     CHARACTER_FLAG_UNK24                = 0x00800000,
+
     CHARACTER_FLAG_LOCKED_BY_BILLING    = 0x01000000,
     CHARACTER_FLAG_DECLINED             = 0x02000000,
     CHARACTER_FLAG_UNK27                = 0x04000000,
@@ -715,6 +717,7 @@ Player::Player (WorldSession *session): Unit(), m_achievementMgr(this), m_reputa
     {
         m_bgBattlegroundQueueID[j].bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;
         m_bgBattlegroundQueueID[j].invitedToInstance = 0;
+
     }
 
     m_logintime = time(NULL);
@@ -9055,6 +9058,17 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
                                                             // 8 Arena season id
     data << uint32(0xF3D) << uint32(sWorld->getIntConfig(CONFIG_ARENA_SEASON_ID));
 
+	// May be send timer to start Wintergrasp
+		if(sWorld->GetWintergrapsState()==4354)
+		data << uint32(0x1102) << sWorld->GetWintergrapsTimer();
+		else
+		data << uint32(0xEC5) << sWorld->GetWintergrapsTimer();
+		// ---
+		
+			
+	
+	
+	
     if (mapid == 530)                                       // Outland
     {
         data << uint32(0x9bf) << uint32(0x0);               // 7
@@ -10243,6 +10257,7 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
     for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if (Bag* pBag = GetBagByPos(i))
+
         {
             for (uint32 j = 0; j < pBag->GetBagSize(); j++)
             {
