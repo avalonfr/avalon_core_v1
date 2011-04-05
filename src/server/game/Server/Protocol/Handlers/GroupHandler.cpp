@@ -117,6 +117,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket & recv_data)
     if (group2 && group2->isBGGroup())
         group2 = player->GetOriginalGroup();
     // player already in another group or invited
+
     if (group2 || player->GetGroupInvite())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, ERR_ALREADY_IN_GROUP_S);
@@ -242,6 +243,7 @@ void WorldSession::HandleGroupAcceptOpcode(WorldPacket& recv_data)
 
     group->BroadcastGroupUpdate();
 }
+
 
 void WorldSession::HandleGroupDeclineOpcode(WorldPacket & /*recv_data*/)
 {
