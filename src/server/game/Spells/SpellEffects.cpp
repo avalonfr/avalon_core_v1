@@ -1589,7 +1589,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
     else if (itemTarget)
         sScriptMgr->OnDummyEffect(m_caster, m_spellInfo->Id, effIndex, itemTarget);
 }
-
 void Spell::EffectTriggerSpellWithValue(SpellEffIndex effIndex)
 {
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
