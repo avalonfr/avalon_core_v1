@@ -4,25 +4,25 @@ SET NAMES 'utf8';
 
 DELETE FROM `trinity_string` WHERE entry IN (756,757,758,759,760,761,762,763,764,765,766,767,768,769,770,771,772,780,781,782,783);
 INSERT INTO `trinity_string` (`entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`) VALUES
-('756', 'Battle begins!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Битва началась'),
-('757', '%s has successfully defended the fortress!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s успешно защитил(а) крепость!'),
-('758', '%s has taken over the fortress!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s захватил(а) крепость'),
-('759', 'The %s siege workshop has been damaged by the %s!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('760', 'The %s siege workshop has been destroyed by the %s!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('761', 'The %s tower has been damaged!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s башня повреждена'),
-('762', 'The %s tower has been destroyed!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s башня уничтожена!'),
-('763', 'Wintergrasp fortress is under attack!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('764', 'Wintergrasp is now under the control of the %s.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('756', 'Que la Bataille Commence!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Битва началась'),
+('757', '%s a defendu la forteresse avec succes!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s успешно защитил(а) крепость!'),
+('758', '%s a capture la forteresse!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s захватил(а) крепость'),
+('759', 'L atelier  %s a ete endommage par %s!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('760', 'L atelier %s a ete detruit par %s!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('761', 'La tour %s  a ete endommagee!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s башня повреждена'),
+('762', 'La tour %s  a ete detruite!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '%s башня уничтожена!'),
+('763', 'La forteresse est attaquee!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('764', 'Le joug est maintenant sous le controle de %s.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 ('765', 'Wintergrasp timer set to %s.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('766', 'Wintergrasp battle started.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('767', 'Wintergrasp battle finished.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('768', 'Wintergrasp info: %s controlled. Timer: %s. Wartime: %s. Number of Players: (Horde: %u, Alliance: %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('766', 'Joug bataille en cours.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('767', 'Joug bataille terminee.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+('768', 'Info joug : %s controle. temps: %s. guerre: %s. nombre de joueurs: (Horde: %u, Alliance: %u)', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 ('769', 'Wintergrasp outdoorPvP is disabled.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 ('770', 'Wintergrasp outdoorPvP is enabled.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-('771', 'You have reached Rank 1: Corporal', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Вы достигли Ранга 1: Капрал'),
-('772', 'You have reached Rank 2: First Lieutenant', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Вы достигли Ранга 2: Лейтенант'),
-('780', 'Before the Battle of  Wintergrasp left 30 minutes!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'До битвы на  Озере Ледяных Оков осталось 30 минут!'),
-('781', 'Before the Battle of  Wintergrasp left 10 minutes! Portal from Dalaran will work in 5 minutes.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'До битвы на  Озере Ледяных Оков осталось 10 минут! Портал с Даларана начнет роботу через 5 минут.'),
+('771', 'Vous avez atteint le rang  1: Corporal', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Вы достигли Ранга 1: Капрал'),
+('772', 'Vous avez atteint le rang 2: 1er Lieutenant', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Вы достигли Ранга 2: Лейтенант'),
+('780', '30 minutes avant la bataille du joug!', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'До битвы на  Озере Ледяных Оков осталось 30 минут!'),
+('781', '10 minutes avant la bataille du joug !Portail a partir de  Dalaran activés dans 5 minutes.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'До битвы на  Озере Ледяных Оков осталось 10 минут! Портал с Даларана начнет роботу через 5 минут.'),
 ('782', 'The battle for Wintergrasp  has stopped! Not enough defenders. Wintergrasp Fortress remains  Attackers.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Битва за Озеро Ледяных Оков Остановлена. Не хватает защитников. Крепость переходит атакующей  стороне.'),
 ('783', 'The battle for Wintergrasp  has stopped! Not enough attackers. Wintergrasp Fortress remains  Defenders.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Битва за Озеро Ледяных Оков Остановлена. Не хватает нападающих. Крепость остается защитникам.');
 
@@ -141,7 +141,7 @@ insert into `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `qu
 insert into `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `quest_start_active`, `quest_end`, `cast_flags`, `aura_required`, `aura_forbidden`, `user_type`) values('32627','60968','0','0','0','1','0','0','0');
 insert into `npc_spellclick_spells` (`npc_entry`, `spell_id`, `quest_start`, `quest_start_active`, `quest_end`, `cast_flags`, `aura_required`, `aura_forbidden`, `user_type`) values('32629','60968','0','0','0','1','0','0','0');
 
-/* ajout des objectif outdoor */
+/* ajout des objectifs outdoor */
 DELETE FROM gameobject_template WHERE entry IN (182173,182174,182175,182210,183104,183411,183412,183413,183414,182522,182523,182097,182098,182096,181899);
 
 insert into `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`, `WDBVerified`) values('181899','29','6834','Doodad_BattlefieldBanner_State_Base_Plaguelands01','','','','114','32','1','0','0','0','0','0','0','80','11515','2426','2427','10568','10556','10697','10696','10699','10698','11151','11150','20','2428','1','5','480','1200','1','0','50','0','0','0','','12340');
@@ -160,3 +160,6 @@ insert into `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconNa
 insert into `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`, `WDBVerified`) values('183413','29','6834','Terokkar Banner','','','','0','48','1','0','0','0','0','0','0','75','0','2623','2625','0','0','0','0','12499','12498','12492','12493','80','2624','1','10','60','120','1','0','50','0','0','0','','12340');
 insert into `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `faction`, `flags`, `size`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `data0`, `data1`, `data2`, `data3`, `data4`, `data5`, `data6`, `data7`, `data8`, `data9`, `data10`, `data11`, `data12`, `data13`, `data14`, `data15`, `data16`, `data17`, `data18`, `data19`, `data20`, `data21`, `data22`, `data23`, `ScriptName`, `WDBVerified`) values('183414','29','6834','Terokkar Banner','','','','0','48','1','0','0','0','0','0','0','75','0','2623','2625','0','0','0','0','12501','12500','12494','12495','80','2624','1','10','60','120','1','0','50','0','0','0','','12340');
 
+/* main gate fortress */
+delete FROM gameobject WHERE id IN (191810);
+insert into `gameobject` (`id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) values('191810','571','1','1','5397.11','2841.54','425.901','3.14159','0','0','0','0','300','0','1');
