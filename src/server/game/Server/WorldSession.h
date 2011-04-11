@@ -867,11 +867,11 @@ class WorldSession
         QueryResultFuture m_charEnumCallback;
         QueryResultFuture m_addIgnoreCallback;
         QueryResultFuture m_stablePetCallback;
-        QueryCallback<std::string> m_charRenameCallback;
-        QueryCallback<std::string> m_addFriendCallback;
-        QueryCallback<uint32> m_unstablePetCallback;
-        QueryCallback<uint32> m_stableSwapCallback;
-        QueryCallback<uint64> m_sendStabledPetCallback;
+        QueryCallback<QueryResult, std::string> m_charRenameCallback;
+        QueryCallback<QueryResult, std::string> m_addFriendCallback;
+        QueryCallback<QueryResult, uint32> m_unstablePetCallback;
+        QueryCallback<QueryResult, uint32> m_stableSwapCallback;
+        QueryCallback<QueryResult, uint64> m_sendStabledPetCallback;
         QueryResultHolderFuture m_charLoginCallback;
 
     private:
@@ -883,17 +883,13 @@ class WorldSession
         void LogUnprocessedTail(WorldPacket *packet);
 
         // EnumData helpers
-        bool CharCanLogin(uint32 LowGUID)
+        bool CharCanLogin(uint32 lowGUID)
         {
-            if (find(m_AllowedCharsToLogin.begin(),
-                     m_AllowedCharsToLogin.end(),
-                     LowGUID) == m_AllowedCharsToLogin.end())
-                return false;
-            return true;
+            return _allowedCharsToLogin.find(lowGUID) != _allowedCharsToLogin.end();
         }
         // this stores the GUIDs of the characters who can login
         // characters who failed on Player::BuildEnumData shouldn't login
-        std::list<uint32> m_AllowedCharsToLogin;
+        std::set<uint32> _allowedCharsToLogin;
 
         uint32 m_GUIDLow;                                   // set loggined or recently logout player (while m_playerRecentlyLogout set)
         Player *_player;
