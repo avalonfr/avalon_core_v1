@@ -161,14 +161,14 @@ DROP TABLE IF EXISTS `arena_team_member`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `arena_team_member` (
-  `arenateamid` int(10) unsigned NOT NULL DEFAULT '0',
+  `arenaTeamId` int(10) unsigned NOT NULL DEFAULT '0',
   `guid` int(10) unsigned NOT NULL DEFAULT '0',
   `weekGames` smallint(5) unsigned NOT NULL DEFAULT '0',
   `weekWins` smallint(5) unsigned NOT NULL DEFAULT '0',
   `seasonGames` smallint(5) unsigned NOT NULL DEFAULT '0',
   `seasonWins` smallint(5) unsigned NOT NULL DEFAULT '0',
   `personalRating` smallint(5) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`arenateamid`,`guid`)
+  PRIMARY KEY (`arenaTeamId`,`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1194,29 +1194,29 @@ DROP TABLE IF EXISTS `corpse`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `corpse` (
-  `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `player` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Character Global Unique Identifier',
-  `position_x` float NOT NULL DEFAULT '0',
-  `position_y` float NOT NULL DEFAULT '0',
-  `position_z` float NOT NULL DEFAULT '0',
+  `corpseGuid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
+  `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Character Global Unique Identifier',
+  `posX` float NOT NULL DEFAULT '0',
+  `posY` float NOT NULL DEFAULT '0',
+  `posZ` float NOT NULL DEFAULT '0',
   `orientation` float NOT NULL DEFAULT '0',
-  `map` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
+  `mapId` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
   `phaseMask` smallint(5) unsigned NOT NULL DEFAULT '1',
   `displayId` int(10) unsigned NOT NULL DEFAULT '0',
   `itemCache` text NOT NULL,
   `bytes1` int(10) unsigned NOT NULL DEFAULT '0',
   `bytes2` int(10) unsigned NOT NULL DEFAULT '0',
-  `guild` int(10) unsigned NOT NULL DEFAULT '0',
+  `guildId` int(10) unsigned NOT NULL DEFAULT '0',
   `flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `dynFlags` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `time` int(10) unsigned NOT NULL DEFAULT '0',
-  `corpse_type` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `instance` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`),
-  KEY `idx_type` (`corpse_type`),
-  KEY `instance` (`instance`),
-  KEY `Idx_player` (`player`),
-  KEY `Idx_time` (`time`)
+  `corpseType` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `instanceId` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Instance Identifier',
+  PRIMARY KEY (`corpseGuid`),
+  KEY `idx_type` (`corpseType`),
+  KEY `idx_instance` (`instanceId`),
+  KEY `idx_player` (`guid`),
+  KEY `idx_time` (`time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Death System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1238,10 +1238,10 @@ DROP TABLE IF EXISTS `creature_respawn`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `creature_respawn` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `respawntime` int(10) unsigned NOT NULL DEFAULT '0',
-  `instance` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`,`instance`),
-  KEY `instance` (`instance`)
+  `respawnTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `instanceId` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Instance Identifier',
+  PRIMARY KEY (`guid`,`instanceId`),
+  KEY `idx_instance` (`instanceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Grid Loading System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1311,10 +1311,10 @@ DROP TABLE IF EXISTS `gameobject_respawn`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `gameobject_respawn` (
   `guid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Global Unique Identifier',
-  `respawntime` int(10) unsigned NOT NULL DEFAULT '0',
-  `instance` int(10) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`guid`,`instance`),
-  KEY `instance` (`instance`)
+  `respawnTime` int(10) unsigned NOT NULL DEFAULT '0',
+  `instanceId` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Instance Identifier',
+  PRIMARY KEY (`guid`,`instanceId`),
+  KEY `idx_instance` (`instanceId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Grid Loading System';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

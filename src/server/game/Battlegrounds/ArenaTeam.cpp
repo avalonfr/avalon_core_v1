@@ -156,9 +156,9 @@ bool ArenaTeam::AddMember(const uint64& playerGuid)
 
     // Feed data to the struct
     ArenaTeamMember newmember;
-    newmember.Name              = playerName;
-    newmember.Guid              = playerGuid;
-    newmember.Class             = playerClass;
+    newmember.Name             = playerName;
+    newmember.Guid             = playerGuid;
+    newmember.Class            = playerClass;
     newmember.SeasonGames      = 0;
     newmember.WeekGames        = 0;
     newmember.SeasonWins       = 0;
@@ -171,7 +171,7 @@ bool ArenaTeam::AddMember(const uint64& playerGuid)
     // Save player's arena team membership to db
     stmt = CharacterDatabase.GetPreparedStatement(CHAR_SET_ARENA_TEAM_MEMBER);
     stmt->setUInt32(0, TeamId);
-    stmt->setUInt32(1, playerGuid);
+    stmt->setUInt32(1, GUID_LOPART(playerGuid));
     CharacterDatabase.Execute(stmt);
 
     // Inform player if online
@@ -834,7 +834,7 @@ void ArenaTeam::SaveToDB()
         stmt->setUInt16(3, itr->SeasonGames);
         stmt->setUInt16(4, itr->SeasonWins);
         stmt->setUInt32(5, GetId());
-        stmt->setUInt16(6, GUID_LOPART(itr->Guid));
+        stmt->setUInt32(6, GUID_LOPART(itr->Guid));
         trans->Append(stmt);
 
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPDATE_CHARACTER_ARENA_STATS);

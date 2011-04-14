@@ -1950,8 +1950,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
 
     uint32 count = 0;
 
-    QueryResult result = CharacterDatabase.Query("SELECT guid,respawntime,instance FROM creature_respawn");
-
+    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_LOAD_CREATURE_RESPAWNS));
     if (!result)
     {
         sLog->outString(">> Loaded 0 creature respawn time.");
@@ -1981,13 +1980,11 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
     uint32 oldMSTime = getMSTime();
 
     // Remove outdated data
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_GO_RESPAWN_TIMES);
-    CharacterDatabase.DirectExecute(stmt);
+    CharacterDatabase.DirectExecute(CharacterDatabase.GetPreparedStatement(CHAR_DEL_EXPIRED_GO_RESPAWNS));
 
     uint32 count = 0;
 
-    QueryResult result = CharacterDatabase.Query("SELECT guid,respawntime,instance FROM gameobject_respawn");
-
+    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_LOAD_GO_RESPAWNS));
     if (!result)
     {
         sLog->outString(">> Loaded 0 gameobject respawn times. DB table `gameobject_respawn` is empty!");
@@ -4907,12 +4904,12 @@ void ObjectMgr::LoadScripts(ScriptsType type)
     if (tableName.empty())
         return;
 
-    if (sWorld->IsScriptScheduled())                          // function don't must be called in time scripts use.
+    if (sScriptMgr->IsScriptScheduled())                    // function cannot be called when scripts are in use.
         return;
 
     sLog->outString("Loading %s...", tableName.c_str());
 
-    scripts->clear();                                        // need for reload support
+    scripts->clear();                                       // need for reload support
 
     bool isSpellScriptTable = (type == SCRIPTS_SPELL);
     char buff[125];
@@ -6657,7 +6654,7 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         m_mailid = (*result)[0].GetUInt32()+1;
 
-    result = CharacterDatabase.Query("SELECT MAX(guid) FROM corpse");
+    result = CharacterDatabase.Query("SELECT MAX(corpseGuid) FROM corpse");
     if (result)
         m_hiCorpseGuid = (*result)[0].GetUInt32()+1;
 
@@ -6669,7 +6666,7 @@ void ObjectMgr::SetHighestGuids()
     if (result)
         m_equipmentSetGuid = (*result)[0].GetUInt64()+1;
 
-    result = CharacterDatabase.Query("SELECT MAX(guildid) FROM guild");
+    result = CharacterDatabase.Query("SELECT MAX(guildId) FROM guild");
     if (result)
         m_guildId = (*result)[0].GetUInt32()+1;
 
@@ -7186,11 +7183,7 @@ void ObjectMgr::LoadCorpses()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                                      0           1           2            3         4      5          6         7       8       9     10      11
-    QueryResult result = CharacterDatabase.Query("SELECT position_x, position_y, position_z, orientation, map, displayId, itemCache, bytes1, bytes2, guild, flags, dynFlags"
-    //                                               12       13          14        15       16     17
-                                                 ", time, corpse_type, instance, phaseMask, guid, player FROM corpse WHERE corpse_type <> 0");
-
+    PreparedQueryResult result = CharacterDatabase.Query(CharacterDatabase.GetPreparedStatement(CHAR_LOAD_CORPSES));
     if (!result)
     {
         sLog->outString(">> Loaded 0 corpses. DB table `pet_name_generation` is empty.");
@@ -7199,15 +7192,12 @@ void ObjectMgr::LoadCorpses()
     }
 
     uint32 count = 0;
-
     do
     {
-
         Field *fields = result->Fetch();
-
         uint32 guid = fields[16].GetUInt32();
 
-        Corpse *corpse = new Corpse;
+        Corpse *corpse = new Corpse();
         if (!corpse->LoadFromDB(guid, fields))
         {
             delete corpse;
@@ -7215,7 +7205,6 @@ void ObjectMgr::LoadCorpses()
         }
 
         sObjectAccessor->AddCorpse(corpse);
-
         ++count;
     }
     while (result->NextRow());
@@ -7733,7 +7722,7 @@ void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t
         m_CreatureRespawnTimesMtx.release();
     }
 
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_CREATURE_RESPAWN_TIME);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_CREATURE_RESPAWN);
     stmt->setUInt32(0, loguid);
     stmt->setUInt64(1, uint64(t));
     stmt->setUInt32(2, instance);
@@ -7749,7 +7738,7 @@ void ObjectMgr::RemoveCreatureRespawnTime(uint32 loguid, uint32 instance)
         m_CreatureRespawnTimesMtx.release();
     }
 
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CREATURE_RESPAWN_TIME);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CREATURE_RESPAWN);
     stmt->setUInt32(0, loguid);
     stmt->setUInt32(1, instance);
     CharacterDatabase.Execute(stmt);
@@ -7781,7 +7770,7 @@ void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
         m_GORespawnTimesMtx.release();
     }
 
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_GO_RESPAWN_TIME);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_ADD_GO_RESPAWN);
     stmt->setUInt32(0, loguid);
     stmt->setUInt64(1, uint64(t));
     stmt->setUInt32(2, instance);
@@ -7797,7 +7786,7 @@ void ObjectMgr::RemoveGORespawnTime(uint32 loguid, uint32 instance)
         m_GORespawnTimesMtx.release();
     }
 
-    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GO_RESPAWN_TIME);
+    PreparedStatement *stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GO_RESPAWN);
     stmt->setUInt32(0, loguid);
     stmt->setUInt32(1, instance);
     CharacterDatabase.Execute(stmt);
@@ -7832,8 +7821,12 @@ void ObjectMgr::DeleteRespawnTimeForInstance(uint32 instance)
         }
         m_CreatureRespawnTimesMtx.release();
     }
-    CharacterDatabase.PExecute("DELETE FROM creature_respawn WHERE instance = '%u'", instance);
-    CharacterDatabase.PExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", instance);
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CREATURE_RESPAWN_BY_INSTANCE);
+    stmt->setUInt32(0, instance);
+    CharacterDatabase.Execute(stmt);
+    stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GO_RESPAWN_BY_INSTANCE);
+    stmt->setUInt32(0, instance);
+    CharacterDatabase.Execute(stmt);
 }
 
 void ObjectMgr::DeleteGOData(uint32 guid)
