@@ -3056,7 +3056,6 @@ bool IsPartOfSkillLine(uint32 skillId, uint32 spellId)
 
 bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32 newArea) const
 {
-	OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
     if (gender != GENDER_NONE)                   // not in expected gender
         if (!player || gender != player->getGender())
             return false;
@@ -3101,8 +3100,9 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
 		{
 			if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
 			{
-				if ((pvpWG->isWarTime()==false) || !player || (!player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY)) || player->HasAura(45472) || player->HasAura(44795) || player->GetPositionZ() > 619.2f || player->isInFlight())
-					return false;
+				if (OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+          if ((pvpWG->isWarTime()==false) || !player || (!player->HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) && !player->HasAuraType(SPELL_AURA_FLY)) || player->HasAura(45472) || player->HasAura(44795) || player->GetPositionZ() > 619.2f || player->isInFlight())
+            return false;
 			}
 		}
 		break;
@@ -4109,19 +4109,6 @@ void SpellMgr::LoadSpellCustomAttr()
         case 72674: // Mutated Strength (Professor Putricide)
         case 72675: // Mutated Strength (Professor Putricide)
             spellInfo->Effect[1] = 0;
-            count++;
-            break;
-        case 70447: // Volatile Ooze Adhesive (Professor Putricide)
-        case 72836: // Volatile Ooze Adhesive (Professor Putricide)
-        case 72837: // Volatile Ooze Adhesive (Professor Putricide)
-        case 72838: // Volatile Ooze Adhesive (Professor Putricide)
-        case 70672: // Gaseous Bloat (Professor Putricide)
-        case 72455: // Gaseous Bloat (Professor Putricide)
-        case 72832: // Gaseous Bloat (Professor Putricide)
-        case 72833: // Gaseous Bloat (Professor Putricide)
-            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_TARGET_ENEMY;
-            spellInfo->EffectImplicitTargetB[1] = TARGET_UNIT_TARGET_ENEMY;
-            spellInfo->EffectImplicitTargetB[2] = TARGET_UNIT_TARGET_ENEMY;
             count++;
             break;
         case 70911: // Unbound Plague (Professor Putricide)
