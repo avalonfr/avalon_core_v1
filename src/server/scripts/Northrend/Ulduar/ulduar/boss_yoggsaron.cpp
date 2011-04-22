@@ -135,6 +135,8 @@ enum Spells
     SPELL_DEATH_RAY_DAMAGE_VISUAL               = 63886,
     SPELL_DEATH_RAY_WARNING_VISUAL              = 63882,
     SPELL_PSYCHOSIS                             = 63795,
+	SPELL_PSYCHOSIS_10							= 63795,
+	SPELL_PSYCHOSIS_25							= 65301,
     SPELL_MALADY_OF_THE_MIND                    = 63830,
     
     // Guardian of Yogg Saron
@@ -608,7 +610,7 @@ public:
                     {
                         case EVENT_PSYCHOSIS:
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 60, true))
-                                DoCast(pTarget, SPELL_PSYCHOSIS);
+                                DoCast(pTarget, RAID_MODE(SPELL_PSYCHOSIS_10,SPELL_PSYCHOSIS_25));
                             events.ScheduleEvent(EVENT_PSYCHOSIS, urand(4000, 6000), 0, PHASE_2);
                             break;
                         case EVENT_MALADY_OF_THE_MIND:
@@ -704,6 +706,37 @@ public:
             uiPhase_timer = uiTimer;
             ++uiStep;
         }
+
+		void SpellHitTarget(Unit * pWho, const SpellEntry * pSpell)
+		{
+			// reduces Sanity by %
+			int32 sanityCount = 0;
+			switch(pSpell->Id)
+			{
+				case SPELL_BRAIN_LINK:
+					sanityCount = 2; break;
+				case SPELL_MALADY_OF_THE_MIND: // Malady of the Mind 10
+					sanityCount = 3; break;
+				case SPELL_PSYCHOSIS_10: // Psychosis 10
+					sanityCount = 9; break;
+				case SPELL_PSYCHOSIS_25: // Psychosis 25
+					sanityCount = 12; break;
+			}
+			if (sanityCount)
+			{
+				if (Aura * aur = pWho->GetAura(SPELL_SANITY))
+				{
+					if (aur->GetStackAmount() <= sanityCount)
+					{
+						pWho->RemoveAurasDueToSpell(SPELL_SANITY);
+						return;
+					}
+					else
+						aur->ModStackAmount(-sanityCount);
+				}
+			}
+		}
+
     };
 
 };
@@ -996,6 +1029,31 @@ public:
                     break;
             } 
         }
+
+		void SpellHitTarget(Unit * pWho, const SpellEntry * pSpell)
+		{
+			// reduces Sanity by %
+			int32 sanityCount = 0;
+			switch(pSpell->Id)
+			{
+				case SPELL_LUNATIC_GAZE_P3: // Lunatic Gaze P3
+					sanityCount = 4; break;
+			}
+			if (sanityCount)
+			{
+				if (Aura * aur = pWho->GetAura(SPELL_SANITY))
+				{
+					if (aur->GetStackAmount() <= sanityCount)
+					{
+						pWho->RemoveAurasDueToSpell(SPELL_SANITY);
+						return;
+					}
+					else
+						aur->ModStackAmount(-sanityCount);
+				}
+			}
+		}
+		
     };
 
 };
@@ -1077,7 +1135,7 @@ public:
                     {
                         DoCastAOE(SPELL_SHATTERED_ILLUSION, true);
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                        if (GameObject* pDoor = me->FindNearestGameObject(GOB_CHAMBER_DOOR + illusion, 60))
+                        if (GameObject* pDoor = me->FindNearestGameObject(GOB_CHAMBER_DOOR + illusion, 150.0f))
                             pDoor->SetGoState(GO_STATE_ACTIVE);
                         // The Illusion shatters and a path to the central chamber opens!
                         std::list<Unit*> unitList;
@@ -1106,6 +1164,30 @@ public:
                     break;
             }
         }
+
+		void SpellHitTarget(Unit * pWho, const SpellEntry * pSpell)
+		{
+			// reduces Sanity by %
+			int32 sanityCount = 0;
+			switch(pSpell->Id)
+			{
+				case SPELL_INDUCE_MADNESS: // Induce Madness
+					sanityCount = 100; break;
+			}
+			if (sanityCount)
+			{
+				if (Aura * aur = pWho->GetAura(SPELL_SANITY))
+				{
+					if (aur->GetStackAmount() <= sanityCount)
+					{
+						pWho->RemoveAurasDueToSpell(SPELL_SANITY);
+						return;
+					}
+					else
+						aur->ModStackAmount(-sanityCount);
+				}
+			}
+		}
     };
 
 };
@@ -1997,8 +2079,8 @@ void AddSC_boss_yoggsaron()
     new npc_corruptor_tentacle();
     new npc_immortal_guardian();
     new npc_keeper_image();
-    new npc_ys_freya();
     new npc_sanity_well();
+	new npc_ys_freya();
     new npc_ys_thorim();
     new npc_ys_mimiron();
     new npc_ys_hodir();
