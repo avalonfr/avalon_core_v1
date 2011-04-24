@@ -7123,7 +7123,6 @@ void Spell::EffectPlayerNotification(SpellEffIndex effIndex)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-	OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197);
 
     switch(m_spellInfo->Id)
     {
@@ -7131,13 +7130,14 @@ void Spell::EffectPlayerNotification(SpellEffIndex effIndex)
 		{
 			if (sWorld->getBoolConfig(CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED))
 			{
-				if (pvpWG->isWarTime()==true)
-				{
-					unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);
-					unitTarget->PlayDirectSound(9417); // Fel Reaver sound
-					unitTarget->MonsterTextEmote("The air is too thin in Wintergrasp for normal flight. You will be ejected in 9 sec.",unitTarget->GetGUID(),true);
-					break;
-				} else unitTarget->RemoveAura(58730);
+				if(	OutdoorPvPWG *pvpWG = (OutdoorPvPWG*)sOutdoorPvPMgr->GetOutdoorPvPToZoneId(4197))
+					if (pvpWG->isWarTime()==true)
+					{
+						unitTarget->ToPlayer()->GetSession()->SendNotification(LANG_ZONE_NOFLYZONE);
+						unitTarget->PlayDirectSound(9417); // Fel Reaver sound
+						unitTarget->MonsterTextEmote("The air is too thin in Wintergrasp for normal flight. You will be ejected in 9 sec.",unitTarget->GetGUID(),true);
+						break;
+					} else unitTarget->RemoveAura(58730);
 			}
 		break;
 		}
