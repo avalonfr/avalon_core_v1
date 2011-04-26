@@ -1865,6 +1865,21 @@ insert into `script_texts` (`npc_entry`, `entry`, `content_default`, `content_lo
 insert into `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) values('33287','-1603264','Ready to move out, keep those dwarves off of our backs!',NULL,'Nous sommes prêts à partir. Empêchez les nains de nous attaquer !',NULL,NULL,NULL,NULL,NULL,NULL,'0','1','0','0','SAY_AGGRO_3');
 insert into `script_texts` (`npc_entry`, `entry`, `content_default`, `content_loc1`, `content_loc2`, `content_loc3`, `content_loc4`, `content_loc5`, `content_loc6`, `content_loc7`, `content_loc8`, `sound`, `type`, `language`, `emote`, `comment`) values('33413','-1603273','Do not hold back! Destroy them!',NULL,'Ne vous retenez pas ! Détruisez-les !',NULL,NULL,NULL,NULL,NULL,NULL,'15736','1','0','0','Thorim SAY_SPECIAL_2');
 
+-- coeur xt002
+DELETE FROM `npc_spellclick_spells` WHERE `npc_entry` IN (33113, 33114, 33118, 33293, 33432, 33651);
+INSERT INTO `npc_spellclick_spells` (`npc_entry`,`spell_id`,`quest_start`,`quest_start_active`,`quest_end`,`cast_flags`,`aura_required`,`aura_forbidden`,`user_type`) VALUES
+(33113,46598,0,0,0,0,0,0,0), -- Flame Leviathan
+(33114,46598,0,0,0,0,0,0,0), -- Flame Leviathan Seat
+(33118,46598,0,0,0,0,0,0,0), -- Ignis
+(33293,46598,0,0,0,0,0,0,0), -- XT-002
+(33432,46598,0,0,0,0,0,0,0), -- Leviathan MK II
+(33651,46598,0,0,0,0,0,0,0); -- VX-001
+-- XT-002 correct vehicle id
+UPDATE `creature_template` SET `VehicleId` = 353 WHERE `entry` = 33293;
+-- XT-002 Hearth
+DELETE FROM `vehicle_template_accessory` WHERE `entry` = 33293;
+INSERT INTO `vehicle_template_accessory` (`entry`, `accessory_entry`, `seat_id`, `minion`, `description`) VALUES
+(33293, 33329, 0, 1, "XT-002 Hearth");
 
 
 
