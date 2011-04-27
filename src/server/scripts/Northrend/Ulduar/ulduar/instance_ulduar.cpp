@@ -49,7 +49,15 @@ enum eGameObjects
     GO_THORIM_LEVER         = 194265,
     GO_MIMIRON_TRAM         = 194675,
     GO_MIMIRON_ELEVATOR     = 194749,
-    GO_KEEPERS_DOOR         = 194255
+    GO_KEEPERS_DOOR         = 194255,
+
+	GO_ALGALON_DOOR				= 194767,
+	GO_UNIVERSE_GLOBE           = 194148,
+    GO_UNIVERSE_FLOOR_1         = 194715,
+    GO_UNIVERSE_FLOOR_2         = 194716,
+    GO_ALGALON_SIGIL_DOOR       = 194910,
+    GO_ALGALON_TRAP_DOOR        = 194253,
+
 };
 
 class instance_ulduar : public InstanceMapScript
@@ -69,7 +77,7 @@ public:
             SetBossNumber(MAX_BOSS_NUMBER);
             LoadDoorData(doorData);
         }
-
+		 uint32 uiEncounter[MAX_BOSS_NUMBER];
         uint64 uiLeviathan;
         uint64 uiNorgannon;
         uint64 uiIgnis;
@@ -113,7 +121,14 @@ public:
         uint64 ThorimLeverGUID;
         uint64 MimironTramGUID;
         uint64 MimironElevatorGUID;
-        
+
+		uint64 uiAlgalonTrapDoor;
+        uint64 uiAlgalonDoor;
+		uint64 uiAlgalonGlobeGUID;
+        uint64 uiUniverseFloor1GUID;
+        uint64 uiUniverseFloor2GUID;
+		uint64 uiAlgalonTrapDoorGUID;
+
         void OnGameObjectCreate(GameObject* pGo)
         {
             AddDoor(pGo, true);
@@ -159,6 +174,30 @@ public:
                     }
                     break;
                 }
+				case GO_ALGALON_DOOR:
+				{
+						InstanceScript* pInstance = pGo->GetInstanceScript();
+						uiAlgalonDoor = pGo->GetGUID() ;
+						if(pInstance && pInstance->GetBossState(BOSS_ALGALON) == DONE)
+							HandleGameObject(uiAlgalonDoor, true);
+						else
+							HandleGameObject(uiAlgalonDoor, false);
+						break ;
+				}
+
+				 case GO_UNIVERSE_GLOBE:
+                    uiAlgalonGlobeGUID = pGo->GetGUID();
+                    break;
+                case GO_UNIVERSE_FLOOR_1:
+                    uiUniverseFloor1GUID = pGo->GetGUID();
+                    break;
+                case GO_UNIVERSE_FLOOR_2:
+                    uiUniverseFloor2GUID = pGo->GetGUID();
+                    break;
+                case GO_ALGALON_TRAP_DOOR:
+                    uiAlgalonTrapDoorGUID = pGo->GetGUID();
+                    break;
+
                 default: break;
             }
         }
@@ -363,6 +402,8 @@ public:
                     return uiYoggSaronBrain;
                 case DATA_YOGGSARON:
                     return uiYoggSaron;
+				case DATA_UNIVERSE_GLOBE:
+					return uiAlgalonGlobeGUID;
             }
             return NULL;
         }
@@ -511,6 +552,26 @@ public:
                             pHodir->SetVisible(true);
                     }
                     break;
+			   case BOSS_ALGALON:
+					switch (state)
+					{
+						case IN_PROGRESS :
+							HandleGameObject(uiAlgalonDoor, false);
+							HandleGameObject(uiAlgalonTrapDoorGUID,true);
+							HandleGameObject(uiUniverseFloor2GUID,true);
+							HandleGameObject(uiUniverseFloor1GUID,false);
+						
+							break;
+
+						case NOT_STARTED :
+							//reset floor & globe
+							HandleGameObject(uiAlgalonDoor, true);
+							HandleGameObject(uiAlgalonTrapDoorGUID,false);
+							HandleGameObject(uiUniverseFloor2GUID,false);
+							HandleGameObject(uiUniverseFloor1GUID,true);
+							//HandleGameObject(uiAlgalonGlobeGUID,false);
+							break;
+					}
             }
         
             return true;
@@ -530,6 +591,57 @@ public:
                 }
             }
         }
+
+		std::string GetSaveData()
+        {
+            OUT_SAVE_INST_DATA;
+
+            std::ostringstream saveStream;
+            saveStream << "U U " << GetBossSaveData() << " " << uiEncounter[14];
+
+            OUT_SAVE_INST_DATA_COMPLETE;
+            return saveStream.str();
+        }
+
+        void Load(const char* strIn)
+        {
+            if (!strIn)
+            {
+                OUT_LOAD_INST_DATA_FAIL;
+                return;
+            }
+
+            OUT_LOAD_INST_DATA(strIn);
+
+            char dataHead1, dataHead2;
+
+            std::istringstream loadStream(strIn);
+            loadStream >> dataHead1 >> dataHead2;
+
+            if (dataHead1 == 'U' && dataHead2 == 'U')
+            {
+                for (uint8 i = 0; i < MAX_BOSS_NUMBER; ++i)
+                {
+                    uint32 tmpState;
+
+					loadStream >> tmpState;
+
+					if (tmpState == IN_PROGRESS || tmpState > SPECIAL)
+                        tmpState = NOT_STARTED;
+
+					SetBossState(i,  EncounterState(tmpState));
+					sLog->outDebug(LOG_FILTER_TSCR,"Load : %u",tmpState);
+					uiEncounter[i] = EncounterState(tmpState);
+                }
+				loadStream >> uiEncounter[14]; //colossus pre leviathan
+				CheckKeepersState();
+            }
+            OUT_LOAD_INST_DATA_COMPLETE;
+			
+        }
+
+
+
     };
 
 };
