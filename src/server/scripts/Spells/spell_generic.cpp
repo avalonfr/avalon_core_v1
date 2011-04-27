@@ -799,6 +799,47 @@ class spell_gen_profession_research : public SpellScriptLoader
         }
 };
 
+enum EasterLayNobblegardenTriggers
+{
+    SPELL_RABIT_COSTUME=61716,
+    SPELL_NOBLEGARDEN_BUNNY=61734
+};
+class spell_61719_easter_lay_noblegarden_egg_aura : public SpellScriptLoader
+{
+public:
+    spell_61719_easter_lay_noblegarden_egg_aura() : SpellScriptLoader("spell_61719_easter_lay_noblegarden_egg_aura") { }
+
+    class spell_61719_easter_lay_noblegarden_egg_aura_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_61719_easter_lay_noblegarden_egg_aura_AuraScript);
+
+        void HandleEffectRemove(AuraEffect const * aurEff, AuraEffectHandleModes /*mode*/)
+        {
+            if (GetTargetApplication()->GetRemoveMode() !=  AURA_REMOVE_BY_DEFAULT)
+                return;
+            //if (GetTarget()->ToPlayer() && GetTarget()->ToPlayer()->GetSession()->isLogingOut())
+            //    return;
+
+            if (aurEff->GetPeriodicTimer() == aurEff->GetAmplitude())
+                return; // lame check to avoid infinite loop
+
+            GetEffect(EFFECT_0)->ResetPeriodic(true); //use GetEffect to avoid const_cast<AuraEffect*>(aurEff)
+            if (GetTarget()->HasAura(SPELL_RABIT_COSTUME)||GetTarget()->HasAura(SPELL_NOBLEGARDEN_BUNNY))
+                GetTarget()->AddAura(GetId(),GetTarget());
+        }
+
+        void Register()
+        {
+            OnEffectRemove += AuraEffectRemoveFn(spell_61719_easter_lay_noblegarden_egg_aura_AuraScript::HandleEffectRemove, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_61719_easter_lay_noblegarden_egg_aura_AuraScript();
+    }
+};
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -819,4 +860,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_gunship_portal();
     new spell_gen_dungeon_credit();
     new spell_gen_profession_research();
+	new spell_61719_easter_lay_noblegarden_egg_aura();
 }
