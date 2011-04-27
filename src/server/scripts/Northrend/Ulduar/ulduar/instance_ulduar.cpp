@@ -203,12 +203,46 @@ public:
                 case 33670: uiAerialUnit = pCreature->GetGUID(); return;
                 case 34068: uiMagneticCore = pCreature->GetGUID(); return;
                 case 33271: uiVezax = pCreature->GetGUID(); return;
-                case 33410: uiFreyaYS = pCreature->GetGUID(); return;
-                case 33413: uiThorimYS = pCreature->GetGUID(); return;
-                case 33412: uiMimironYS = pCreature->GetGUID(); return;
-                case 33411: uiHodirYS = pCreature->GetGUID(); return;
                 case 33890: uiYoggSaronBrain = pCreature->GetGUID(); return;
                 case 33288: uiYoggSaron = pCreature->GetGUID(); return;
+
+					/* Keeper gossip */
+				case 33410: 
+					{
+					uiFreyaYS = pCreature->GetGUID(); 
+					InstanceScript* pInstance = pCreature->GetInstanceScript();
+                    pCreature->SetVisible(false);
+                    if (pInstance && pInstance->GetBossState(BOSS_FREYA) == DONE)
+                        pCreature->SetVisible(true);
+					return;
+					}
+                case 33413:
+					{
+					uiThorimYS = pCreature->GetGUID();
+					InstanceScript* pInstance = pCreature->GetInstanceScript();
+                    pCreature->SetVisible(false);
+                    if (pInstance && pInstance->GetBossState(BOSS_THORIM) == DONE)
+                        pCreature->SetVisible(true);
+					return;
+					}
+                case 33412: 
+					{
+					uiMimironYS = pCreature->GetGUID(); 
+					InstanceScript* pInstance = pCreature->GetInstanceScript();
+                    pCreature->SetVisible(false);
+                    if (pInstance && pInstance->GetBossState(BOSS_MIMIRON) == DONE)
+                        pCreature->SetVisible(true);
+					return;
+					}
+                case 33411:
+					{
+					uiHodirYS = pCreature->GetGUID();
+					InstanceScript* pInstance = pCreature->GetInstanceScript();
+                    pCreature->SetVisible(false);
+                    if (pInstance && pInstance->GetBossState(BOSS_HODIR) == DONE)
+                        pCreature->SetVisible(true);
+					return;
+					}
             
                 // Keeper's Images
                 case 33241: uiFreyaImage = pCreature->GetGUID();
@@ -435,6 +469,9 @@ public:
                         HandleGameObject(uiKologarnBridge, false);
                     break;
                 case BOSS_HODIR:
+					/*activation image gardien gossip*/
+					if (Creature* pHodirGossip = instance->GetCreature(uiHodirYS))
+                        pHodirGossip->SetVisible(true); 
                     CheckKeepersState();
                     break;
                 case BOSS_THORIM:
@@ -443,12 +480,21 @@ public:
                         if (state == IN_PROGRESS)
                             pThorimLever->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_UNK1);
                     }
+					/*activation image gardien gossip*/
+					if (Creature* pThorimGossip = instance->GetCreature(uiThorimYS))
+                        pThorimGossip->SetVisible(true); 
                     CheckKeepersState();
                     break;
                 case BOSS_MIMIRON:
+					/*activation image gardien gossip*/
+					if (Creature* pMimironGossip = instance->GetCreature(uiMimironYS))
+                        pMimironGossip->SetVisible(true); 
                     CheckKeepersState();
                     break;
                 case BOSS_FREYA:
+					/*activation image gardien gossip*/
+					if (Creature* pFreyaGossip = instance->GetCreature(uiFreyaYS))
+                        pFreyaGossip->SetVisible(true); 
                     CheckKeepersState();
                     break;
                 case BOSS_VEZAX:
