@@ -762,6 +762,8 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
 				case 63322: // Saronite Vapors
                     return false;
                 case 30877: // Tag Murloc
+				case 61734: // Noblegarden Bunny
+				case 61716: // Rabbit Costume
 				case 62478: // Frozen Blows
                     return true;
                 default:
