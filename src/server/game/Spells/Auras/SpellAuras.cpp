@@ -1019,6 +1019,25 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                         break;
                 }
                 break;
+			case SPELLFAMILY_HUNTER:
+				// Rapid Killing
+				if (GetSpellProto()->SpellFamilyFlags[1] & 0x01000000)
+				{
+					// Rapid Recuperation
+					// FIXME: this is completely wrong way to fixing this talent
+					// but for unknown reason it won't proc if your target are dead
+					if (AuraEffect * auraEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3560, 1))
+					{
+						uint32 spellId;
+						switch (auraEff->GetId())
+						{
+							case 53228: spellId = 56654; break;
+							case 53232: spellId = 58882; break;
+						}
+						target->CastSpell(target, spellId, true);
+					}
+				}
+				break;
             case SPELLFAMILY_WARLOCK:
                 switch(GetId())
                 {
@@ -1393,7 +1412,15 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                 // Remove Vanish on stealth remove
                 if (GetId() == 1784)
                     target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
-                break;
+                // Remove Savage Combat triggered aura at poisons remove
+				else if (GetSpellProto()->SpellFamilyFlags[1] & 0x80000 &&
+					caster && (caster->HasAura(51682) || caster->HasAura(58413)))
+				{
+					// this is just temp solution and has some problems
+					target->RemoveAurasDueToSpell(58683, GetCasterGUID());
+					target->RemoveAurasDueToSpell(58684, GetCasterGUID());
+				}
+				break;
             case SPELLFAMILY_PALADIN:
                 // Remove the immunity shield marker on Forbearance removal if AW marker is not present
                 if (GetId() == 25771 && target->HasAura(61988) && !target->HasAura(61987))
@@ -1441,6 +1468,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const * aurApp, Unit * caster,
                     break;
             }
             break;
+			case SPELLFAMILY_DRUID:
+				// Enrage - armor reduction implemented here
+				if (GetSpellProto()->SpellFamilyFlags[0] & 0x80000)
+					{
+						if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0))
+						{
+						uint32 armorMod;
+						switch (auraEff->GetId())
+							{
+								case 1178: armorMod = 27; break;
+								case 9635: armorMod = 16; break;
+							}
+							armorMod = auraEff->GetAmount() / 100 * armorMod;
+							if (apply)
+								auraEff->ChangeAmount(auraEff->GetAmount() - armorMod);
+							else
+								auraEff->ChangeAmount(auraEff->GetAmount() + armorMod);
+						}
+						break;
+					}
+					break;
         case SPELLFAMILY_ROGUE:
             // Stealth
             if (GetSpellProto()->SpellFamilyFlags[0] & 0x00400000)
