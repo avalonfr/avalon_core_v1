@@ -128,6 +128,7 @@ public:
         uint64 uiUniverseFloor1GUID;
         uint64 uiUniverseFloor2GUID;
 		uint64 uiAlgalonTrapDoorGUID;
+		uint64 uiAlgalonGUID;
 
         void OnGameObjectCreate(GameObject* pGo)
         {
@@ -244,6 +245,7 @@ public:
                 case 33271: uiVezax = pCreature->GetGUID(); return;
                 case 33890: uiYoggSaronBrain = pCreature->GetGUID(); return;
                 case 33288: uiYoggSaron = pCreature->GetGUID(); return;
+				case 32871: uiAlgalonGUID = pCreature->GetGUID(); return;
 
 					/* Keeper gossip */
 				case 33410: 
@@ -404,6 +406,8 @@ public:
                     return uiYoggSaron;
 				case DATA_UNIVERSE_GLOBE:
 					return uiAlgalonGlobeGUID;
+				case DATA_ALGALON :
+					return uiAlgalonGUID;
             }
             return NULL;
         }
@@ -495,6 +499,20 @@ public:
                             HodirRareChest->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_UNK1);
                     }
                     break;
+               case BOSS_ALGALON:
+				   {
+						if (value == TO_BE_DECIDED)
+						{
+							if (Creature* pAlgalon = instance->GetCreature(uiAlgalonGUID))
+								pAlgalon->ForcedDespawn(360000);
+							HandleGameObject(uiAlgalonDoor,true);
+						}
+				   }
+                    break;
+
+
+
+
             }
         }
 

@@ -405,6 +405,7 @@ enum Spells
     SPELL_ASCEND                    = 64487,
     SPELL_BIG_BANG                  = 64443,
     H_SPELL_BIG_BANG                = 64584,
+	SPELL_BERSERK                   = 47008,
     SPELL_COSMIC_SMASH              = 62301,
     H_SPELL_COSMIC_SMASH            = 64598,
     SPELL_PHASE_PUNCH               = 64412,
@@ -418,10 +419,12 @@ enum Spells
     SPELL_BLACK_HOLE_EFFECT         = 46230,
     SPELL_PHASE_PUNCH_EFFECT        = 64417,
     SPELL_SINGULARITY               = 46238,
+
     SPELL_BLACK_HOLE_PHASE          = 62168,
     SPELL_BLACK_HOLE_DAMAGE         = 62169,
     SPELL_BLACK_HOLE_SPAWN_VISUAL   = 62003,
     SPELL_SUMMON_BLACK_HOLE         = 62189,
+
     SPELL_ALGALON_EVENT_CLIMAX      = 64580,
     SPELL_COSMIC_SMASH_EFFECT       = 62311,
     H_SPELL_COSMIC_SMASH_EFFECT     = 64596,
@@ -438,11 +441,6 @@ enum Creatures
     CREATURE_UNLEASHED_DARK_MATTER  = 34097,
 	CREATURE_AZEROTH				= 34246
 };
-
-/*enum Data
-{
-    DATA_PHASE
-};*/
 
 enum Yells
 {
@@ -492,7 +490,7 @@ public:
         boss_algalonAI(Creature *c) : BossAI(c, BOSS_ALGALON)
         {
 			pInstance = (c->GetInstanceScript());
-            Summon = false;
+            Summon = true; // a remettre a verai
         }
 
         std::list<uint64> m_lCollapsingStarGUIDList;
@@ -628,11 +626,15 @@ public:
                 hasHit = true ;
         }
 
+
         void UpdateAI(const uint32 diff)
         {
             //Return since we have no target
-            if (!UpdateVictim())
-                return;
+            //if (!UpdateVictim())
+            //    return;
+
+			if((CheckWipe()) && (!UpdateVictim()))
+				return;
 
             if (me->HasUnitState(UNIT_STAT_CASTING))
                 return;
@@ -673,7 +675,6 @@ public:
                                 break;
                             case 5:
                                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE);
-								//me->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE);
                                 me->SetReactState(REACT_AGGRESSIVE);
                                 Summon = true;
 								me->FindNearestCreature(CREATURE_AZEROTH,20.0f)->DisappearAndDie();
@@ -784,17 +785,23 @@ public:
                 if (uiBigBangTimer <= diff)
                 {
                     DoScriptText(RAND(SAY_BIG_BANG_1,SAY_BIG_BANG_2), me);
-                    DoCast(me->getVictim(), RAID_MODE(SPELL_BIG_BANG,H_SPELL_BIG_BANG));
+                    DoCast(me, RAID_MODE(SPELL_BIG_BANG,H_SPELL_BIG_BANG));
                     hasCastedBigBang = true ;
-                    uiBigBangTimer = 9000;
+                    uiBigBangTimer = 4000;
                 } else uiBigBangTimer -= diff;
             }
             else
             {
                 if (uiBigBangTimer <= diff)
                 {
-                    if(!hasHit)
-                        uiAscendTimer = 0 ;
+                    if(hasHit)
+                        uiAscendTimer = 5000 ;
+					else 
+					{
+						DoCast(me,SPELL_BERSERK );
+						uiAscendTimer = 5000 ;
+					}
+
                     hasHit = false ;
                     hasCastedBigBang = false ;
                     uiBigBangTimer = 81000;
@@ -852,12 +859,41 @@ public:
 
             // Don't attack current target if he's not visible for us.
             if(me->getVictim() && me->getVictim()->GetPhaseMask() != 1)
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
+                me->getThreatManager().modifyThreatPercent(me->getVictim(),0);
 
             DoMeleeAttackIfReady();
 
-			EnterEvadeIfOutOfCombatArea(diff);
+			//EnterEvadeIfOutOfCombatArea(diff);
         }
+
+		 bool CheckWipe()
+        {
+
+            if (pInstance)
+            {
+                if (Map* pMap = me->GetMap())
+                {
+                    Map::PlayerList const &players = pMap->GetPlayers();
+                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    {
+                        Player* pPlayer = itr->getSource();
+                        if (!pPlayer)
+							return true;
+
+                        if (pPlayer->isGameMaster())
+							 continue;
+
+						if (!pPlayer->IsInRange(me,0.1f,50.0f))
+							continue;
+
+                        if (pPlayer->isAlive())
+                            return false;
+                    }
+                }
+            }
+            return true;
+        }
+
     };
 
 	CreatureAI* GetAI(Creature* pCreature) const    
@@ -882,11 +918,15 @@ public:
 
         uint32 healthPercent ;
         uint32 uiHealthLostTimer ;
+		uint32 uitargettimer ;
+		uint32 uidisappear ;
 
         void Reset()
         {
             healthPercent = me->GetMaxHealth()/100 ;
             uiHealthLostTimer = 1000 ;
+			uitargettimer = 5000 ;
+		
         }
 
         void JustDied(Unit* who)
@@ -896,29 +936,46 @@ public:
                 blackHole->AI()->SetData(DATA_PHASE, 1) ;
         }
 
-        void SpellHitTarget(Unit* target, const SpellEntry* spell)
-        {
-            if(spell->Id == RAID_MODE(SPELL_BLACK_HOLE_EXPLOSION, H_SPELL_BLACK_HOLE_EXPLOSION))
-                me->DealDamage(target, RAID_MODE(urand(16088, 16912),urand(20475, 21525)), 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_SHADOW);
-        }
-
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
+			
+			if (uitargettimer <= diff)
+			{
+				// Don't attack current target if he's not visible for us & switch all 5s
+				Unit *pVictim = SelectTarget(SELECT_TARGET_RANDOM, 0);
+				if (!pVictim)
+					return;
+				else if (pVictim->GetPhaseMask() != 1)
+						me->getThreatManager().modifyThreatPercent(pVictim, -100);
+				uitargettimer = 3000;
+			}else uitargettimer -= diff;
 
-            // Don't attack current target if he's not visible for us.
-            if(me->getVictim() && me->getVictim()->GetPhaseMask() != 1)
-                me->getThreatManager().modifyThreatPercent(me->getVictim(), -100);
+
 
             if (uiHealthLostTimer <= diff)
             {
                 if (me->GetHealth() > healthPercent)
                     me->SetHealth(me->GetHealth()-healthPercent);
-                else
-                    me->DealDamage(me, me->GetHealth());
-                uiHealthLostTimer = 1000 ;
+                else 
+				{
+                    me->DealDamage(me, (me->GetHealth()-1));
+					me->AI()->JustDied(me);
+				}
+				if (me->GetHealth() == 1)
+					uidisappear = 0;
+				
+				uiHealthLostTimer = 1000 ;
+
             } else uiHealthLostTimer -= diff ;
+
+			if ((uidisappear <= diff) && (me->GetHealth() < healthPercent))
+			{
+				me->DisappearAndDie(); //tempo le temps d appliquer le just died puis despawn
+				uidisappear = 3600*7*24*1000;
+			}
+			else uidisappear -= diff;
         }
     };
 
@@ -944,7 +1001,8 @@ public:
 
         uint8 uiPhase ;
         uint32 uiDarkMatterSpawnTimer ;
-
+		uint32 uicastsingularitytimer ;
+		uint32 uitransferttimer ;
         void SetData(uint32 id, uint32 value)
         {
             if (id == DATA_PHASE)
@@ -967,6 +1025,38 @@ public:
             }
         }
 
+
+		void selectTargettotransfer()
+		{
+			if (Map* pMap = me->GetMap())
+            {
+                Map::PlayerList const &players = pMap->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                {
+                    Player* pPlayer = itr->getSource();
+                    if (!pPlayer)
+                            continue;
+
+                    if (pPlayer->isGameMaster())
+                            continue;
+
+                                        
+					if(me->IsInRange(pPlayer,0.1f,5.0f) && pPlayer->GetPhaseMask() != 16)
+					{
+						me->AddAura(SPELL_BLACK_HOLE_DAMAGE,pPlayer);
+						me->AddAura(SPELL_BLACK_HOLE_PHASE,pPlayer);
+						if(Aura* aur = pPlayer->GetAura(SPELL_BLACK_HOLE_DAMAGE))
+							aur->SetDuration(5*60*1000);
+						if(Aura* aur = pPlayer->GetAura(SPELL_BLACK_HOLE_PHASE))
+							aur->SetDuration(5*60*1000);
+					}
+
+				}
+
+			}
+		}
+
+
         void Reset()
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
@@ -974,6 +1064,7 @@ public:
             DoCast(SPELL_BLACK_HOLE_PASSIVE) ;
             uiDarkMatterSpawnTimer = urand(1000, 4000) ;
             me->SetReactState(REACT_PASSIVE);
+			uitransferttimer = 1000;
         }
 
         void UpdateAI(const uint32 diff)
@@ -992,6 +1083,13 @@ public:
                 }
                 uiDarkMatterSpawnTimer = 30000 ;
             } else uiDarkMatterSpawnTimer -= diff ;
+
+			if (uitransferttimer <= diff)
+			{
+				selectTargettotransfer();
+				uitransferttimer = 1000;
+			}
+			else uitransferttimer -= diff;
 
             if (!UpdateVictim())
                 return;
@@ -1079,24 +1177,26 @@ public:
             {
                 Unit *pTarget = NULL;
                 uint32 damage ;
-                std::list<HostileReference *> t_list = me->getThreatManager().getThreatList();
-                std::vector<Unit *> target_list;
-                for (std::list<HostileReference *>::const_iterator itr = t_list.begin(); itr!= t_list.end(); ++itr)
-                {
-                    pTarget = Unit::GetUnit(*me, (*itr)->getUnitGuid());
-                    if (!pTarget)
-                        continue;
+				if (Map* pMap = me->GetMap())
+				{
+					Map::PlayerList const &players = pMap->GetPlayers();
+					for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+					{
+						Player* pTarget = itr->getSource();
+						if (!pTarget)
+							continue;
 
-                    if (pTarget->GetPhaseMask() != 1)
-                        continue;
+						if (pTarget->GetPhaseMask() != 1)
+							continue;
 
-                    if(me->GetDistance2d(pTarget) <= 1.0f)
-                        damage = RAID_MODE(43000, 55000) ;
-                    else
-                        damage = RAID_MODE(float(43000)/me->GetDistance2d(pTarget), float(55000)/me->GetDistance2d(pTarget)) ;
-                    me->SendSpellNonMeleeDamageLog(pTarget,RAID_MODE(SPELL_COSMIC_SMASH_EFFECT, H_SPELL_COSMIC_SMASH_EFFECT),damage,SPELL_SCHOOL_MASK_FIRE,0,0,false,0,false);
-                    me->DealDamage(pTarget, damage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
-                }
+						if(me->GetDistance2d(pTarget) <= 1.0f)
+							damage = RAID_MODE(43000, 55000) ;
+						else
+							damage = RAID_MODE(float(43000)/me->GetDistance2d(pTarget), float(55000)/me->GetDistance2d(pTarget)) ;
+						me->SendSpellNonMeleeDamageLog(pTarget,RAID_MODE(SPELL_COSMIC_SMASH_EFFECT, H_SPELL_COSMIC_SMASH_EFFECT),damage,SPELL_SCHOOL_MASK_FIRE,0,0,false,0,false);
+						me->DealDamage(pTarget, damage, 0, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_FIRE);
+					}
+				}
                 me->DisappearAndDie();
             } else uiCosmicSmashTimer -= diff ;
 
@@ -1178,16 +1278,13 @@ class spell_algalon_event_beam: public SpellScriptLoader
         }
 };
 
-
-
-
 void AddSC_boss_algalon()
 {
-    new boss_algalon;
-    new mob_collapsing_star;
-	new mob_black_hole;
-    new mob_living_constellation;
-    new mob_algalon_stalker_asteroid_target;
-    new go_celestial_planetarium_access;
-	new spell_algalon_event_beam;
+    new boss_algalon();
+    new mob_collapsing_star();
+	new mob_black_hole();
+    new mob_living_constellation();
+    new mob_algalon_stalker_asteroid_target();
+    new go_celestial_planetarium_access();
+	new spell_algalon_event_beam();
 }
