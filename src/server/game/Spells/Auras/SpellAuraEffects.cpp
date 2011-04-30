@@ -593,8 +593,15 @@ int32 AuraEffect::CalculateAmount(Unit * caster)
                 break;
             // Earth Shield
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellProto->SpellFamilyFlags[1] & 0x400)
-                amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellProto(), amount, SPELL_DIRECT_DAMAGE);
-            break;
+                {
+					// return to unmodified by spellmods value
+					amount = m_spellProto->EffectBasePoints[m_effIndex];
+					// apply spell healing bonus
+					amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellProto(), amount, SPELL_DIRECT_DAMAGE);
+					// apply spellmods
+					amount = caster->ApplyEffectModifiers(GetSpellProto(), m_effIndex, float(amount));
+				}
+			break;
         case SPELL_AURA_DAMAGE_SHIELD:
             if (!caster)
                 break;
@@ -690,6 +697,9 @@ int32 AuraEffect::CalculateAmount(Unit * caster)
                 // Bonus from Glyph of Lightwell
                 if (AuraEffect* modHealing = caster->GetAuraEffect(55673, 0))
                     AddPctN(amount, modHealing->GetAmount());
+				// Bonus from talent Spiritual Healing
+				if (AuraEffect* modHealing = caster->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_PRIEST, 46, 1))
+					AddPctN(amount, modHealing->GetAmount());
             }
             break;
         case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
@@ -841,7 +851,7 @@ void AuraEffect::CalculatePeriodic(Unit * caster, bool create)
             if (IsChanneledSpell(m_spellProto))
                 caster->ModSpellCastTime(m_spellProto, m_amplitude);
             // and periodic time of auras affected by SPELL_AURA_PERIODIC_HASTE
-            if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellProto))
+            if (caster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, m_spellProto) || m_spellProto->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
                 m_amplitude = int32(m_amplitude * caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
         }
     }
@@ -2474,6 +2484,14 @@ void AuraEffect::TriggerSpell(Unit * target, Unit * caster) const
                 triggerCaster->CastSpell(triggerTarget, triggeredSpellInfo, true, 0, this, triggerCaster->GetGUID());
                 return;
             }
+			// Rapid Recuperation (triggered energize have basepoints == 0)
+			case 56654:
+			case 58882:
+			{
+				if (int32 mana = target->GetMaxPower(POWER_MANA) / 100 * GetAmount())
+					target->CastCustomSpell(target, triggerSpellId, &mana, NULL, NULL, true, NULL, this);
+				return;
+			}
             // Slime Spray - temporary here until preventing default effect works again
             // added on 9.10.2010
             case 69508:

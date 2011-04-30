@@ -5558,8 +5558,20 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 if (!procSpell)
                     return false;
 
+			// Very ugly hacks here. This required for triggered and AOE spells
+			uint32 costPercent = procSpell->ManaCostPercentage;
+			if (procSpell->SpellFamilyFlags[0] & 0x200000) // Arcane Missiles
+				costPercent = 6;
+			else if (procSpell->SpellFamilyFlags[0] & 0x80) // Blizzard
+				costPercent = urand(1,9);
+			else if (procSpell->SpellFamilyFlags[1] & 0x10000) // Living Bomb
+				costPercent = urand(1,22);
+			// Dragon's Breath, Arcane Explosion, Cone of Cold, Frost Nova, Flamestrike, Blast Wave
+			else if (procSpell->SpellFamilyFlags[0] & 0x801244 || procSpell->SpellFamilyFlags[1] & 0x40)
+				costPercent = urand(1,costPercent);
+		
                 // mana cost save
-                int32 cost = int32(procSpell->manaCost + CalculatePctU(GetCreateMana(), procSpell->ManaCostPercentage));
+                int32 cost = int32(procSpell->manaCost + CalculatePctU(GetCreateMana(), costPercent));
                 basepoints0 = CalculatePctN(cost, triggerAmount);
                 if (basepoints0 <= 0)
                     return false;
@@ -6468,7 +6480,6 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 // This effect only from Rapid Killing (mana regen)
                 if (!(procSpell->SpellFamilyFlags[1] & 0x01000000))
                     return false;
-                triggered_spell_id = 56654;
 
                 target = this;
 
@@ -7822,6 +7833,17 @@ bool Unit::HandleAuraProc(Unit * pVictim, uint32 damage, Aura * triggeredByAura,
                     *handled = true;
                     break;
                 }
+				// Vigilance - original proc picking wrong target
+				case 50720:
+				{
+					*handled = true;
+					if (Unit * caster = triggeredByAura->GetCaster())
+					{
+						CastSpell(caster, 50725, true);
+						return true;
+					}	
+					return false;
+				}
             }
             break;
         case SPELLFAMILY_PALADIN:
@@ -8136,6 +8158,8 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, AuraEffect* trig
                     }
                     basepoints0 = CalculatePctN(int32(damage), triggerAmount) / 3;
                     target = this;
+					if (AuraEffect * aurEff = target->GetAuraEffect(trigger_spell_id, 0))
+						basepoints0 += aurEff->GetAmount();
                 }
                 break;
             }

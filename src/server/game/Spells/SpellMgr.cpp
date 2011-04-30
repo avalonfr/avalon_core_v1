@@ -3631,6 +3631,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             ++count;
             break;
+		// Chains of Ice
+		case 45524:
+			// this will fix self-damage caused by Glyph of Chains of Ice
+			spellInfo->EffectImplicitTargetA[2] = TARGET_UNIT_TARGET_ENEMY;
+			count++;
+			break;
         // Heroism
         case 32182:
             spellInfo->excludeCasterAuraSpell = 57723; // Exhaustion
@@ -3693,6 +3699,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectRadiusIndex[0] = 45;
             ++count;
             break;
+		case 63944: // Renewed Hope hack
+			spellInfo->EffectApplyAuraName[0] = 87;
+			spellInfo->EffectMiscValue[0] = 127;
+			count++;
+			break;
         case 27820:                             // Mana Detonation
         //case 28062: case 39090:                 // Positive/Negative Charge
         //case 28085: case 39093:
@@ -3799,6 +3810,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->procCharges = 2;
             ++count;
             break;
+		case 53257: // Cobra Strikes
+			spellInfo->procCharges = 2;
+			spellInfo->StackAmount = 0;
+			count++;
+			break;
         case 44544:    // Fingers of Frost
             spellInfo->EffectSpellClassMask[0] = flag96(685904631, 1151048, 0);
             ++count;
@@ -3855,10 +3871,18 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->Stances = 1 << (FORM_TREE - 1);
             ++count;
             break;
+		case 55689: // Glyph of Shadow (to prevent glyph aura loss)
+			spellInfo->Stances = 0;
+			count++;
+			break;
         case 30421:     // Nether Portal - Perseverence
             spellInfo->EffectBasePoints[2] += 30000;
             ++count;
             break;
+		case 61607: // Mark of Blood
+			spellInfo->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+			++count;
+			break;
         // some dummy spell only has dest, should push caster in this case
         case 62324: // Throw Passenger
             spellInfo->Targets |= TARGET_FLAG_UNIT_CASTER;
@@ -4118,6 +4142,15 @@ void SpellMgr::LoadSpellCustomAttr()
                     break;
                 ++count;
                 break;
+			case SPELLFAMILY_HUNTER:
+				// Monstrous Bite target fix
+				// seems we incorrectly handle spell with "no target"
+				if (spellInfo->SpellIconID == 599)
+					spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
+				else
+					break;
+				count++;
+				break;
             case SPELLFAMILY_DRUID:
                 // Starfall Target Selection
                 if (spellInfo->SpellFamilyFlags[2] & 0x100)
@@ -4126,8 +4159,8 @@ void SpellMgr::LoadSpellCustomAttr()
                 else if (spellInfo->SpellFamilyFlags[2] & 0x800000)
                     mSpellCustomAttr[i] |= SPELL_ATTR0_CU_EXCLUDE_SELF;
                 // Roar
-                else if (spellInfo->SpellFamilyFlags[0] & 0x8)
-                    mSpellCustomAttr[i] |= SPELL_ATTR0_CU_AURA_CC;
+                else if (spellInfo->SpellFamilyFlags[0] & 0x1000 && spellInfo->SpellIconID == 494)
+					mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
                 else
                     break;
                 ++count;
