@@ -23,7 +23,7 @@
 #include <list>
 
 struct ItemLocale;
-struct ItemPrototype;
+struct ItemTemplate;
 struct ItemRandomSuffixEntry;
 struct ItemRandomPropertiesEntry;
 struct SpellEntry;
@@ -60,9 +60,9 @@ public:
     virtual bool ValidateName(char* buffer, const char* context);
 
 protected:
-    std::string _FormatName(uint8 index, ItemLocale const *locale, char* const* suffixStrings) const;
+    std::string FormatName(uint8 index, ItemLocale const* locale, char* const* suffixStrings) const;
 
-    ItemPrototype const* _item;
+    ItemTemplate const* _item;
     int32 _data[8];
     ItemRandomSuffixEntry const* _suffix;
     ItemRandomPropertiesEntry const* _property;
