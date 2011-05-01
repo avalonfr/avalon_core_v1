@@ -1898,8 +1898,8 @@ DELETE FROM `spell_script_names` WHERE `spell_id` IN (61719);
 INSERT INTO `spell_script_names` (spell_id,ScriptName) VALUES 
 (61719,'spell_61719_easter_lay_noblegarden_egg_aura');
 
-/* -------------------------------------------------------------- ALGALON -----------------------------------------------------
----------------------------------------------------------------------*/
+/* -------------------------------------------------------------- ALGALON -----------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------------------------------------*/
 
 UPDATE `creature_template` SET `ScriptName` = 'boss_algalon' WHERE `entry` = 32871;
 UPDATE `creature_template` SET `ScriptName` = 'mob_collapsing_star' WHERE `entry` = 32955;

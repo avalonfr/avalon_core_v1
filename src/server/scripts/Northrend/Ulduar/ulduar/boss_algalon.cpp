@@ -490,7 +490,8 @@ public:
         boss_algalonAI(Creature *c) : BossAI(c, BOSS_ALGALON)
         {
 			pInstance = (c->GetInstanceScript());
-            Summon = true; // a remettre a verai
+            Summon = false; 
+			summondeath = false;
         }
 
         std::list<uint64> m_lCollapsingStarGUIDList;
@@ -512,6 +513,7 @@ public:
         bool bHasSpawnedBlackHoles ;
         bool bIsEnraged;
         bool Summon;
+		bool summondeath;
 		bool hasHit;
         bool hasCastedBigBang;
 
@@ -734,15 +736,18 @@ public:
 
                 if (HealthBelowPct(2))
                 {
-                    me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    me->RemoveAllAuras();
-                    me->AttackStop();
-                    me->SetReactState(REACT_PASSIVE);
-                    Summon = false ;
-                    uiStep = 1;
+					if(!summondeath)
+					{
+						me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+						me->RemoveAllAuras();
+						me->AttackStop();
+						me->SetReactState(REACT_PASSIVE);
+						summondeath = true ;
+						uiStep = 1;
+					}
                 }
 
-                if (!Summon)
+                if (summondeath)
                 {
                     if (uiPhaseTimer <= diff)
                     {
