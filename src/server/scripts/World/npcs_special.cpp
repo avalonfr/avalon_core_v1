@@ -1845,14 +1845,13 @@ UPDATE `creature_template` SET `ScriptName`='npc_spring_rabbit' WHERE `entry`=32
 UPDATE `achievement_criteria_data` SET `value1`=186 WHERE `criteria_id`=9199 AND `type`=6;
 #####*/
 
-enum rabbitSpells
+enum eSpringRabbit
 {
-    SPELL_SPRING_FLING = 61875,
-    SPELL_SPRING_RABBIT_JUMP = 61724,
-    SPELL_SPRING_RABBIT_WANDER = 61726,
-    SPELL_SUMMON_BABY_BUNNY = 61727,
+    NPC_SPRING_RABBIT           = 32791,
+    NPC_SPRING_RABBIT_BABBY     = 32793,
     SPELL_SPRING_RABBIT_IN_LOVE = 61728,
-    NPC_SPRING_RABBIT = 32791
+    SPELL_SPRING_RABBIT_JUMP    = 61724,
+    SPELL_SPRING_RABBIT_FLING   = 61875,
 };
 
 class npc_spring_rabbit : public CreatureScript
@@ -1860,79 +1859,61 @@ class npc_spring_rabbit : public CreatureScript
 public:
     npc_spring_rabbit() : CreatureScript("npc_spring_rabbit") { }
 
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new npc_spring_rabbitAI(creature);
-    }
-
     struct npc_spring_rabbitAI : public ScriptedAI
     {
-        npc_spring_rabbitAI(Creature* c) : ScriptedAI(c) { }
-
-        bool inLove;
-        uint32 jumpTimer;
-        uint32 bunnyTimer;
-        uint32 searchTimer;
-        uint64 rabbitGUID;
+        npc_spring_rabbitAI(Creature *c) : ScriptedAI(c) {Reset();}
+        bool m_bIsLove;
+        uint32 uiCheckTimer;
 
         void Reset()
         {
-            inLove = false;
-            rabbitGUID = 0;
-            jumpTimer = urand(5000, 10000);
-            bunnyTimer = urand(10000, 20000);
-            searchTimer = urand(5000, 10000);
-            if (Unit* owner = me->GetOwner())
-                me->GetMotionMaster()->MoveFollow(owner, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE);
-        }
+            uiCheckTimer = 5000;
+            m_bIsLove = false;
 
-        void EnterCombat(Unit * /*who*/) { }
-
-        void DoAction(const int32 /*param*/)
-        {
-            inLove = true;
-            if (Unit* owner = me->GetOwner())
-                owner->CastSpell(owner, SPELL_SPRING_FLING, true);
+            if (Unit* own = me->GetOwner())
+                me->GetMotionMaster()->MoveFollow(own,0,0);
         }
 
         void UpdateAI(const uint32 diff)
         {
-            if (inLove)
+            if (uiCheckTimer <= diff)
             {
-                if (jumpTimer <= diff)
+                if (!m_bIsLove)
                 {
-                    if (Unit* rabbit = Unit::GetUnit(*me, rabbitGUID))
-                        DoCast(rabbit, SPELL_SPRING_RABBIT_JUMP);
-                    jumpTimer = urand(5000, 10000);
-                }else jumpTimer -= diff;
-
-                if (bunnyTimer <= diff)
-                {
-                    DoCast(SPELL_SUMMON_BABY_BUNNY);
-                    bunnyTimer = urand(20000, 40000);
-                }else bunnyTimer -= diff;
-            }
-            else
-            {
-                if (searchTimer <= diff)
-                {
-                    if (Creature* rabbit = me->FindNearestCreature(NPC_SPRING_RABBIT, 10.0f))
+                    if (Creature* rabbit = me->FindNearestCreature(NPC_SPRING_RABBIT, 7, true))
                     {
-                        if (rabbit == me || rabbit->HasAura(SPELL_SPRING_RABBIT_IN_LOVE))
+                        if (rabbit->GetGUID() == me->GetGUID())
                             return;
 
-                        me->AddAura(SPELL_SPRING_RABBIT_IN_LOVE, me);
-                        DoAction(1);
-                        rabbit->AddAura(SPELL_SPRING_RABBIT_IN_LOVE, rabbit);
-                        rabbit->AI()->DoAction(1);
-                        rabbit->CastSpell(rabbit, SPELL_SPRING_RABBIT_JUMP, true);
-                        rabbitGUID = rabbit->GetGUID();
+                        if (!rabbit->HasAura(SPELL_SPRING_RABBIT_IN_LOVE))
+                        {
+                            me->CastSpell(me, SPELL_SPRING_RABBIT_IN_LOVE, true);
+                            rabbit->CastSpell(rabbit, SPELL_SPRING_RABBIT_IN_LOVE, true);
+
+                            if (Unit* owner = me->GetOwner())
+                                owner->CastSpell(owner, SPELL_SPRING_RABBIT_FLING, true);
+
+                            if (Unit* owner = rabbit->GetOwner())
+                                owner->CastSpell(owner, SPELL_SPRING_RABBIT_FLING, true);
+
+                            m_bIsLove = true;
+                        }
                     }
-                    searchTimer = urand(5000, 10000);
-                }else searchTimer -= diff;
+                }
+  
+                DoCast(me, SPELL_SPRING_RABBIT_JUMP);
+
+                uiCheckTimer = urand(5000, 8000);
             }
+            else
+                uiCheckTimer -= diff;
         }
     };
+
+    CreatureAI *GetAI(Creature *creature) const
+    {
+        return new npc_spring_rabbitAI(creature);
+    }
 };
 
 class npc_mirror_image : public CreatureScript
