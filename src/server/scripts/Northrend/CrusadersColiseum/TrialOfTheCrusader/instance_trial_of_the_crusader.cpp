@@ -626,7 +626,7 @@ public:
                             {
                                 if (Item *pItem = plr->GetItemByPos(INVENTORY_SLOT_BAG_0, i))
                                 {
-                                    if (ItemPrototype const* proto = sObjectMgr->GetItemPrototype(pItem->GetEntry()))
+                                    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(pItem->GetEntry()))
                                     {
                                         uint32 lvl = proto->ItemLevel;
                                         uint32 id = proto->ItemId;
