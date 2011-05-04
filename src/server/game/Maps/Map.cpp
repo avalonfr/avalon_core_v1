@@ -30,6 +30,7 @@
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Group.h"
+#include "PathFactory.h"
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -54,6 +55,12 @@ Map::~Map()
 
     if (!m_scriptSchedule.empty())
         sScriptMgr->DecreaseScheduledScriptCount(m_scriptSchedule.size());
+		
+	 // unload instance specific navigation data
+	 MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_parentMap->GetId(), GetInstanceId());
+
+	 MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId());
+
 }
 
 bool Map::ExistMap(uint32 mapid, int gx, int gy)
@@ -170,7 +177,10 @@ void Map::LoadMapAndVMap(int gx, int gy)
 {
     LoadMap(gx, gy);
     if (i_InstanceId == 0)
+	{
         LoadVMap(gx, gy);                                   // Only load the data for the base map
+		MMAP::MMapFactory::createOrGetMMapManager()->loadMap(GetId(), gx, gy);
+	}
 }
 
 void Map::InitStateMachine()
@@ -972,6 +982,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool unloadAll)
             }
             // x and y are swapped
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gx, gy);
+			MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId(), gx, gy);
         }
         else
             ((MapInstanced*)m_parentMap)->RemoveGridMapReference(GridPair(gx, gy));

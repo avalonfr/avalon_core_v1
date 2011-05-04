@@ -71,6 +71,9 @@
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
 #include "Channel.h"
+#include "MemoryManagement.h"
+#include "PathFactory.h"
+ 
 #include "OutdoorPvPWG.h"
 
 volatile bool World::m_stopEvent = false;
@@ -129,7 +132,8 @@ World::~World()
         delete command;
 
     VMAP::VMapFactory::clear();
-
+	MMAP::MMapFactory::clear();
+	
     //TODO free addSessQueue
 }
 
@@ -1128,8 +1132,14 @@ void World::LoadConfigSettings(bool reload)
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
     VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
-    sLog->outString("WORLD: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i PetLOS:%i", enableLOS, enableHeight, enableIndoor, enablePetLOS);
-    sLog->outString("WORLD: VMap data directory is: %svmaps", m_dataPath.c_str());
+    sLog->outString("WORLD: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i, PetLOS:%i", enableLOS, enableHeight, enableIndoor, enablePetLOS);
+	sLog->outString("WORLD: VMap data directory is: %svmaps", m_dataPath.c_str());
+
+	// Pathfinding related.
+	m_bool_configs[CONFIG_ENABLE_PATHFINDING] = sConfig->GetBoolDefault("pathing.enable", true);
+	std::string ignoreMapIds = sConfig->GetStringDefault("pathing.ignoreMapsIds", "");
+	MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
+	sLog->outString("WORLD: Pathfinding %sabled", m_bool_configs[CONFIG_ENABLE_PATHFINDING] ? "en" : "dis");
 
     m_int_configs[CONFIG_MAX_WHO] = sConfig->GetIntDefault("MaxWhoListReturns", 49);
     m_bool_configs[CONFIG_PET_LOS] = sConfig->GetBoolDefault("vmap.petLOS", true);
@@ -1214,6 +1224,9 @@ void World::SetInitialWorldSettings()
     ///- Initialize the random number generator
     srand((unsigned int)time(NULL));
 
+	///- Initialize detour memory management
+	dtAllocSetCustom(dtCustomAlloc, dtCustomFree);
+	
     ///- Initialize config settings
     LoadConfigSettings();
 

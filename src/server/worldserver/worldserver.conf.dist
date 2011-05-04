@@ -301,6 +301,24 @@ vmap.petLOS = 1
 
 vmap.enableIndoorCheck = 1
 
+# mMaps.ignoreMapIds
+# Description: Disable mmap pathfinding on the listed maps.
+# Default: 1 - (Enabled) List of map ids with delimiter ','
+# 0 - (Disabled)
+
+pathing.ignoreMapsIds = ""
+
+#
+# pathfinding.activated
+# Description: Enable/Disable pathfinding using mmaps
+# Default: 1 - (Enabled)
+# 0 - (Disabled)
+
+pathing.enable = 1
+
+#
+
+
 #
 #    DetectPosCollision
 #        Description: Check final move position, summon position, etc for visible collision with
@@ -319,7 +337,7 @@ DetectPosCollision = 1
 #                     0.5 - (Minimum, Contact Range, More sensitive reaction to target movement)
 #                     5.0 - (Maximum, Melee attack range, Less CPU usage)
 
-TargetPosRecalculateRange = 1.5
+TargetPosRecalculateRange = 0.5
 
 #
 #    UpdateUptimeInterval

@@ -470,6 +470,7 @@ struct Position
     bool IsInDist(const Position *pos, float dist) const
         { return GetExactDistSq(pos) < dist * dist; }
     bool HasInArc(float arcangle, const Position *pos) const;
+	bool HasInArc(const float arcangle, const float x, const float y) const;
     bool HasInLine(const Unit *target, float distance, float width) const;
     std::string ToString() const;
 };
@@ -679,6 +680,7 @@ class WorldObject : public Object, public WorldLocation
             float d = GetExactDist2d(obj) - GetObjectSize() - obj->GetObjectSize();
             return d > 0.0f ? d : 0.0f;
         }
+		float GetDistanceSqr(float x, float y, float z) const;
         float GetDistance2d(float x, float y) const
         {
             float d = GetExactDist2d(x, y) - GetObjectSize();

@@ -20,6 +20,7 @@
 #define TRINITY_MAP_H
 
 #include "Define.h"
+
 #include <ace/RW_Thread_Mutex.h>
 #include <ace/Thread_Mutex.h>
 
@@ -33,6 +34,7 @@
 
 #include <bitset>
 #include <list>
+#include <set>
 
 class Unit;
 class WorldPacket;
@@ -64,7 +66,7 @@ struct ScriptAction
 // Map file format defines
 // ******************************************
 #define MAP_MAGIC             'SPAM'
-#define MAP_VERSION_MAGIC     '1.1v'
+#define MAP_VERSION_MAGIC	  '1.2v'
 #define MAP_AREA_MAGIC        'AERA'
 #define MAP_HEIGHT_MAGIC      'TGHM'
 #define MAP_LIQUID_MAGIC      'QILM'
@@ -80,6 +82,8 @@ struct map_fileheader
     uint32 heightMapSize;
     uint32 liquidMapOffset;
     uint32 liquidMapSize;
+	uint32 holesOffset;
+	uint32 holesSize;
 };
 
 #define MAP_AREA_NO_AREA      0x0001
