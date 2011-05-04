@@ -53,6 +53,7 @@ enum Yells
 
 enum eSpells
 {
+
     // Leviathan MK II
     SPELL_MINES_SPAWN                           = 65347,
     SPELL_PROXIMITY_MINES                       = 63027,
