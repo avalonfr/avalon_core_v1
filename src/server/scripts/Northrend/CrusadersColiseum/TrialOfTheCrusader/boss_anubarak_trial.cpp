@@ -133,7 +133,7 @@ public:
             {
                 //Spawn Frost Spheres
                 for (int i=0; i < 6; i++)
-                    if (Unit *pSummoned = me->SummonCreature(34606, SphereSpawn[i])) //frost sphere
+                    if (Unit *pSummoned = me->SummonCreature(NPC_FROST_SPHERE, SphereSpawn[i])) //frost sphere
                         m_aSphereGUID[i] = pSummoned->GetGUID();
 
             }
@@ -154,6 +154,7 @@ public:
 
         uint64 m_aSphereGUID[6];
         uint32 summonFrostSphereTimer;
+		uint32 checkTimer;
 
         void Reset()
         {
@@ -165,6 +166,7 @@ public:
             Burrow_Timer = 90000;
             burrowed = false;
             tick_Timer = 1000;
+			checkTimer = 500;
 
             me->RemoveAllAuras();
             me->RemoveFlag64(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
@@ -242,6 +244,22 @@ public:
                             }
             }
 
+			if(phase == 2)
+			{
+				Creature* spike = me->FindNearestCreature(NPC_SPIKE,100.0f);
+				
+				if(!spike)
+				{
+					if(checkTimer < diff)
+					{
+						events.ScheduleEvent(EVENT_SPIKE, 500);
+						checkTimer = 2500;
+					}
+					else checkTimer -= diff;
+					
+				}
+			}
+			
             if (!UpdateVictim())
                 return;
 
@@ -695,11 +713,27 @@ public:
             if (!UpdateVictim())
                 return;
 
-            if (tryToBurrow && !me->HasAura(RAID_MODE(PERMAFROST_N, PERMAFROST_N, PERMAFROST_H, PERMAFROST_H)))
+            if (tryToBurrow)
             {
-                DoCast(me, SUBMERGE_BURROWER);
-                me->SetFlag64(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
-                tryToBurrow = false;
+					tryToBurrow = false;
+					Creature* frost_sphere = me->FindNearestCreature(NPC_FROST_SPHERE,10.0f);
+					bool canSubmerge = true;
+					
+					if(frost_sphere)
+					{
+						if(frost_sphere->GetDisplayId() == 11686)
+						{
+							float distance = me->GetDistance2d(frost_sphere->GetPositionX(), frost_sphere->GetPositionY());
+							if (distance < 4.0f)
+								canSubmerge = false;
+						}
+					}
+					
+					if(canSubmerge)
+					{
+						DoCast(me, SUBMERGE_BURROWER);
+						me->SetFlag64(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE|UNIT_FLAG_NOT_SELECTABLE);
+					}
             }
 
             if (me->HasAura(SUBMERGE_BURROWER))

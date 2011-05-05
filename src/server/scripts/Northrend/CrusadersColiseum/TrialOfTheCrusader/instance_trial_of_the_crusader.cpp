@@ -267,9 +267,9 @@ public:
     {
         switch (go->GetEntry())
         {
-        case GO_MAIN_GATE: uiMainGateGuid = go->GetGUID(); break;
-        case GO_FLOOR: uiFloorGuid = go->GetGUID(); break;
-        case GO_CACHE: uiCacheGuid = go->GetGUID(); break;
+			case GO_MAIN_GATE: uiMainGateGuid = go->GetGUID(); break;
+			case GO_FLOOR: uiFloorGuid = go->GetGUID(); break;
+			break;
         }
 
         AddDoor(go, NULL);
@@ -321,6 +321,16 @@ public:
 
     void OnPlayerEnter(Player* player)
     {
+	if (player->GetDifficulty(instance->IsRaid()) == RAID_DIFFICULTY_10MAN_HEROIC || player->GetDifficulty(instance->IsRaid()) == RAID_DIFFICULTY_25MAN_HEROIC)
+		{
+			player->SendUpdateWorldState(4390,1);
+			player->SendUpdateWorldState(4389,attempts);
+		}
+		else
+		{
+			player->SendUpdateWorldState(4390,0);		
+		}
+		
         if (!m_team)
         {
             if (player->GetGroup())
@@ -389,6 +399,10 @@ public:
 
         if (idx == UPDATE_DEATHS_COUNT)
         {
+		if (instance->GetSpawnMode() == 1 || instance->GetSpawnMode() == 3)
+			{
+				DoUpdateWorldState(4389,attempts);
+			}
             ++deathsCount;
             return;
         }
@@ -495,7 +509,21 @@ public:
             return InstanceScript::SetBossState(id, state);
 
         if (id == DATA_FACTION_CHAMPIONS && state == DONE)
-            instance->GetCreature(uiTirionGuid)->SummonGameObject(GO_CACHE,563.800964f, 140.557205f, 393.957205f, 4.700161f, 0, 0, 0, 0, 0);
+           switch(instance->GetSpawnMode())
+			{
+				case 0:
+					instance->GetCreature(uiTirionGuid)->SummonGameObject(GO_CACHE_10N,563.800964f, 140.557205f, 393.957205f, 4.700161f, 0, 0, 0, 0, 0);
+					break;
+				case 1:
+					instance->GetCreature(uiTirionGuid)->SummonGameObject(GO_CACHE_25N,563.800964f, 140.557205f, 393.957205f, 4.700161f, 0, 0, 0, 0, 0);
+					break;
+				case 2:
+					instance->GetCreature(uiTirionGuid)->SummonGameObject(GO_CACHE_10H,563.800964f, 140.557205f, 393.957205f, 4.700161f, 0, 0, 0, 0, 0);
+					break;
+				case 3:
+					instance->GetCreature(uiTirionGuid)->SummonGameObject(GO_CACHE_25H,563.800964f, 140.557205f, 393.957205f, 4.700161f, 0, 0, 0, 0, 0);
+					break;
+			}
 
         if (id == DATA_LORD_JARAXXUS && (state == DONE || state == FAIL) && !misstressOfPain.empty())
         {

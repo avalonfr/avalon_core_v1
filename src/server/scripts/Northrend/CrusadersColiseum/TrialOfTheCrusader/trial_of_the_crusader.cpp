@@ -1367,7 +1367,7 @@ public:
         InstanceScript* pInstance = pCreature->GetInstanceScript();
         if (!pInstance)
         {
-            pCreature->MonsterSay("You have to be inside the instance to talk with me", LANG_UNIVERSAL, 0);
+            pCreature->MonsterSay("Vous êtes ici pour parler avec moi", LANG_UNIVERSAL, 0);
             return false;
         }
 
@@ -1390,15 +1390,15 @@ public:
             break;
 
         case GOSSIP_ACTION_INFO_DEF+2:
-            pCreature->MonsterSay("Хорошо, я дождусь вашего лидера.", LANG_UNIVERSAL, pPlayer->GetGUID());
+            pCreature->MonsterSay("Okay, je vais attendre pour votre chef.", LANG_UNIVERSAL, pPlayer->GetGUID());
             break;
 
         case GOSSIP_ACTION_INFO_DEF+3:
-            pCreature->MonsterSay("Надеюсь, статистика верна. Хорошего дня.", LANG_UNIVERSAL, pPlayer->GetGUID());
+            pCreature->MonsterSay("J'espère que les statistiques sont correctes. Have a nice day.", LANG_UNIVERSAL, pPlayer->GetGUID());
             break;
 
         default:
-            pCreature->MonsterSay("Undefined selected option", LANG_UNIVERSAL, 0);
+            pCreature->MonsterSay("Vous êtes ici pour parler avec moi", LANG_UNIVERSAL, 0);
         }
 
         pPlayer->CLOSE_GOSSIP_MENU();
@@ -1410,7 +1410,7 @@ public:
     {
         if ((!pPlayer->GetGroup() || !pPlayer->GetGroup()->IsLeader(pPlayer->GetGUID())) && !pPlayer->isGameMaster())
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Vous etes ici pour parler avec moi.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Vous êtes ici pour parler avec moi.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
             pPlayer->SEND_GOSSIP_MENU(13691, pCreature->GetGUID());
             return true;
         }

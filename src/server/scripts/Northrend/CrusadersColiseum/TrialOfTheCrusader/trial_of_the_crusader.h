@@ -76,7 +76,7 @@ enum
     SCARAB_DEATH,
 
     ///*=============== ENTRY
-
+	NPC_FIRE_BOMB   				= 34854,
     NPC_GORMOK                      = 34796,
     NPC_ACIDMAW                     = 35144,
     NPC_DREADSCALE                  = 34799,
@@ -130,6 +130,9 @@ enum
     NPC_GADAJACY                    = 34816,
     NPC_SNOBOLD                     = 34800,
     NPC_MISSTRESS_OF_PAIN           = 34826,
+	NPC_INFERNAL					= 34815,
+	NPC_PORTAL 						= 34825,
+	NPC_VOLCANO 					= 34813,
 
 
 
@@ -138,7 +141,10 @@ enum
     GO_DOOR_N                       = 195650,
     GO_DOOR_S                       = 195649,
     GO_DOOR_E                       = 195648,
-    GO_CACHE                        = 195631
+    GO_CACHE_10N                    = 195631,
+    GO_CACHE_10H                    = 195633,
+    GO_CACHE_25N                    = 195632,
+    GO_CACHE_25H                    = 195635,
 };
 
 
