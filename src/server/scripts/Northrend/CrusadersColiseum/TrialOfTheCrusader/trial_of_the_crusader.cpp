@@ -1410,7 +1410,7 @@ public:
     {
         if ((!pPlayer->GetGroup() || !pPlayer->GetGroup()->IsLeader(pPlayer->GetGUID())) && !pPlayer->isGameMaster())
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Извини, я не яляюсь лидером рейда.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Vous etes ici pour parler avec moi.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+2);
             pPlayer->SEND_GOSSIP_MENU(13691, pCreature->GetGUID());
             return true;
         }
@@ -1421,32 +1421,32 @@ public:
 
         if (instance->GetBossState(DATA_TWIN_VALKYR) == DONE)
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Мы одержали победу над Валь'кирами-близнецами!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous avons vaincus les valkrys !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         }
         else if (instance->GetBossState(DATA_FACTION_CHAMPIONS) == DONE)
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Мы одержали победу над чемпионами фракций!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous avons vaincus les champions des factions!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         }
         else if (instance->GetBossState(DATA_LORD_JARAXXUS) == DONE)
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Мы одержали победу над лордом Джараксусом!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous avons vaincus le seigneur Jaraxxus!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         }
         else if (instance->GetBossState(DATA_BEASTS) == DONE)
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Мы одержали победу над Нордскольскими чудовищами!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous avons vaincus les betes du Norfendre!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         }
         else
         {
-            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Мы готовы к началу состязания!", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
+            pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous sommes prets !", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
         }
 
 
         if (pPlayer->isGameMaster())
         {
             std::stringstream str;
-            str << "Deaths Count: ";
+            str << "Nombres de morts: ";
             str << instance->GetData(DATA_DEATHS_COUNT);
-            str << ", Attempts remaning: ";
+            str << ", Tentatives restantes: ";
             str << instance->GetData(DATA_ATTEMPTS);
             str << ", Played as: ";
             str << (instance->GetData(DATA_TEAM) == ALLIANCE ? "alliance" : instance->GetData(DATA_TEAM) == HORDE ? "horde" : "<error: team not defined>");

@@ -647,6 +647,7 @@ struct mob_concentrated_energieAI : public ScriptedAI
         pos = (*creature);
         actualPosition = (*creature);
         inOnePlace_Timer = 0;
+		instance = creature->GetInstanceScript();
         done = false;
     }
 
@@ -655,6 +656,7 @@ struct mob_concentrated_energieAI : public ScriptedAI
     Position pos;
     Position actualPosition;
     bool done;
+	InstanceScript* instance;
 
     void KilledUnit(Unit* who)
     {
@@ -720,7 +722,47 @@ struct mob_concentrated_energieAI : public ScriptedAI
 
         if (done)
             return;
-
+			
+		if(Creature * light = ObjectAccessor::GetCreatureOrPetOrVehicle((*me), instance->GetData64(BOSS_LIGHT_TWIN)))
+			if (light->isAlive() && isLight && me->GetDistance2d(light) < 0.5f)
+			{
+				int rand = urand(2,5);			
+				for(int i = 0; i < rand; i++)
+				{
+					light->AddAura(POWERING_UP, light);
+				}
+				
+				Aura const * aura = light->GetAura(POWERING_UP);
+				if (aura && aura->GetStackAmount() > 99)
+				{
+					light->RemoveAurasDueToSpell(POWERING_UP);
+					light->AddAura(EMPROVED_LIGHT, light);
+				}				
+				me->ForcedDespawn(500);
+				done = true;
+				return;
+			}
+		
+		if(Creature * dark = ObjectAccessor::GetCreatureOrPetOrVehicle((*me), instance->GetData64(BOSS_DARK_TWIN)))
+			if (dark->isAlive() && !isLight && me->GetDistance2d(dark) < 0.5f)
+			{
+				int rand = urand(2,5);			
+				for(int i = 0; i < rand; i++)
+				{
+					dark->AddAura(POWERING_UP, dark);
+				}
+				
+				Aura const * aura = dark->GetAura(POWERING_UP);
+				if (aura && aura->GetStackAmount() > 99)
+				{
+					dark->RemoveAurasDueToSpell(POWERING_UP);
+					dark->AddAura(EMPROVED_DARKNESS, dark);
+				}
+				me->ForcedDespawn(500);
+				done = true;
+				return;
+			}
+			
         if (const Map* map = me->GetMap())
         {
             Map::PlayerList const& list = map->GetPlayers();
@@ -740,6 +782,12 @@ struct mob_concentrated_energieAI : public ScriptedAI
                     {
                         //don't turning done 'true' will make energies to cast buff 2-3 times on target, witch (afaik) is blizzlike
                         plr->AddAura(POWERING_UP, plr);
+							Aura const * aura = plr->GetAura(POWERING_UP);
+							if (aura && aura->GetStackAmount() > 99)
+							{
+								plr->RemoveAurasDueToSpell(POWERING_UP);
+								plr->AddAura(isLight ? EMPROVED_LIGHT : EMPROVED_DARKNESS, plr);
+							}
                         me->ForcedDespawn(500);
                         return;
                     }
