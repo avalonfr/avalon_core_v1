@@ -756,8 +756,11 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case 34700: // Allergic Reaction
                 case 61987: // Avenging Wrath Marker
                 case 61988: // Divine Shield exclude aura
+				case 50524: // Runic Power Feed
+                case 34709: // Shadow Sight
                     return false;
                 case 30877: // Tag Murloc
+				case 62478: // Frozen Blows
                     return true;
                 default:
                     break;
@@ -767,6 +770,8 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Amplify Magic, Dampen Magic
             if (spellproto->SpellFamilyFlags[0] == 0x00002000)
                 return true;
+			if (spellId == 64343) // Impact buff
+				return true;
             // Ignite
             if (spellproto->SpellIconID == 45)
                 return true;
@@ -786,6 +791,11 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
             // Aspect of the Viper
             if (spellId == 34074)
                 return true;
+            break;
+		case SPELLFAMILY_WARRIOR:
+            // Shockwave
+            if (spellId == 46968)
+                return false;
             break;
         case SPELLFAMILY_SHAMAN:
             if (spellId == 30708)
@@ -2894,12 +2904,22 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
         }
         case SPELLFAMILY_HUNTER:
         {
+			// Freezing Trap & Freezing Arrow & Wyvern Sting
+            if  (spellproto->SpellIconID == 180 || spellproto->SpellIconID == 1721)
+                return DIMINISHING_POLYMORPH;
             // Hunter's mark
             if ((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538)
                 return DIMINISHING_LIMITONLY;
             // Scatter Shot
             if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
                 return DIMINISHING_NONE;
+            break;
+        }
+		case SPELLFAMILY_PRIEST:
+        {
+            // Shackle Undead
+            if (spellproto->SpellIconID == 27)
+                return DIMINISHING_POLYMORPH;
             break;
         }
         default:
@@ -3202,6 +3222,9 @@ bool SpellMgr::CanAurasStack(Aura const *aura1, Aura const *aura2, bool sameCast
     {
         // Hack for Incanter's Absorption
         if (spellId_1 == 44413)
+            return true;
+		// Power Spark
+        if (spellId_1 == 55849)
             return true;
         if (aura1->GetCastItemGUID() && aura2->GetCastItemGUID())
             if (aura1->GetCastItemGUID() != aura2->GetCastItemGUID() && (GetSpellCustomAttr(spellId_1) & SPELL_ATTR0_CU_ENCHANT_PROC))
@@ -3607,6 +3630,8 @@ void SpellMgr::LoadSpellCustomAttr()
             ++count;
             break;
         case 49838: // Stop Time
+		case 50526: // Wandering Plague
+        case 52916: // Honor Among Thieves
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
             ++count;
             break;
@@ -3627,6 +3652,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
             ++count;
             break;
+		case 71880:
+       case 71892:
+            spellInfo->SpellFamilyName = SPELLFAMILY_GENERIC;
+            spellInfo->procChance = 20;
+            count++;
+            break;
 		// Chains of Ice
 		case 45524:
 		  // this will fix self-damage caused by Glyph of Chains of Ice
@@ -3645,6 +3676,11 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->excludeCasterAuraSpell = 57724; // Sated
             ++count;
             break;
+		// Titanic Storm
+		case 64172:
+			spellInfo->excludeTargetAuraSpell = 65294; // Empowered
+			count++;
+			break;
         case 20335: // Heart of the Crusader
         case 20336:
         case 20337:
@@ -3658,6 +3694,13 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_NEARBY_ENTRY;
             spellInfo->EffectImplicitTargetB[0] = TARGET_DST_NEARBY_ENTRY;
             ++count;
+            break;
+		case 24131:                             // Wyvern Sting (rank 1)
+        case 24134:                             // Wyvern Sting (rank 2)
+        case 24135:                             // Wyvern Sting (rank 3)
+            // something wrong and it applied as positive buff
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_NEGATIVE_EFF0;
+            count++;
             break;
         case 26029: // Dark Glare
         case 37433: // Spout
@@ -3723,6 +3766,13 @@ void SpellMgr::LoadSpellCustomAttr()
         case 45761: // Shoot
         case 42611: // Shoot
         case 62374: // Pursued
+		case 50988: // Glare of the Tribunal (nh)
+        case 59870: // Glare of the Tribunal (hc)
+        case 55927: // Sear Beam (nh)
+        case 59509: // Sear Beam (hc)
+		case 56397: // Arcane Barrage
+		case 62488: // Activate Construct
+  		case 62016: // Charge Orb
             spellInfo->MaxAffectedTargets = 1;
             ++count;
             break;
@@ -3732,6 +3782,35 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_DST_CASTER;
             spellInfo->EffectImplicitTargetA[1] = TARGET_DST_CASTER;
             ++count;
+            break;
+		case 28836: //Mark - should not be resistet
+        case 28786: //Locust Swarm
+        case 54022: //Locust Swarm
+        case 57579: //Shadow Fissure - Sartharion Drakes
+        case 59127: //Shadow Fissure - Sartharion Drakes        
+		case 57570: //Shadow Breath - Sartharion Drakes
+        case 59126: //Shadow Breath - Sartharion Drakes
+        case 56908: //Fire Breath - Sartharion
+        case 58956: //Fire Breath - Sartharion
+            spellInfo->AttributesEx4 |= SPELL_ATTR4_FIXED_DAMAGE;
+            count++;
+            break;
+		case 57491: //Flame Tzunami Hack - Sartharion
+        case 60430: //Flame Tzunami Hack - Sartharion
+            spellInfo->EffectRadiusIndex[0] = 8;
+            spellInfo->EffectRadiusIndex[1] = 8;
+            spellInfo->EffectRadiusIndex[2] = 8;
+            count++;
+            break;
+        case 57697: //Lavastrike Hack - Sartharion
+            spellInfo->EffectImplicitTargetA[0] = TARGET_DST_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetB[0] = TARGET_DST_TARGET_ENEMY;
+            count++;
+            break;
+        case 31225:
+        case 8593:
+            spellInfo->AttributesEx2 |= SPELL_ATTR2_ALLOW_DEAD_TARGET;
+            count++;
             break;
         case 41376: // Spite
         case 39992: // Needle Spine
@@ -3744,11 +3823,23 @@ void SpellMgr::LoadSpellCustomAttr()
         case 54172: // Divine Storm (heal)
         case 29213: // Curse of the Plaguebringer - Noth
         case 28542: // Life Drain - Sapphiron
-        case 66588: // Flaming Spear
         case 54171: // Divine Storm
+		case 60936: // Surge of Power
+		case 61693: // Arcane Storm
             spellInfo->MaxAffectedTargets = 3;
             ++count;
             break;
+		case 66588: // Flaming Spear
+            spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+            spellInfo->EffectImplicitTargetA[1] = TARGET_UNIT_TARGET_ENEMY;
+             break;
+       	case 62661: // Searing Flames
+        case 61915: // Lightning Whirl 10
+	    case 63483: // Lightning Whirl 25
+		case 55098: // Transformation
+		    spellInfo->InterruptFlags = 47;
+		    count++;
+		    break;
         case 38310: // Multi-Shot
         case 53385: // Divine Storm (Damage)
             spellInfo->MaxAffectedTargets = 4;
@@ -3770,6 +3861,7 @@ void SpellMgr::LoadSpellCustomAttr()
         case 40861: // Wicked Beam
         case 54835: // Curse of the Plaguebringer - Noth (H)
         case 54098: // Poison Bolt Volly - Faerlina (H)
+		case 61694: // Arcane Storm
             spellInfo->MaxAffectedTargets = 10;
             ++count;
             break;
@@ -3926,6 +4018,12 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER;
             ++count;
             break;
+		case 62713: // Irionbranch's Essence
+		case 62968: // Brightleaf's Essence
+			spellInfo->EffectRadiusIndex[0] = 41; // 150 yeard
+			spellInfo->EffectRadiusIndex[1] = 41;
+			count++;
+			break;
         case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
             spellInfo->EffectMiscValue[0] = MECHANIC_IMMUNE_SHIELD;
             ++count;
@@ -3937,12 +4035,22 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
             ++count;
             break;
+		case 66532:
+        case 66963:
+        case 66964:
+        case 66965:
+            spellInfo->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            count++;
+            break;
         case 18500: // Wing Buffet
         case 33086: // Wild Bite
         case 49749: // Piercing Blow
         case 52890: // Penetrating Strike
         case 53454: // Impale
+		case 55276: // Puncture
         case 59446: // Impale
+		case 59826: // Puncture
+		case 60590: // Void Strike
         case 62383: // Shatter
         case 64777: // Machine Gun
         case 65239: // Machine Gun
@@ -3960,20 +4068,55 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->StackAmount = 4;
             ++count;
             break;
+		case 20224: // Seals of the Pure (Rank 1)
+        case 20225: // Seals of the Pure (Rank 2)
+        case 20330: // Seals of the Pure (Rank 3)
+        case 20331: // Seals of the Pure (Rank 4)
+        case 20332: // Seals of the Pure (Rank 5)
+            spellInfo->EffectSpellClassMask[EFFECT_0][1] = 0x20400800;
+            count++;
+            break;
+        case 72928:
+            spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
+            count++;
+             break;
         case 63675: // Improved Devouring Plague
             spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_DONE_BONUS;
             ++count;
             break;
+		case 56278: // Read Pronouncement, missing EffectApplyAuraName
+            spellInfo->Effect[0] = SPELL_EFFECT_DUMMY;
+            count++;
+             break;
+        case 45529: // Blood Tap
+            spellInfo->EffectMiscValue[0] = 0;
+            count++;
+            break;
+		case 64145:     // Diminish Power
+				spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+				count++;
+			break;
+		case 63882:     // Death Ray Warning Visual
+		case 63886:     // Death Ray Damage Visual
+				spellInfo->AttributesEx |= SPELL_ATTR1_STACK_FOR_DIFF_CASTERS;
+				spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ALLY;
+				count++;
+				break;
+		case 62714:     // Shadow Nova
+		case 65209:     // Shadow Nova
+				spellInfo->Effect[0] = 0;
+				count++;
+				break;
+		case 53241: // Marked for Death (Rank 1)
+		case 53243: // Marked for Death (Rank 2)
+		case 53244: // Marked for Death (Rank 3)
+		case 53245: // Marked for Death (Rank 4)
+		case 53246: // Marked for Death (Rank 5)
+				spellInfo->EffectSpellClassMask[0] = flag96(423937, 276955137, 2049);
+				count++;
+				break;
         case 33206: // Pain Suppression
             spellInfo->AttributesEx5 &= ~SPELL_ATTR5_USABLE_WHILE_STUNNED;
-            ++count;
-            break;
-        case 53241: // Marked for Death (Rank 1)
-        case 53243: // Marked for Death (Rank 2)
-        case 53244: // Marked for Death (Rank 3)
-        case 53245: // Marked for Death (Rank 4)
-        case 53246: // Marked for Death (Rank 5)
-            spellInfo->EffectSpellClassMask[0] = flag96(423937, 276955137, 2049);
             ++count;
             break;
         case 70728: // Exploit Weakness
@@ -4011,6 +4154,15 @@ void SpellMgr::LoadSpellCustomAttr()
             break;
         // ULDUAR SPELLS
         //
+		case 62775: // XT-002 - Tympanic Tantrum
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_ARMOR;
+            count++;
+            break;
+		case 65210: // Keeper Mimiron Destabilization Matrix
+            // Ignore LoS (because Mimiron stands in a Tube and is out of LoS)
+            mSpellCustomAttr[i] |= SPELL_ATTR0_CU_IGNORE_LOS;
+            count++;
+            break;
         case 63342: // Focused Eyebeam Summon Trigger
             spellInfo->MaxAffectedTargets = 1;
             ++count;
