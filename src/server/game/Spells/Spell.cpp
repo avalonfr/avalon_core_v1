@@ -937,7 +937,10 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
 
     if (!CheckTarget(pVictim, effIndex))
         return;
-
+	// Skip if has aura "Recently Reapaired"
+    if (pVictim->HasAura(62705))
+        return;
+		
     // Check for effect immune skip if immuned
     bool immuned = pVictim->IsImmunedToSpellEffect(m_spellInfo, effIndex);
 	// Saronite Vapors Hack
@@ -1306,6 +1309,25 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
 
         caster->DealSpellDamage(&damageInfo, true);
 
+		 // unleashed dark & light
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC && m_spellInfo->EffectTriggerSpell[1] == 3617 && (m_spellInfo->SpellIconID == 1988 || m_spellInfo->SpellIconID == 1874))
+        {
+            AuraEffect const* pAurEff;
+            if ((pAurEff = unitTarget->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE,SPELLFAMILY_GENERIC,1,0)) && !damageInfo.damage)
+            {
+
+                unitTarget->AddAura(67590,unitTarget);
+                if (unitTarget->GetAura(67590)->GetStackAmount() == 100)
+                {
+                    unitTarget->RemoveAura(67590);
+                    if (SpellSchoolMask(m_spellInfo->SchoolMask) == SPELL_SCHOOL_MASK_FIRE)
+                        unitTarget->AddAura(67218,unitTarget);
+                    else
+                        unitTarget->AddAura(67215,unitTarget);
+                }
+            }
+        }
+		
         // Haunt
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
         {
@@ -1418,15 +1440,24 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
 
         if (!m_caster->IsFriendlyTo(unit))
         {
+		// spell misses if target has Invisibility or Vanish and isn't visible for caster
+            if (m_spellInfo->speed > 0.0f && unit == m_targets.getUnitTarget()
+                && ((unit->HasInvisibilityAura() || m_caster->HasInvisibilityAura())
+                || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, SPELLFAMILYFLAG_ROGUE_VANISH))
+                && !m_caster->canSeeOrDetect(unit))
+            {
+                return SPELL_MISS_MISS;
+            }
             unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
             //TODO: This is a hack. But we do not know what types of stealth should be interrupted by CC
             if ((m_customAttr & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer())
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 
 			bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_BINARY) > 0);
-			m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
-			if (m_resist >= 100)
-				return SPELL_MISS_RESIST;
+            m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
+            if (m_resist >= 100)
+                return SPELL_MISS_RESIST;
+
         }
         else
         {
@@ -5828,6 +5859,9 @@ bool Spell::CanAutoCast(Unit* target)
 
 SpellCastResult Spell::CheckRange(bool strict)
 {
+	// ugly hack for CHOKING_CLOUD
+    if(m_spellInfo->Id == 58963 || m_spellInfo->Id == 60895)
+        return SPELL_CAST_OK;
     // self cast doesn't need range checking -- also for Starshards fix
     if (m_spellInfo->rangeIndex == 1)
         return SPELL_CAST_OK;
