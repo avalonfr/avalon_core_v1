@@ -527,7 +527,7 @@ public:
         uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
         uint32 displayid = target->GetDisplayId();
         uint32 nativeid = target->GetNativeDisplayId();
-        uint32 Entry = target->GetEntry();
+        uint32 Entry = target->GetUInt32Value(2);
         CreatureTemplate const* cInfo = target->GetCreatureInfo();
 
         int64 curRespawnDelay = target->GetRespawnTimeEx()-time(NULL);

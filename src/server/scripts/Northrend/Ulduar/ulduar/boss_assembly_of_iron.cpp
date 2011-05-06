@@ -327,7 +327,7 @@ public:
                     {
                         events.RescheduleEvent(EVENT_OVERWHELMING_POWER, urand(2000, 5000));
                         // Add HardMode Loot
-						me->AddLootMode(LOOT_MODE_HARD_MODE_2);
+						me->AddLootMode(LOOT_MODE_HARD_MODE_1);
                     }
                     break;
             }
