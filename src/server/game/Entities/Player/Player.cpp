@@ -41,6 +41,9 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
+#include "ArenaTeamMgr.h"
+#include "GuildMgr.h"
+#include "GroupMgr.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
@@ -889,7 +892,7 @@ Player::~Player ()
 void Player::CleanupsBeforeDelete(bool finalCleanup)
 {
     TradeCancel(false);
-    DuelComplete(DUEL_INTERUPTED);
+    DuelComplete(DUEL_INTERRUPTED);
 
     Unit::CleanupsBeforeDelete(finalCleanup);
 
@@ -4728,7 +4731,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     sObjectAccessor->ConvertCorpseForPlayer(playerguid);
 
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
-        if (Guild* pGuild = sObjectMgr->GetGuildById(guildId))
+        if (Guild* pGuild = sGuildMgr->GetGuildById(guildId))
             pGuild->DeleteMember(guid);
 
     // remove from arena teams
@@ -4737,7 +4740,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     // the player was uninvited already on logout so just remove from group
     QueryResult resultGroup = CharacterDatabase.PQuery("SELECT guid FROM group_member WHERE memberGuid=%u", guid);
     if (resultGroup)
-        if (Group* group = sObjectMgr->GetGroupByStorageId((*resultGroup)[0].GetUInt32()))
+        if (Group* group = sGroupMgr->GetGroupByDbStoreId((*resultGroup)[0].GetUInt32()))
             RemoveFromGroup(group, playerguid);
 
     // Remove signs from petitions (also remove petitions if owner);
@@ -5411,7 +5414,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
                     return TotalCost;
                 }
 
-                Guild *pGuild = sObjectMgr->GetGuildById(GetGuildId());
+                Guild *pGuild = sGuildMgr->GetGuildById(GetGuildId());
                 if (!pGuild)
                     return TotalCost;
 
@@ -7500,13 +7503,13 @@ void Player::DuelComplete(DuelCompleteType type)
     sLog->outDebug(LOG_FILTER_UNITS, "Duel Complete %s %s", GetName(), duel->opponent->GetName());
 
     WorldPacket data(SMSG_DUEL_COMPLETE, (1));
-    data << (uint8)((type != DUEL_INTERUPTED) ? 1 : 0);
+    data << (uint8)((type != DUEL_INTERRUPTED) ? 1 : 0);
     GetSession()->SendPacket(&data);
 
     if (duel->opponent->GetSession())
         duel->opponent->GetSession()->SendPacket(&data);
 
-    if (type != DUEL_INTERUPTED)
+    if (type != DUEL_INTERRUPTED)
     {
         data.Initialize(SMSG_DUEL_WINNER, (1+20));          // we guess size
         data << uint8(type == DUEL_WON ? 0 : 1);            // 0 = just won; 1 = fled
@@ -7939,12 +7942,11 @@ void Player::_ApplyWeaponDamage(uint8 slot, ItemTemplate const *proto, ScalingSt
 
     float minDamage = proto->Damage[0].DamageMin;
     float maxDamage = proto->Damage[0].DamageMax;
-    int32 extraDPS = 0;
 
     // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
     if (ssv)
     {
-        extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
+        int32 extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
         if (extraDPS)
         {
             float average = extraDPS * proto->Delay / 1000.0f;
@@ -9029,6 +9031,7 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             break;
         case 4100:  // The Culling of Stratholme
             NumberOfFields = 13;
+            break;
          default:
             NumberOfFields = 12;
             break;
@@ -9796,7 +9799,7 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                 }
             }
 
-            if (Item* ohWeapon = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
             {
                 if (proto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || proto->SubClass == ITEM_SUBCLASS_WEAPON_STAFF)
                 {
@@ -11162,7 +11165,6 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count) const
         if (pItem->IsBindedNotWith(this))
             return EQUIP_ERR_DONT_OWN_THAT_ITEM;
 
-        Bag *pBag;
         ItemTemplate const *pBagProto;
 
         // item is 'one item only'
@@ -11213,11 +11215,11 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count) const
 
             for (int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; ++t)
             {
-                if (pBag = GetBagByPos(t))
+                if (Bag* bag = GetBagByPos(t))
                 {
-                    if (ItemCanGoIntoBag(pItem->GetTemplate(), pBag->GetTemplate()))
+                    if (ItemCanGoIntoBag(pItem->GetTemplate(), bag->GetTemplate()))
                     {
-                        for (uint32 j = 0; j < pBag->GetBagSize(); j++)
+                        for (uint32 j = 0; j < bag->GetBagSize(); j++)
                         {
                             pItem2 = GetItemByPos(t, j);
                             if( pItem2 && pItem2->CanBeMergedPartlyWith(pProto) == EQUIP_ERR_OK && inv_bags[t-INVENTORY_SLOT_BAG_START][j] + pItem->GetCount() <= pProto->GetMaxStackSize())
@@ -11270,15 +11272,15 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count) const
 
             for (int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; ++t)
             {
-                if (pBag = GetBagByPos(t))
+                if (Bag* bag = GetBagByPos(t))
                 {
-                    pBagProto = pBag->GetTemplate();
+                    pBagProto = bag->GetTemplate();
 
                     // not plain container check
                     if (pBagProto && (pBagProto->Class != ITEM_CLASS_CONTAINER || pBagProto->SubClass != ITEM_SUBCLASS_CONTAINER) &&
                         ItemCanGoIntoBag(pProto, pBagProto))
                     {
-                        for (uint32 j = 0; j < pBag->GetBagSize(); j++)
+                        for (uint32 j = 0; j < bag->GetBagSize(); j++)
                         {
                             if (inv_bags[t-INVENTORY_SLOT_BAG_START][j] == 0)
                             {
@@ -11309,15 +11311,15 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count) const
         // search free slot in bags
         for (int t = INVENTORY_SLOT_BAG_START; !b_found && t < INVENTORY_SLOT_BAG_END; ++t)
         {
-            if (pBag = GetBagByPos(t))
+            if (Bag* bag = GetBagByPos(t))
             {
-                pBagProto = pBag->GetTemplate();
+                pBagProto = bag->GetTemplate();
 
                 // special bag already checked
                 if (pBagProto && (pBagProto->Class != ITEM_CLASS_CONTAINER || pBagProto->SubClass != ITEM_SUBCLASS_CONTAINER))
                     continue;
 
-                for (uint32 j = 0; j < pBag->GetBagSize(); j++)
+                for (uint32 j = 0; j < bag->GetBagSize(); j++)
                 {
                     if (inv_bags[t-INVENTORY_SLOT_BAG_START][j] == 0)
                     {
@@ -16227,7 +16229,7 @@ void Player::_LoadArenaTeamInfo(PreparedQueryResult result)
 
             uint32 arenaTeamId = fields[0].GetUInt32();
 
-            ArenaTeam* arenaTeam = sObjectMgr->GetArenaTeamById(arenaTeamId);
+            ArenaTeam* arenaTeam = sArenaTeamMgr->GetArenaTeamById(arenaTeamId);
             if (!arenaTeam)
             {
                 sLog->outError("Player::_LoadArenaTeamInfo: couldn't load arenateam %u", arenaTeamId);
@@ -16516,7 +16518,7 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
         if (!arena_team_id)
             continue;
 
-        if (ArenaTeam * at = sObjectMgr->GetArenaTeamById(arena_team_id))
+        if (ArenaTeam * at = sArenaTeamMgr->GetArenaTeamById(arena_team_id))
             if (at->IsMember(GetGUID()))
                 continue;
 
@@ -17735,7 +17737,7 @@ void Player::_LoadGroup(PreparedQueryResult result)
     //QueryResult *result = CharacterDatabase.PQuery("SELECT guid FROM group_member WHERE memberGuid=%u", GetGUIDLow());
     if (result)
     {
-        if (Group* group = sObjectMgr->GetGroupByStorageId((*result)[0].GetUInt32()))
+        if (Group* group = sGroupMgr->GetGroupByDbStoreId((*result)[0].GetUInt32()))
         {
             uint8 subgroup = group->GetMemberGroup(GetGUID());
             SetGroup(group, subgroup);
@@ -18782,7 +18784,7 @@ void Player::_SaveStats(SQLTransaction& trans)
     std::ostringstream ss;
     ss << "INSERT INTO character_stats (guid, maxhealth, maxpower1, maxpower2, maxpower3, maxpower4, maxpower5, maxpower6, maxpower7, "
         "strength, agility, stamina, intellect, spirit, armor, resHoly, resFire, resNature, resFrost, resShadow, resArcane, "
-        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower) VALUES ("
+        "blockPct, dodgePct, parryPct, critPct, rangedCritPct, spellCritPct, attackPower, rangedAttackPower, spellPower, resilience) VALUES ("
         << GetGUIDLow() << ", "
         << GetMaxHealth() << ", ";
     for (uint8 i = 0; i < MAX_POWERS; ++i)
@@ -18800,7 +18802,8 @@ void Player::_SaveStats(SQLTransaction& trans)
        << GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1) << ", "
        << GetUInt32Value(UNIT_FIELD_ATTACK_POWER) << ", "
        << GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) << ", "
-       << GetBaseSpellPowerBonus() << ")";
+       << GetBaseSpellPowerBonus() << ", "
+       << GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_TAKEN_SPELL) << ")";
     trans->Append(ss.str().c_str());
 }
 
@@ -19683,6 +19686,10 @@ void Player::RemoveSpellMods(Spell * spell)
 
 void Player::DropModCharge(SpellModifier * mod, Spell * spell)
 {
+    // this mod shouldn't be removed here
+    if (mod->op == SPELLMOD_CRIT_DAMAGE_BONUS)
+        return;
+
     if (spell && mod->ownerAura && mod->charges > 0)
     {
         --mod->charges;
@@ -19770,7 +19777,7 @@ void Player::LeaveAllArenaTeams(uint64 guid)
         uint32 arenaTeamId = fields[0].GetUInt32();
         if (arenaTeamId != 0)
         {
-            ArenaTeam* arenaTeam = sObjectMgr->GetArenaTeamById(arenaTeamId);
+            ArenaTeam* arenaTeam = sArenaTeamMgr->GetArenaTeamById(arenaTeamId);
             if (arenaTeam)
                 arenaTeam->DelMember(guid, true);
         }
@@ -20409,7 +20416,7 @@ uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot) const
     uint32 max_personal_rating = 0;
     for (uint8 i = minarenaslot; i < MAX_ARENA_SLOT; ++i)
     {
-        if (ArenaTeam * at = sObjectMgr->GetArenaTeamById(GetArenaTeamId(i)))
+        if (ArenaTeam * at = sArenaTeamMgr->GetArenaTeamById(GetArenaTeamId(i)))
         {
             uint32 p_rating = GetArenaPersonalRating(i);
             uint32 t_rating = at->GetRating();
@@ -20903,8 +20910,9 @@ bool Player::CanReportAfkDueToLimit()
 ///This player has been blamed to be inactive in a battleground
 void Player::ReportedAfkBy(Player* reporter)
 {
-    Battleground *bg = GetBattleground();
-    if (!bg || bg != reporter->GetBattleground() || GetTeam() != reporter->GetTeam())
+    Battleground* bg = GetBattleground();
+    // Battleground also must be in progress!
+    if (!bg || bg != reporter->GetBattleground() || GetTeam() != reporter->GetTeam() || bg->GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     // check if player has 'Idle' or 'Inactive' debuff
@@ -22921,7 +22929,7 @@ void Player::AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell)
 
     if (!(spellInfo->Attributes & (SPELL_ATTR0_UNK4|SPELL_ATTR0_PASSIVE)))
         cdTime *= GetFloatValue(UNIT_MOD_CAST_SPEED);
-    else if (IsRangedWeaponSpell(spellInfo) && !spell->IsAutoRepeat())
+    else if (IsRangedWeaponSpell(spellInfo) && spell && !spell->IsAutoRepeat())
         cdTime *= m_modAttackSpeedPct[RANGED_ATTACK];
 
     if (cdTime > 1500.0f)
@@ -24401,7 +24409,7 @@ uint32 Player::GetReputation(uint32 factionentry)
 
 std::string Player::GetGuildName()
 {
-    return sObjectMgr->GetGuildById(GetGuildId())->GetName();
+    return sGuildMgr->GetGuildById(GetGuildId())->GetName();
 }
 
 void Player::SendDuelCountdown(uint32 counter)

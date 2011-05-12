@@ -19,6 +19,8 @@
 #include "Common.h"
 #include "DBCEnums.h"
 #include "ObjectMgr.h"
+#include "ArenaTeamMgr.h"
+#include "GuildMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "DatabaseEnv.h"
@@ -637,7 +639,7 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) 
         sLog->outDebug(LOG_FILTER_ACHIEVEMENTSYS, "AchievementMgr::SendAchievementEarned(%u)", achievement->ID);
     #endif
 
-    if (Guild* guild = sObjectMgr->GetGuildById(GetPlayer()->GetGuildId()))
+    if (Guild* guild = sGuildMgr->GetGuildById(GetPlayer()->GetGuildId()))
     {
         Trinity::AchievementChatBuilder say_builder(*GetPlayer(), CHAT_MSG_GUILD_ACHIEVEMENT, LANG_ACHIEVEMENT_EARNED, achievement->ID);
         Trinity::LocalizedPacketDo<Trinity::AchievementChatBuilder> say_do(say_builder);
@@ -899,7 +901,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 uint32 counter =0;
-                for (RewardedQuestSet::const_iterator itr = GetPlayer()->getRewardedQuests().begin(); itr != GetPlayer()->getRewardedQuests().end(); itr++)
+                for (RewardedQuestSet::const_iterator itr = GetPlayer()->getRewardedQuests().begin(); itr != GetPlayer()->getRewardedQuests().end(); ++itr)
                 {
                     Quest const* quest = sObjectMgr->GetQuestTemplate(*itr);
                     if (quest && quest->GetZoneOrSort() >= 0 && uint32(quest->GetZoneOrSort()) == achievementCriteria->complete_quests_in_zone.zoneID)
@@ -1515,7 +1517,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 {
                     for (uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
                         if (uint32 arena_team_id = GetPlayer()->GetArenaTeamId(arena_slot))
-                            if (ArenaTeam * at = sObjectMgr->GetArenaTeamById(arena_team_id))
+                            if (ArenaTeam * at = sArenaTeamMgr->GetArenaTeamById(arena_team_id))
                                 if (at->GetType() == reqTeamType)
                                 {
                                     SetCriteriaProgress(achievementCriteria, at->GetStats().Rating, PROGRESS_HIGHEST);

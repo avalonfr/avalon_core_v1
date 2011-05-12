@@ -43,10 +43,6 @@
 #include "ConditionMgr.h"
 #include <functional>
 
-
-class Group;
-class Guild;
-class ArenaTeam;
 class Item;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push, N), also any gcc version not support it at some platform
@@ -608,13 +604,6 @@ class ObjectMgr
     public:
         typedef UNORDERED_MAP<uint32, Item*> ItemMap;
 
-        typedef std::set<Group *> GroupSet;
-        typedef std::vector<Group *> GroupStorage;
-
-        typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
-
-        typedef UNORDERED_MAP<uint32, ArenaTeam*> ArenaTeamMap;
-
         typedef UNORDERED_MAP<uint32, Quest*> QuestMap;
 
         typedef UNORDERED_MAP<uint32, AreaTrigger> AreaTriggerMap;
@@ -644,35 +633,10 @@ class ObjectMgr
         void LoadGameObjectTemplate();
         void AddGameobjectInfo(GameObjectTemplate *goinfo);
 
-        Group * GetGroupByGUID(uint32 guid) const;
-        void AddGroup(Group* group) { mGroupSet.insert(group); }
-        void RemoveGroup(Group* group) { mGroupSet.erase(group); }
-
-        uint32 GenerateNewGroupStorageId();
-        void RegisterGroupStorageId(uint32 storageId, Group* group);
-        void FreeGroupStorageId(Group* group);
-        void SetNextGroupStorageId(uint32 storageId) { NextGroupStorageId = storageId; };
-        Group* GetGroupByStorageId(uint32 storageId) const;
-
-        Guild* GetGuildByLeader(uint64 const&guid) const;
-        Guild* GetGuildById(uint32 guildId) const;
-        Guild* GetGuildByName(const std::string& guildname) const;
-        std::string GetGuildNameById(uint32 guildId) const;
-        void AddGuild(Guild* pGuild);
-        void RemoveGuild(uint32 guildId);
-
-        ArenaTeam* GetArenaTeamById(uint32 arenateamid) const;
-        ArenaTeam* GetArenaTeamByName(const std::string& arenateamname) const;
-        ArenaTeam* GetArenaTeamByCaptain(uint64 const& guid) const;
-        void AddArenaTeam(ArenaTeam* arenaTeam);
-        void RemoveArenaTeam(uint32 Id);
-        ArenaTeamMap::iterator GetArenaTeamMapBegin() { return mArenaTeamMap.begin(); }
-        ArenaTeamMap::iterator GetArenaTeamMapEnd()   { return mArenaTeamMap.end(); }
-
         CreatureTemplate const* GetCreatureTemplate(uint32 entry);
         CreatureTemplateContainer const* GetCreatureTemplates() { return &CreatureTemplateStore; }
         CreatureModelInfo const* GetCreatureModelInfo(uint32 modelId);
-        CreatureModelInfo const* GetCreatureModelRandomGender(uint32 &displayID);
+        CreatureModelInfo const* GetCreatureModelRandomGender(uint32* displayID);
         uint32 ChooseDisplayId(uint32 team, const CreatureTemplate *cinfo, const CreatureData *data = NULL);
         static void ChooseCreatureFlags(const CreatureTemplate *cinfo, uint32& npcflag, uint32& unit_flags, uint32& dynamicflags, const CreatureData *data = NULL);
         EquipmentInfo const *GetEquipmentInfo(uint32 entry);
@@ -849,9 +813,6 @@ class ObjectMgr
             return NULL;
         }
 
-        void LoadGuilds();
-        void LoadArenaTeams();
-        void LoadGroups();
         void LoadQuests();
         void LoadQuestRelations()
         {
@@ -1003,10 +964,9 @@ class ObjectMgr
 
         void SetHighestGuids();
         uint32 GenerateLowGuid(HighGuid guidhigh);
-        uint32 GenerateArenaTeamId();
         uint32 GenerateAuctionID();
         uint64 GenerateEquipmentSetGuid();
-        uint32 GenerateGuildId();
+
         uint32 GenerateMailID();
         uint32 GeneratePetNumber();
 
@@ -1180,7 +1140,7 @@ class ObjectMgr
         static PetNameInvalidReason CheckPetName(const std::string& name);
         static bool IsValidCharterName(const std::string& name);
 
-        static bool CheckDeclinedNames(std::wstring mainpart, DeclinedName const& names);
+        static bool CheckDeclinedNames(std::wstring w_ownname, DeclinedName const& names);
 
         GameTele const* GetGameTele(uint32 id) const
         {
@@ -1275,10 +1235,8 @@ class ObjectMgr
     protected:
 
         // first free id for selected id type
-        uint32 m_arenaTeamId;
         uint32 m_auctionid;
         uint64 m_equipmentSetGuid;
-        uint32 m_guildId;
         uint32 m_ItemTextId;
         uint32 m_mailid;
         uint32 m_hiPetNumber;
@@ -1292,12 +1250,7 @@ class ObjectMgr
         uint32 m_hiGoGuid;
         uint32 m_hiDoGuid;
         uint32 m_hiCorpseGuid;
-        uint32 m_hiGroupGuid;
         uint32 m_hiMoTransGuid;
-
-        // Database storage IDs
-
-        uint32 NextGroupStorageId;
 
         QuestMap            mQuestTemplates;
 
@@ -1305,11 +1258,6 @@ class ObjectMgr
         typedef UNORDERED_MAP<uint32, uint32> QuestAreaTriggerMap;
         typedef std::set<uint32> TavernAreaTriggerSet;
         typedef std::set<uint32> GameObjectForQuestSet;
-
-        GroupSet            mGroupSet;
-        GroupStorage        mGroupStorage;
-        GuildMap            mGuildMap;
-        ArenaTeamMap        mArenaTeamMap;
 
         QuestAreaTriggerMap mQuestAreaTriggerMap;
         TavernAreaTriggerSet mTavernAreaTriggerSet;

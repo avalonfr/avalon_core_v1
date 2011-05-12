@@ -21,6 +21,7 @@
 #include "ArenaTeam.h"
 #include "World.h"
 #include "Group.h"
+#include "ArenaTeamMgr.h"
 
 ArenaTeam::ArenaTeam()
 {
@@ -52,12 +53,12 @@ bool ArenaTeam::Create(uint32 captainGuid, uint8 type, std::string teamName, uin
         return false;
 
     // Check if arena team name is already taken
-    if (sObjectMgr->GetArenaTeamByName(TeamName))
+    if (sArenaTeamMgr->GetArenaTeamByName(TeamName))
         return false;
 
 
     // Generate new arena team id
-    TeamId = sObjectMgr->GenerateArenaTeamId();
+    TeamId = sArenaTeamMgr->GenerateArenaTeamId();
 
     // Assign member variables
     CaptainGuid = captainGuid;
@@ -126,7 +127,7 @@ bool ArenaTeam::AddMember(const uint64& playerGuid)
     // Check if player is already in a similar arena team
     if (player && player->GetArenaTeamId(GetSlot()) || Player::GetArenaTeamIdFromDB(playerGuid, GetType()) != 0)
     {
-        sLog->outError("Arena: Player %s (guid: %u) already has an arena team of type %u", playerName.c_str(), playerGuid, GetType());
+        sLog->outError("Arena: Player %s (guid: %u) already has an arena team of type %u", playerName.c_str(), GUID_LOPART(playerGuid), GetType());
         return false;
     }
 
@@ -185,7 +186,7 @@ bool ArenaTeam::AddMember(const uint64& playerGuid)
             player->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_MEMBER, 1);
     }
 
-    sLog->outArena("Player: %s [GUID: %u] joined arena team type: %u [Id: %u].", playerName.c_str(), playerGuid, GetType(), GetId());
+    sLog->outArena("Player: %s [GUID: %u] joined arena team type: %u [Id: %u].", playerName.c_str(), GUID_LOPART(playerGuid), GetType(), GetId());
 
     return true;
 }
@@ -360,7 +361,7 @@ void ArenaTeam::Disband(WorldSession* session)
     CharacterDatabase.CommitTransaction(trans);
 
     // Remove arena team from ObjectMgr
-    sObjectMgr->RemoveArenaTeam(TeamId);
+    sArenaTeamMgr->RemoveArenaTeam(TeamId);
 }
 
 void ArenaTeam::Roster(WorldSession* session)
@@ -662,8 +663,8 @@ void ArenaTeam::FinishGame(int32 mod)
 
     // Update team's rank, start with rank 1 and increase until no team with more rating was found
     Stats.Rank = 1;
-    ObjectMgr::ArenaTeamMap::const_iterator i = sObjectMgr->GetArenaTeamMapBegin();
-    for (; i != sObjectMgr->GetArenaTeamMapEnd(); ++i)
+    ArenaTeamMgr::ArenaTeamContainer::const_iterator i = sArenaTeamMgr->GetArenaTeamMapBegin();
+    for (; i != sArenaTeamMgr->GetArenaTeamMapEnd(); ++i)
     {
         if (i->second->GetType() == Type && i->second->GetStats().Rating > Stats.Rating)
             ++Stats.Rank;

@@ -1089,11 +1089,8 @@ void AuraEffect::Update(uint32 diff, Unit * caster)
             std::list<AuraApplication*> effectApplications;
             GetApplicationList(effectApplications);
             // tick on targets of effects
-            if (!caster || !caster->HasUnitState(UNIT_STAT_ISOLATED))
-            {
-                for (std::list<AuraApplication*>::iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
-                    PeriodicTick(*apptItr, caster);
-            }
+            for (std::list<AuraApplication*>::iterator apptItr = effectApplications.begin(); apptItr != effectApplications.end(); ++apptItr)
+                PeriodicTick(*apptItr, caster);
         }
     }
 }
@@ -1401,7 +1398,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_DONE_PERIODIC;
             uint32 procVictim   = PROC_FLAG_TAKEN_PERIODIC;
-            uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_DOT;
+            uint32 procEx = (crit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT) | PROC_EX_INTERNAL_DOT;
             damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
             if (damage)
                 procVictim|=PROC_FLAG_TAKEN_DAMAGE;
@@ -1483,7 +1480,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_DONE_PERIODIC;
             uint32 procVictim   = PROC_FLAG_TAKEN_PERIODIC;
-            uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_DOT;
+            uint32 procEx = (crit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT) | PROC_EX_INTERNAL_DOT;
             damage = (damage <= absorb+resist) ? 0 : (damage-absorb-resist);
             if (damage)
                 procVictim|=PROC_FLAG_TAKEN_DAMAGE;
@@ -1640,7 +1637,7 @@ void AuraEffect::PeriodicTick(AuraApplication * aurApp, Unit * caster) const
 
             uint32 procAttacker = PROC_FLAG_DONE_PERIODIC;
             uint32 procVictim   = PROC_FLAG_TAKEN_PERIODIC;
-            uint32 procEx = PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT;
+            uint32 procEx = (crit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT) | PROC_EX_INTERNAL_HOT;
             // ignore item heals
             if (!haveCastItem)
                 caster->ProcDamageAndSpell(target, procAttacker, procVictim, procEx, damage, BASE_ATTACK, GetSpellProto());
@@ -2870,6 +2867,21 @@ void AuraEffect::HandleModInvisibility(AuraApplication const * aurApp, uint8 mod
 
             target->m_invisibility.DelFlag(type);
         }
+        else
+        {
+            bool found = false;
+            Unit::AuraEffectList const& invisAuras = target->GetAuraEffectsByType(SPELL_AURA_MOD_INVISIBILITY);
+            for (Unit::AuraEffectList::const_iterator i = invisAuras.begin(); i != invisAuras.end(); ++i)
+            {
+                if (GetMiscValue() == (*i)->GetMiscValue())
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+                target->m_invisibility.DelFlag(type);
+        }
 
         target->m_invisibility.AddValue(type, -GetAmount());
     }
@@ -3473,8 +3485,7 @@ void AuraEffect::HandleAuraTransform(AuraApplication const * aurApp, uint8 mode,
                         team = target->ToPlayer()->GetTeam();
 
                     uint32 displayID = sObjectMgr->ChooseDisplayId(team, ci);
-
-                    CreatureModelInfo const *minfo = sObjectMgr->GetCreatureModelRandomGender(displayID);
+                    sObjectMgr->GetCreatureModelRandomGender(&displayID);
 
                     target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayID);
                 }
@@ -3934,7 +3945,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const * aurApp, uint8 mode, b
             team = target->ToPlayer()->GetTeam();
 
         uint32 displayID = sObjectMgr->ChooseDisplayId(team, ci);
-        CreatureModelInfo const *minfo = sObjectMgr->GetCreatureModelRandomGender(displayID);
+        sObjectMgr->GetCreatureModelRandomGender(&displayID);
 
         //some spell has one aura of mount and one of vehicle
         for (uint32 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -4948,9 +4959,9 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const * aurApp, uint8
         return;
     }
 
-    //save current and max HP before applying aura
-    uint32 curHPValue = target->GetHealth();
-    uint32 maxHPValue = target->GetMaxHealth();
+    // save current health state
+    float healthPct = target->GetHealthPct();
+    bool alive = target->isAlive();
 
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
@@ -4958,16 +4969,13 @@ void AuraEffect::HandleModTotalPercentStat(AuraApplication const * aurApp, uint8
         {
             target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(GetAmount()), apply);
             if (target->GetTypeId() == TYPEID_PLAYER || target->ToCreature()->isPet())
-                target->ApplyStatPercentBuffMod(Stats(i), (float)GetAmount(), apply);
+                target->ApplyStatPercentBuffMod(Stats(i), float(GetAmount()), apply);
         }
     }
 
     //recalculate current HP/MP after applying aura modifications (only for spells with SPELL_ATTR0_UNK4 0x00000010 flag)
-    if ((GetMiscValue() == STAT_STAMINA) && (maxHPValue > 0) && (m_spellProto->Attributes & SPELL_ATTR0_UNK4))
-    {
-        uint32 newHPValue = target->CountPctFromMaxHealth(int32(100.0f * curHPValue / maxHPValue));
-        target->SetHealth(newHPValue);
-    }
+    if (GetMiscValue() == STAT_STAMINA && (m_spellProto->Attributes & SPELL_ATTR0_UNK4))
+        target->SetHealth(std::max<uint32>(uint32(healthPct * target->GetMaxHealth() * 0.01f), (alive ? 1 : 0)));
 }
 
 void AuraEffect::HandleAuraModResistenceOfStatPercent(AuraApplication const * aurApp, uint8 mode, bool /*apply*/) const
@@ -5970,6 +5978,15 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                             }
                             break;
                         }
+                        case 43681: // Inactive
+                        {
+                            if (!target || target->GetTypeId() != TYPEID_PLAYER || aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+                                return;
+
+                            if (target->GetMap()->IsBattleground())
+                                target->ToPlayer()->LeaveBattleground();
+                            break;
+                        }
                         case 42783: // Wrath of the Astromancer
                             target->CastSpell(target, GetAmount(), true, NULL, this);
                             break;
@@ -6014,8 +6031,8 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                     // Lifebloom
                     if (GetSpellProto()->SpellFamilyFlags[1] & 0x10)
                     {
-                        // Final heal only on dispelled or duration end
-                        if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE && aurApp->GetRemoveMode() != AURA_REMOVE_BY_ENEMY_SPELL)
+                        // Final heal only on duration end
+                        if (aurApp->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
                             return;
 
                         // final heal
@@ -6032,7 +6049,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                     break;
                 case SPELLFAMILY_PRIEST:
                     // Vampiric Touch
-                    if (m_spellProto->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL)
+                    if (m_spellProto->SpellFamilyFlags[1] & 0x0400 && aurApp->GetRemoveMode() == AURA_REMOVE_BY_ENEMY_SPELL && GetEffIndex() == 0)
                     {
                         if (AuraEffect const * aurEff = GetBase()->GetEffect(1))
                         {
@@ -6218,7 +6235,7 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                                 team = target->ToPlayer()->GetTeam();
 
                             uint32 displayID = sObjectMgr->ChooseDisplayId(team, creatureInfo);
-                            CreatureModelInfo const *minfo = sObjectMgr->GetCreatureModelRandomGender(displayID);
+                            sObjectMgr->GetCreatureModelRandomGender(&displayID);
 
                             target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayID);
                         }

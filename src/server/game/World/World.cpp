@@ -37,9 +37,12 @@
 #include "AchievementMgr.h"
 #include "AuctionHouseMgr.h"
 #include "ObjectMgr.h"
+#include "ArenaTeamMgr.h"
+#include "GuildMgr.h"
 #include "TicketMgr.h"
 #include "CreatureEventAIMgr.h"
 #include "SpellMgr.h"
+#include "GroupMgr.h"
 #include "Chat.h"
 #include "DBCStores.h"
 #include "LootMgr.h"
@@ -306,7 +309,7 @@ bool World::HasRecentlyDisconnected(WorldSession* session)
                 ++i;
             }
             else
-                m_disconnects.erase(i);
+                m_disconnects.erase(i++);
         }
     }
     return false;
@@ -1539,19 +1542,23 @@ void World::SetInitialWorldSettings()
     sLog->outString("Loading Completed Achievements...");
     sAchievementMgr->LoadCompletedAchievements();
 
+    // Delete expired auctions before loading
+    sLog->outString("Deleting expired auctions...");
+    sAuctionMgr->DeleteExpiredAuctionsAtStartup();
+
     ///- Load dynamic data tables from the database
     sLog->outString("Loading Item Auctions...");
     sAuctionMgr->LoadAuctionItems();
     sLog->outString("Loading Auctions...");
     sAuctionMgr->LoadAuctions();
 
-    sObjectMgr->LoadGuilds();
+    sGuildMgr->LoadGuilds();
 
     sLog->outString("Loading ArenaTeams...");
-    sObjectMgr->LoadArenaTeams();
+    sArenaTeamMgr->LoadArenaTeams();
 
     sLog->outString("Loading Groups...");
-    sObjectMgr->LoadGroups();
+    sGroupMgr->LoadGroups();
 
     sLog->outString("Loading ReservedNames...");
     sObjectMgr->LoadReservedPlayersNames();
@@ -2565,7 +2572,7 @@ void World::ProcessCliCommands()
         callbackArg = command->m_callbackArg;
         CliHandler handler(callbackArg, zprint);
         handler.ParseCommands(command->m_command);
-        if(command->m_commandFinished)
+        if (command->m_commandFinished)
             command->m_commandFinished(callbackArg, !handler.HasSentErrorMessage());
         delete command;
     }
