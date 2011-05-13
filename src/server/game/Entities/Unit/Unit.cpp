@@ -1671,7 +1671,9 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 	}
 	
 	victimResistance = victimResistance * (100 - ignoredResistance) / 100;
-	victimResistance += (levelDiff * 5); // Level diff resistance cannot be pierced
+
+	if( pVictim->GetTypeId() != TYPEID_PLAYER && !pVictim->ToCreature()->isWorldBoss())
+		victimResistance += (levelDiff * 5); // Level diff resistance cannot be pierced
 	
 	if (victimResistance <= 0)
 		return 0;
