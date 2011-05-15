@@ -82,7 +82,7 @@ void
 WaypointMovementGenerator<Creature>::MoveToNextNode(CreatureTraveller &traveller)
 {
 	 Creature* owner = &(traveller.i_traveller);
-	 i_destinationHolder.SetDestination(traveller, node->x, node->y, node->z, false);
+	 //i_destinationHolder.SetDestination(traveller, node->x, node->y, node->z, false);
 
 	 PathInfo sub_path(owner, node->x, node->y, node->z);
 	 PointPath pointPath = sub_path.getFullPath();
@@ -90,6 +90,9 @@ WaypointMovementGenerator<Creature>::MoveToNextNode(CreatureTraveller &traveller
 	 float speed = traveller.Speed()*0.001f; // in ms
 	 uint32 traveltime = uint32(pointPath.GetTotalLength()/speed);
 	 owner->SendMonsterMoveByPath(pointPath, 1, pointPath.size(), traveltime);
+	 
+	 PathNode p = pointPath[pointPath.size()-1];
+	 i_destinationHolder.SetDestination(traveller, p.x, p.y, p.z, false);
 
 	 i_nextMoveTime.Reset(traveltime);
 }

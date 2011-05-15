@@ -31,7 +31,7 @@ void PointMovementGenerator<T>::Initialize(T &unit)
     unit.StopMoving();
     Traveller<T> traveller(unit);
     // knockback effect has UNIT_STAT_JUMPING set, so if here we disable sentmonstermove there will be creature position sync problem between client and server
-	i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z, !m_usePathfinding);
+	//i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z, !m_usePathfinding);
 	
 	if (m_usePathfinding)
 	{
@@ -43,7 +43,12 @@ void PointMovementGenerator<T>::Initialize(T &unit)
 		if (unit.GetTypeId() != TYPEID_UNIT)
 			unit.SetUnitMovementFlags(SPLINEFLAG_WALKING);
 		unit.SendMonsterMoveByPath(pointPath, 1, pointPath.size(), traveltime);
+
+		 PathNode p = pointPath[pointPath.size()-1];
+		 i_destinationHolder.SetDestination(traveller, p.x, p.y, p.z, false);
 	}
+	else
+       i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z, true);
 }
 
 template<class T>
