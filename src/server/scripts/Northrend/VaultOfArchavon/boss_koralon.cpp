@@ -37,16 +37,23 @@ enum Spells
 {
     // Spells Koralon
     SPELL_BURNING_BREATH                        = 66665,
+	SPELL_BURNING_BREATH_H                      = 67328,
     SPELL_BURNING_FURY                          = 66721,
     SPELL_FLAME_CINDER_A                        = 66684,
+	SPELL_FLAME_CINDER_A_H                      = 67332,
     SPELL_FLAME_CINDER_B                        = 66681, // don't know the real relation to SPELL_FLAME_CINDER_A atm.
     SPELL_METEOR_FISTS_A                        = 66725,
+	SPELL_METEOR_FISTS_A_H                      = 66765,
     SPELL_METEOR_FISTS_B                        = 67333,
+	SPELL_METEOR_FISTS_B_H                      = 68161,
 
     // Spells Flame Warder
     SPELL_FW_LAVA_BIRST                         = 66813,
+	SPELL_FW_LAVA_BIRST_H                       = 67330,
     SPELL_FW_METEOR_FISTS_A                     = 66808,
+	SPELL_FW_METEOR_FISTS_A_H                   = 66809,
     SPELL_FW_METEOR_FISTS_B                     = 67331,
+	SPELL_FW_METEOR_FISTS_B_H                   = 68160,
 };
 
 class boss_koralon : public CreatureScript
@@ -91,19 +98,19 @@ class boss_koralon : public CreatureScript
                             events.ScheduleEvent(EVENT_BURNING_FURY, 20000);
                             break;
                         case EVENT_BURNING_BREATH:
-                            DoCast(me, SPELL_BURNING_BREATH);
+                            DoCast(me, RAID_MODE(SPELL_BURNING_BREATH,SPELL_BURNING_BREATH_H));
                             events.ScheduleEvent(EVENT_BURNING_BREATH, 45000);
                             break;
                         case EVENT_METEOR_FISTS_A:
-                            DoCast(me, SPELL_METEOR_FISTS_A);
+                            DoCast(me, RAID_MODE(SPELL_METEOR_FISTS_A,SPELL_METEOR_FISTS_A_H));
                             events.ScheduleEvent(EVENT_METEOR_FISTS_B, 1500);
                             break;
                         case EVENT_METEOR_FISTS_B:
-                            DoCast(me, SPELL_METEOR_FISTS_B);
+                            DoCast(me, RAID_MODE(SPELL_METEOR_FISTS_B,SPELL_METEOR_FISTS_B_H));
                             events.ScheduleEvent(EVENT_METEOR_FISTS_A, 45000);
                             break;
                         case EVENT_FLAME_CINDER_A:
-                            DoCast(me, SPELL_FLAME_CINDER_A);
+                            DoCast(me, RAID_MODE(SPELL_FLAME_CINDER_A,SPELL_FLAME_CINDER_A_H));
                             events.ScheduleEvent(EVENT_FLAME_CINDER_A, 30000);
                             break;
                         default:
@@ -160,15 +167,15 @@ class mob_flame_warder : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_FW_LAVA_BIRST:
-                            DoCastVictim(SPELL_FW_LAVA_BIRST);
+                            DoCast(me->getVictim(), RAID_MODE(SPELL_FW_LAVA_BIRST,SPELL_FW_LAVA_BIRST_H));
                             events.ScheduleEvent(EVENT_FW_LAVA_BIRST, 15000);
                             break;
                         case EVENT_FW_METEOR_FISTS_A:
-                            DoCast(me, SPELL_FW_METEOR_FISTS_A);
+                            DoCast(me, RAID_MODE(SPELL_FW_METEOR_FISTS_A,SPELL_FW_METEOR_FISTS_A_H));
                             events.ScheduleEvent(EVENT_FW_METEOR_FISTS_B, 1500);
                             break;
                         case EVENT_FW_METEOR_FISTS_B:
-                            DoCast(me, SPELL_FW_METEOR_FISTS_B);
+                            DoCast(me, RAID_MODE(SPELL_FW_METEOR_FISTS_B,SPELL_FW_METEOR_FISTS_B_H));
                             events.ScheduleEvent(EVENT_FW_METEOR_FISTS_A, 20000);
                             break;
                         default:
