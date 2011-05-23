@@ -1643,7 +1643,10 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 	else
 		resistanceConstant = getLevel() * 5;
 	
-	int32 levelDiff = std::max<int32>(pVictim->getLevel() - getLevel(), 0);
+	int32 levelDiff = 0;
+		
+		if(getLevel() < DEFAULT_MAX_LEVEL)
+			levelDiff = std::max<int32>(pVictim->getLevel() - getLevel(), 0);
 	
 	int32 baseVictimResistance = pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
 	uint32 spellPenetration = GetSpellPenetration(schoolMask);
