@@ -293,7 +293,7 @@ MotionMaster::MovePoint(uint32 id, float x, float y, float z)
     {
         sLog->outStaticDebug("Creature (Entry: %u GUID: %u) targeted point (ID: %u X: %f Y: %f Z: %f)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(), id, x, y, z);
-        Mutate(new PointMovementGenerator<Creature>(0, x, y, z, usePathfinding), MOTION_SLOT_ACTIVE);
+        Mutate(new PointMovementGenerator<Creature>(id, x, y, z, usePathfinding), MOTION_SLOT_ACTIVE);
     }
 }
 

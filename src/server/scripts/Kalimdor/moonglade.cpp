@@ -852,11 +852,14 @@ public:
                 if (!pPlayer) // not in world
                     EnterEvadeMode();
 
+
                 switch (uiPhase)
                 {
                 // standing on floor of a 'house' and speaking a lot
                 case 2:
                     {
+						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("He will stop at nothing to get to Malfurion's physical manifistation. That must not happen... We must keep the beast occupied long enough for Tyrande to arrive." 
                             );
@@ -868,7 +871,8 @@ public:
                     }
                 // still speaking
                 case 3:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Defend Nighthaven, hero..." 
                             );
@@ -881,7 +885,8 @@ public:
                     }
                 // summon Eranikus
                 case 4:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         // not server-wide emote on 3.3.5+ !
                         std::string sText =
                             ("Eranikus, Tyrant of the Dream, has entered our world." 
@@ -910,7 +915,8 @@ public:
                     }
                 // First Eranikus speach
                 case 5:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Pitful predictable mortals... You know not what you have done! The master's will fulfilled. The Moonglade shall be destroyed and Malfurion along with it!" 
                             );
@@ -922,7 +928,8 @@ public:
                     }
                 // Renaulos answering
                 case 6:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Fiend! Face the might of Cenarius!" 
                             );
@@ -934,7 +941,8 @@ public:
                     }
                 // Eranikus answering
                 case 7:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         Eranikus->MonsterTextEmote(" lets loose a sinister laugh.", true);
                         std::string sText =
                             ("You are certanly not your father, insect. Should it interest me, I would crush you with but a swipe of my claws. Turn Shan'do Stormrage over to me and your pitiful life will be spared along with the lives of your people." 
@@ -947,7 +955,8 @@ public:
                     }
                 // Renaulos answering 2
                 case 8:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Who is the predictable one, beast? Surely you did not think that we would summon you on top of Malfurion? Your redemption comes, Eranikus. You will be cleansed of this madness - this corruption." 
                             );
@@ -959,7 +968,8 @@ public:
                     }
                 // Eranikus answering 2
                 case 9:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("My redemption? You are bold, little one. My redemption comes by the will of my god." 
                             );
@@ -973,7 +983,8 @@ public:
                     }
                 // Renaulos answering 3 and continue moving
                 case 10:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Hurry, " +
                             std::string(pPlayer->GetName()) +
@@ -989,7 +1000,8 @@ public:
                     }
                 // First fighting
                 case 11:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Rise, servants of the Nightmare! Rise and destroy this world! Let there be no survivors..." 
                             );
@@ -1021,7 +1033,8 @@ public:
                     }
                 // Eranikus phrase
                 case 12:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         std::string sText =
                             ("Where is your savior? How long can you hold out against my attacks?"
                             );
@@ -1051,7 +1064,8 @@ public:
                     }
                 // still fighting
                 case 13:
-                    {
+                    {						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                         // waiting until all phantasms got killed
                         if (uiCountDeadNightmares == NPC_NIGHTMARE_PHANTASMS_COUNT)
                         {
@@ -1065,7 +1079,7 @@ public:
                             Eranikus->MonsterYell(sText.c_str(), LANG_UNIVERSAL, 0);
                             // CAST_AI is impossible here, so use existed virtual functions
                             Eranikus->AI()->DoAction(1);
-
+							sLog->outError("avanrt spawn ****************************************************");
                             // A LOT OF guards helping here with their rifles (they should run from the whole city)
                             for (int i = 0; i < NPC_MOONGLADE_WARDENS_COUNT*2; i++)
                             {
@@ -1080,8 +1094,12 @@ public:
                     }
                 // fighting with Eranikus
                 case 14:
+					{
+						sLog->outError("Phase %d ****************************************************",uiPhase);
+
                     uiEvent_Timer = 6000000; // nothing to do
                     break;
+					}
                 default: break;
                 }
             } else uiEvent_Timer -= diff;

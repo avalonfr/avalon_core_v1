@@ -71,6 +71,7 @@ bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
 
     if (i_destinationHolder.HasArrived())
     {
+
         unit.ClearUnitState(UNIT_STAT_MOVE);
         arrived = true;
         return false;
