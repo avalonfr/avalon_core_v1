@@ -17,5 +17,5 @@ INSERT INTO `trinity_string` (`entry`,`content_default`) VALUES ('13006','La quê
 INSERT INTO `trinity_string` (`entry`,`content_default`) VALUES ('13007','La quête %u est retirée de la liste des quêtes bugées');
 
 INSERT INTO `command` (`name`,`help`) VALUES ('valide','Syntax .valide $queteID , vous pouvez aussi link votre quête depuis votre journal de quête.');
-INSERT INTO `command` (`name`,`security`,`help`) VALUES ('questbug add','2','Syntax .questbug add $queteID , Ajoute la quete ?a liste des quêtes bugées');
+INSERT INTO `command` (`name`,`security`,`help`) VALUES ('questbug add','2','Syntax .questbug add $queteID , Ajoute la quete à la liste des quêtes bugées');
 INSERT INTO `command` (`name`,`security`,`help`) VALUES ('questbug remove','2','Syntax .questbug remove $queteID , retire la quête de la liste des quêtes bugées');
