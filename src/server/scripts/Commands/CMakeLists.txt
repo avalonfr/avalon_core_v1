@@ -28,6 +28,7 @@ set(scripts_STAT_SRCS
   Commands/cs_quest.cpp
   Commands/cs_reload.cpp
   Commands/cs_pathfinding.cpp
+  Commands/cs_questbug.cpp
 #  Commands/cs_list.cpp
 #  Commands/cs_lookup.cpp
 #  Commands/cs_pdump.cpp

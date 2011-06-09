@@ -1212,3 +1212,59 @@ bool ChatHandler::HandleCharacterTitlesCommand(const char* args)
     }
     return true;
 }
+
+bool ChatHandler::HandleQuestBugAddCommand(const char *args)
+{
+ char* cId = extractKeyFromLink((char*)args,"Hquest");
+ if (!cId)
+ return false;
+
+ uint32 entry = atol(cId);
+ Quest const* pQuest = sObjectMgr->GetQuestTemplate(entry);
+ if (!pQuest)
+ {
+ PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
+ SetSentErrorMessage(true);
+ return false;
+ }
+
+ QueryResult result = WorldDatabase.PQuery("SELECT COUNT(quest_id) FROM quest_bug_list WHERE quest_id='%u'",entry);
+ if ((*result)[0].GetUInt32() == 1)
+ {
+ PSendSysMessage(LANG_QUEST_EVER_SIGNALED,entry);
+ SetSentErrorMessage(true);
+ return false;
+ }
+
+ WorldDatabase.PExecute("INSERT INTO quest_bug_list (`quest_id`) VALUES ('%u')",entry);
+ PSendSysMessage(LANG_QUEST_SIGNALED,entry);
+ return true;
+}
+
+bool ChatHandler::HandleQuestBugRemoveCommand(const char *args)
+{
+ char* cId = extractKeyFromLink((char*)args,"Hquest");
+ if (!cId)
+ return false;
+
+ uint32 entry = atol(cId);
+
+ Quest const* pQuest = sObjectMgr->GetQuestTemplate(entry);
+
+ if (!pQuest)
+ {
+ PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
+ SetSentErrorMessage(true);
+ return false;
+ }
+ QueryResult result = WorldDatabase.PQuery("SELECT COUNT(quest_id) FROM quest_bug_list WHERE quest_id='%u'",entry);
+ if (!result)
+ {
+ PSendSysMessage(LANG_QUEST_NEVER_SIGNALED,entry);
+ SetSentErrorMessage(true);
+ return false;
+ }
+ WorldDatabase.PExecute("DELETE FROM quest_bug_list WHERE quest_id = '%u'",entry);
+ PSendSysMessage(LANG_QUEST_SIGNALED_REMOVED,entry);
+ return true;
+}

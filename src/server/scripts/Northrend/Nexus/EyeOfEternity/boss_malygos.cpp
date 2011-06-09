@@ -745,7 +745,7 @@ public:
         {
             float x = (float)urand(SHELL_MIN_X,SHELL_MAX_X);
             float y = (float)urand(SHELL_MIN_Y,SHELL_MAX_Y);
-            if(Creature *pShell = me->SummonCreature(NPC_ARCANE_OVERLOAD, x, y, FLOOR_Z, 0, TEMPSUMMON_TIMED_DESPAWN, 45000))
+            if(Creature *pShell = me->SummonCreature(NPC_ARCANE_OVERLOAD, x, y, FLOOR_Z+10, 0, TEMPSUMMON_TIMED_DESPAWN, 45000))
             {
                 pShell->CastSpell(pShell, SPELL_ARCANE_BOMB, false);
             }
