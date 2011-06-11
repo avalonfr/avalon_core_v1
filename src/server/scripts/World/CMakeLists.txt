@@ -26,5 +26,5 @@ set(scripts_STAT_SRCS
   World/npc_taxi.cpp
   World/npcs_special.cpp
 )
-
+SOURCE_GROUP(World REGULAR_EXPRESSION .*/World/.*)
 message("  -> Prepared: World")

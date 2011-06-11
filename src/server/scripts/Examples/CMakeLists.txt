@@ -17,5 +17,6 @@ set(scripts_STAT_SRCS
   Examples/example_spell.cpp
   Examples/example_commandscript.cpp
 )
+SOURCE_GROUP(Examples REGULAR_EXPRESSION .*/Examples/.*)
 
 message("  -> Prepared: Examples")

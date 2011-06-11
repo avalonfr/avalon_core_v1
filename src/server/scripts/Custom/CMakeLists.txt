@@ -13,3 +13,4 @@ set(scripts_STAT_SRCS
 )
 
 message("  -> Prepared: Custom")
+SOURCE_GROUP(Custom REGULAR_EXPRESSION .*/Custom/.*)
