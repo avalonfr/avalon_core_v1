@@ -2023,6 +2023,6 @@ insert into `creature_loot_template` (`entry`, `item`, `ChanceOrQuestChance`, `l
 -- pop du 3e en 25
 UPDATE `creature` SET `spawnMask` = 3 where id = 32927;
 
-
+UPDATE `creature_template` SET `ScriptName` = 'npc_crok_scourgebane_quest' WHERE `entry` IN (33762);
 
 

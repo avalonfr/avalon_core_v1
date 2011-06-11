@@ -1,0 +1,1 @@
+UPDATE `creature_template` SET `ScriptName` = 'npc_crok_scourgebane_quest' WHERE `entry` IN (33762);

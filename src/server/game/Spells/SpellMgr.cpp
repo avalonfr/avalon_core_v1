@@ -4274,10 +4274,6 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->AttributesEx3 |= SPELL_ATTR3_STACK_FOR_DIFF_CASTERS;
             ++count;
             break;
-        case 64381: // Strength of the Pack
-            spellInfo->StackAmount = 4;
-            ++count;
-            break;
         case 63018: // Searing Light
         case 65121: // Searing Light (25m)
         case 63024: // Gravity Bomb

@@ -851,7 +851,7 @@ public:
                        if(following) //Si la grenouille a déja recu un /bisou il ne se passe rien
                                return;
 
-                       if(emote==TEXTEMOTE_KISS) // Si on fait /bisou
+                       if(emote==TEXT_EMOTE_KISS) // Si on fait /bisou
                        {
                                if(!pPlayer->HasAura(SPELL_WARTSBGONE_LIP_BALM))
                                        pPlayer->AddAura(SPELL_WARTS,pPlayer);

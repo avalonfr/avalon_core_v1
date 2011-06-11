@@ -2801,7 +2801,7 @@ public:
                 break;
             case GOSSIP_ACTION_TRADE:
                 pCreature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR);
-                pPlayer->SEND_VENDORLIST(pCreature->GetGUID());
+                pPlayer->GetSession()->SendListInventory(pCreature->GetGUID());
                 if (!pCreature->HasAura(SPELL_SQUIRE_SHOP))
                     pCreature->AddAura(SPELL_SQUIRE_SHOP, pCreature);
                 if (!pPlayer->HasAura(SPELL_CHECK_TIRED))
@@ -2829,7 +2829,7 @@ public:
                 pCreature->AI()->SetData(1, uiAction);
                 break;
         }
-        pPlayer->PlayerTalkClass->CloseGossip();
+        pPlayer->PlayerTalkClass->SendCloseGossip();
         return true;
     }
 

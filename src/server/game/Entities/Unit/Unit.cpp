@@ -5775,6 +5775,8 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, uint32 damage, AuraEffect* trigger
                 {
                     target = getVictim();
                     triggered_spell_id = 66765;
+					break;
+				}
                 case 65032: // Boom aura (321 Boombot)
                 {
                     if (pVictim->GetEntry() != 33343)   // Scrapbot
@@ -15602,7 +15604,7 @@ void Unit::Kill(Unit* victim, bool durabilityLoss)
                 {
                     if (creature->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
                     {
-                         ((InstanceMap *)m)->PermBindAllPlayers(creditedPlayer);
+                         ((InstanceMap *)instanceMap)->PermBindAllPlayers(creditedPlayer);
                         /** World of Warcraft Armory **/
                         creditedPlayer->WriteWowArmoryDatabaseLog(3, creature->GetCreatureInfo()->Entry);
                         /** World of Warcraft Armory **/
