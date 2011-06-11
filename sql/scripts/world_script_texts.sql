@@ -91,15 +91,6 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (16295,-1000144,'Thank you for saving my life and bringing me back to safety, $N',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'lilatha SAY_END1'),
    (16295,-1000145,'Captain Helios, I''ve been rescued from the Amani Catacombs. Reporting for duty, sir!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'lilatha SAY_END2'),
    (16295,-1000146,'Liatha, get someone to look at those injuries. Thank you for bringing her back safely.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,0,1,0,'lilatha CAPTAIN_ANSWER'),
-   (20129,-1000159,'Do not proceed. You will be eliminated!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11344,1,0,0,'doomwalker SAY_AGGRO'),
-   (20129,-1000160,'Tectonic disruption commencing.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11345,1,0,0,'doomwalker SAY_EARTHQUAKE_1'),
-   (20129,-1000161,'Magnitude set. Release.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11346,1,0,0,'doomwalker SAY_EARTHQUAKE_2'),
-   (20129,-1000162,'Trajectory locked.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11347,1,0,0,'doomwalker SAY_OVERRUN_1'),
-   (20129,-1000163,'Engage maximum speed.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11348,1,0,0,'doomwalker SAY_OVERRUN_2'),
-   (12429,-1000164,'Threat level zero.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11349,1,0,0,'doomwalker SAY_SLAY_1'),
-   (12429,-1000165,'Directive accomplished.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11350,1,0,0,'doomwalker SAY_SLAY_2'),
-   (12429,-1000166,'Target exterminated.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11351,1,0,0,'doomwalker SAY_SLAY_3'),
-   (12429,-1000167,'System failure in five, f-o-u-r...',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,11352,1,0,0,'doomwalker SAY_DEATH'),
    (12429,-1000168,'Who dares awaken Aquementas?',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'aquementas AGGRO_YELL_AQUE'),
    (12429,-1000169,'Muahahahaha! You fool! You''ve released me from my banishment in the interstices between space and time!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'nether_drake SAY_NIHIL_1'),
    (12429,-1000170,'All of Draenor shall quick beneath my feet! I will destroy this world and reshape it in my image!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,1,0,0,'nether_drake SAY_NIHIL_2'),
@@ -2483,6 +2474,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (32914,-1603201,'Matron, flee! They are ruthless....',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15503,1,0,0,'Elder Stonebark SAY_DEATH'),
 
 -- Hodir
+   (32845,-1603209,'Hodir begins to cast Flash Freeze!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,3,0,0,'Hodir - EMOTE_FREEZE'),
    (32845,-1603210,'You will suffer for this trespass!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15552,1,0,0,'Hodir SAY_AGGRO'),
    (32845,-1603211,'Tragic. To come so far, only to fail.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15553,1,0,0,'Hodir SAY_SLAY_1'),
    (32845,-1603212,'Welcome to the endless winter.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15554,1,0,0,'Hodir SAY_SLAY_2'),
@@ -2492,6 +2484,7 @@ INSERT INTO `script_texts` (`npc_entry`,`entry`,`content_default`,`content_loc1`
    (32845,-1603216,'Enough! This ends now!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15558,1,0,0,'Hodir SAY_BERSERK'),
    (32845,-1603217,'The veil of winter will protect you, champions!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15559,1,0,0,'Hodir SAY_YS_HELP'),
    (32845,-1603218,'Hodir shatters the Rare Cache of Hodir!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,6,0,0,'Hodir SAY_HARD_MODE_MISSED'),
+   (32845,-1603219,'Hodir gains Frozen Blows!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,0,3,0,0,'Hodir - EMOTE_BLOW'),
 
 -- Ignis
    (33118,-1603220,'Insolent whelps! Your blood will temper the weapons used to reclaim this world!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,15564,1,0,0,'Ignis SAY_AGGRO'),

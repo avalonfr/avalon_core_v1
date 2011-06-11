@@ -1619,39 +1619,6 @@ bool Position::IsPositionValid() const
     return Trinity::IsValidMapCoord(m_positionX, m_positionY, m_positionZ, m_orientation);
 }
 
-void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid)
-{
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, CHAT_MSG_MONSTER_SAY, text, language, GetName(), TargetGuid);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), true);
-}
-
-void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid)
-{
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, CHAT_MSG_MONSTER_YELL, text, language, GetName(), TargetGuid);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), true);
-}
-
-void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote)
-{
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, GetName(), TargetGuid);
-    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
-}
-
-void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
-{
-    Player *player = sObjectMgr->GetPlayer(receiver);
-    if (!player || !player->GetSession())
-        return;
-
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetName(), receiver);
-
-    player->GetSession()->SendPacket(&data);
-}
-
 bool WorldObject::isValid() const
 {
     if (!IsInWorld())
@@ -1930,7 +1897,41 @@ namespace Trinity
             uint32 i_language;
             uint64 i_targetGUID;
     };
+
+    class MonsterCustomChatBuilder
+    {
+        public:
+            MonsterCustomChatBuilder(WorldObject const& obj, ChatMsg msgtype, const char* text, uint32 language, uint64 targetGUID)
+                : i_object(obj), i_msgtype(msgtype), i_text(text), i_language(language), i_targetGUID(targetGUID) {}
+            void operator()(WorldPacket& data, LocaleConstant loc_idx)
+            {
+                // TODO: i_object.GetName() also must be localized?
+                i_object.BuildMonsterChat(&data, i_msgtype, i_text, i_language, i_object.GetNameForLocaleIdx(loc_idx), i_targetGUID);
+            }
+
+        private:
+            WorldObject const& i_object;
+            ChatMsg i_msgtype;
+            const char* i_text;
+            uint32 i_language;
+            uint64 i_targetGUID;
+    };
 }                                                           // namespace Trinity
+
+void WorldObject::MonsterSay(const char* text, uint32 language, uint64 TargetGuid)
+{
+    CellPair p = Trinity::ComputeCellPair(GetPositionX(), GetPositionY());
+
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    Trinity::MonsterCustomChatBuilder say_build(*this, CHAT_MSG_MONSTER_SAY, text, language, TargetGuid);
+    Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> say_do(say_build);
+    Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
+    TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
+    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+}
 
 void WorldObject::MonsterSay(int32 textId, uint32 language, uint64 TargetGuid)
 {
@@ -1945,6 +1946,21 @@ void WorldObject::MonsterSay(int32 textId, uint32 language, uint64 TargetGuid)
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_SAY));
+}
+
+void WorldObject::MonsterYell(const char* text, uint32 language, uint64 TargetGuid)
+{
+    CellPair p = Trinity::ComputeCellPair(GetPositionX(), GetPositionY());
+
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    Trinity::MonsterCustomChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, text, language, TargetGuid);
+    Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> say_do(say_build);
+    Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL), say_do);
+    TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterCustomChatBuilder> >, WorldTypeMapContainer > message(say_worker);
+    cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_YELL));
 }
 
 void WorldObject::MonsterYell(int32 textId, uint32 language, uint64 TargetGuid)
@@ -1975,6 +1991,13 @@ void WorldObject::MonsterYellToZone(int32 textId, uint32 language, uint64 Target
             say_do(itr->getSource());
 }
 
+void WorldObject::MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote)
+{
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    BuildMonsterChat(&data, IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE, text, LANG_UNIVERSAL, GetName(), TargetGuid);
+    SendMessageToSetInRange(&data, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), true);
+}
+
 void WorldObject::MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote)
 {
     CellPair p = Trinity::ComputeCellPair(GetPositionX(), GetPositionY());
@@ -1988,6 +2011,20 @@ void WorldObject::MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossE
     Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> > say_worker(this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE), say_do);
     TypeContainerVisitor<Trinity::PlayerDistWorker<Trinity::LocalizedPacketDo<Trinity::MonsterChatBuilder> >, WorldTypeMapContainer > message(say_worker);
     cell.Visit(p, message, *GetMap(), *this, sWorld->getFloatConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE));
+}
+
+void WorldObject::MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper)
+{
+    Player *player = sObjectMgr->GetPlayer(receiver);
+    if (!player || !player->GetSession())
+        return;
+
+    LocaleConstant loc_idx = player->GetSession()->GetSessionDbLocaleIndex();
+
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
+    BuildMonsterChat(&data, IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER, text, LANG_UNIVERSAL, GetNameForLocaleIdx(loc_idx), receiver);
+
+    player->GetSession()->SendPacket(&data);
 }
 
 void WorldObject::MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper)
@@ -2100,40 +2137,57 @@ void WorldObject::AddObjectToRemoveList()
     map->AddObjectToRemoveList(this);
 }
 
-TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropertiesEntry const *properties, uint32 duration, Unit *summoner, uint32 vehId)
+TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropertiesEntry const* properties /*= NULL*/, uint32 duration /*= 0*/, Unit* summoner /*= NULL*/, uint32 spellId /*= 0*/, uint32 vehId /*= 0*/)
 {
     uint32 mask = UNIT_MASK_SUMMON;
     if (properties)
     {
-        switch(properties->Category)
+        switch (properties->Category)
         {
-            case SUMMON_CATEGORY_PET:       mask = UNIT_MASK_GUARDIAN;  break;
-            case SUMMON_CATEGORY_PUPPET:    mask = UNIT_MASK_PUPPET;    break;
-            case SUMMON_CATEGORY_VEHICLE:   mask = UNIT_MASK_MINION;    break;
-            default:
-                switch(properties->Type)
+            case SUMMON_CATEGORY_PET:
+                mask = UNIT_MASK_GUARDIAN;
+                break;
+            case SUMMON_CATEGORY_PUPPET:
+                mask = UNIT_MASK_PUPPET;
+                break;
+            case SUMMON_CATEGORY_VEHICLE:
+                mask = UNIT_MASK_MINION;
+                break;
+            case SUMMON_CATEGORY_WILD:
+            case SUMMON_CATEGORY_ALLY:
+            case SUMMON_CATEGORY_UNK:
+            {
+                switch (properties->Type)
                 {
-                    case SUMMON_TYPE_MINION:
-                    case SUMMON_TYPE_GUARDIAN:
-                    case SUMMON_TYPE_GUARDIAN2:
-                        mask = UNIT_MASK_GUARDIAN;  break;
-                    case SUMMON_TYPE_TOTEM:
-                        mask = UNIT_MASK_TOTEM;     break;
-                    case SUMMON_TYPE_VEHICLE:
-                    case SUMMON_TYPE_VEHICLE2:
-                        mask = UNIT_MASK_SUMMON;    break;
-                    case SUMMON_TYPE_MINIPET:
-                        mask = UNIT_MASK_MINION;    break;
-                    default:
-                        if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
-                            mask = UNIT_MASK_GUARDIAN;
-                        break;
+                case SUMMON_TYPE_MINION:
+                case SUMMON_TYPE_GUARDIAN:
+                case SUMMON_TYPE_GUARDIAN2:
+                    mask = UNIT_MASK_GUARDIAN;
+                    break;
+                case SUMMON_TYPE_TOTEM:
+                    mask = UNIT_MASK_TOTEM;
+                    break;
+                case SUMMON_TYPE_VEHICLE:
+                case SUMMON_TYPE_VEHICLE2:
+                    mask = UNIT_MASK_SUMMON;
+                    break;
+                case SUMMON_TYPE_MINIPET:
+                    mask = UNIT_MASK_MINION;
+                    break;
+                default:
+                    if (properties->Flags & 512) // Mirror Image, Summon Gargoyle
+                        mask = UNIT_MASK_GUARDIAN;
+                    break;
                 }
                 break;
+            }
+            default:
+                return NULL;
         }
     }
 
-    uint32 phase = PHASEMASK_NORMAL, team = 0;
+    uint32 phase = PHASEMASK_NORMAL;
+    uint32 team = 0;
     if (summoner)
     {
         phase = summoner->GetPhaseMask();
@@ -2141,15 +2195,26 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
             team = summoner->ToPlayer()->GetTeam();
     }
 
-    TempSummon *summon = NULL;
-    switch(mask)
+    TempSummon* summon = NULL;
+    switch (mask)
     {
-        case UNIT_MASK_SUMMON:    summon = new TempSummon (properties, summoner);  break;
-        case UNIT_MASK_GUARDIAN:  summon = new Guardian   (properties, summoner);  break;
-        case UNIT_MASK_PUPPET:    summon = new Puppet     (properties, summoner);  break;
-        case UNIT_MASK_TOTEM:     summon = new Totem      (properties, summoner);  break;
-        case UNIT_MASK_MINION:    summon = new Minion     (properties, summoner);  break;
-        default:    return NULL;
+        case UNIT_MASK_SUMMON:
+            summon = new TempSummon(properties, summoner);
+            break;
+        case UNIT_MASK_GUARDIAN:
+            summon = new Guardian(properties, summoner);
+            break;
+        case UNIT_MASK_PUPPET:
+            summon = new Puppet(properties, summoner);
+            break;
+        case UNIT_MASK_TOTEM:
+            summon = new Totem(properties, summoner);
+            break;
+        case UNIT_MASK_MINION:
+            summon = new Minion(properties, summoner);
+            break;
+        default:
+            return NULL;
     }
 
     if (!summon->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), this, phase, entry, vehId, team, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation()))
@@ -2157,6 +2222,8 @@ TempSummon *Map::SummonCreature(uint32 entry, const Position &pos, SummonPropert
         delete summon;
         return NULL;
     }
+
+    summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellId);
 
     summon->SetHomePosition(pos);
 
