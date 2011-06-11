@@ -151,3 +151,36 @@ bool ChatHandler::HandleServerMotdCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandlePlayerQuestCompleteCommand(const char *args)
+{
+ Player* pPlayer = m_session->GetPlayer();
+
+ char* cId = extractKeyFromLink((char*)args,"Hquest");
+ if (!cId)
+ return false;
+ uint32 entry = atol(cId);
+
+ Quest const* pQuest = sObjectMgr->GetQuestTemplate(entry);
+
+ if (!pQuest)
+ {
+ PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
+ SetSentErrorMessage(true);
+ return true;
+ }
+ QueryResult result = WorldDatabase.PQuery("SELECT COUNT(quest_id) FROM quest_bug_list WHERE quest_id='%d'",entry);
+ if ((*result)[0].GetUInt32() != 1)
+ {
+ PSendSysMessage(LANG_QUEST_NOBUG);
+ SetSentErrorMessage(true);
+ return false;
+ }
+ if (pPlayer->GetQuestStatus(entry) == QUEST_STATUS_NONE)
+ {
+ PSendSysMessage(LANG_HAVENT_QUEST);
+ SetSentErrorMessage(true);
+ return false;
+ }
+ pPlayer->CompleteQuest(entry);
+ return true;
+}

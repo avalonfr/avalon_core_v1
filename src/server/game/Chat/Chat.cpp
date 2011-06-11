@@ -338,6 +338,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                               "", NULL }
     };
 
+	static ChatCommand questBugTable[] =
+	{
+	{ "add", SEC_GAMEMASTER, false, OldHandler<&ChatHandler::HandleQuestBugAddCommand>, "", NULL },
+	{ "remove", SEC_GAMEMASTER, false, OldHandler<&ChatHandler::HandleQuestBugRemoveCommand>, "", NULL },
+	{ NULL, 0, false, NULL, "", NULL }
+	};
+	
     static ChatCommand commandTable[] =
     {
         { "character",      SEC_GAMEMASTER,     true,  NULL,                                           "", characterCommandTable},
@@ -425,6 +432,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "unbindsight",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnbindSightCommand>,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
         { "wg",             SEC_ADMINISTRATOR,  false, NULL,                                 "", wintergraspCommandTable },
+		{ "valide", SEC_PLAYER, false, OldHandler<&ChatHandler::HandlePlayerQuestCompleteCommand>, "", NULL },
+		{ "questbug", SEC_GAMEMASTER, false, NULL, "", questBugTable },
        { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
