@@ -347,7 +347,7 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
     QueryResult resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
     if (!resultDB)
     {
-        handler->PSendSysMessage("Aucuns joueurs trouvés.");
+        handler->PSendSysMessage("Aucuns joueurs.");
         return;
     } else
     {
@@ -372,12 +372,12 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
     // this should never happen
     if (!resultDB)
     {
-        handler->PSendSysMessage("Aucuns joueurs trouvés.");
+        handler->PSendSysMessage("Aucuns joueurs.");
         return;
     } else
     {
         handler->SendSysMessage("=============================");
-        handler->PSendSysMessage("Les joueurs avec les moyennes les plus heutes:");
+        handler->PSendSysMessage("Les joueurs avec les moyennes les plus hautes:");
         do
         {
             Field *fieldsDB = resultDB->Fetch();

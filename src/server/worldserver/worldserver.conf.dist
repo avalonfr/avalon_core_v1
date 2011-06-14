@@ -2800,7 +2800,7 @@ Anticheat.Enable = 1
 #        Description: How many reports the player must have to notify to GameMasters ingame when he generates a new report.
 #        Default:     70
 
-Anticheat.ReportsForIngameWarnings = 70
+Anticheat.ReportsForIngameWarnings = 10
 
 #     Anticheat.DetectionsEnabled
 #        Description: It represents which detections are enabled.
@@ -2814,7 +2814,7 @@ Anticheat.ReportsForIngameWarnings = 70
 #
 #        Default:     31
 
-Anticheat.DetectionsEnabled = 31
+Anticheat.DetectionsEnabled = 63
 
 #     Anticheat.MaxReportsForDailyReport
 #        Description: How many reports must the player have to make a report that it is in DB for a day (not only during the player's session).

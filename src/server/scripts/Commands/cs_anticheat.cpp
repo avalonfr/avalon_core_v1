@@ -71,7 +71,7 @@ public:
         WorldPacket data;
 
         // need copy to prevent corruption by strtok call in LineFromMessage original string
-        char* buf = strdup("OWNED !!! Le système anti-triche a signalé à plusieurs reprises que vous pouvez tricher...A Dieu");
+        char* buf = strdup("OWNED! Le systeme anti-triche montre que vous tricher...A Dieu");
         char* pos = buf;
 
         while (char* line = handler->LineFromMessage(pos))
@@ -114,8 +114,10 @@ public:
         if (pTarget == handler->GetSession()->GetPlayer())
             return false;
     
-        // teleport both to jail.
+        // teleport both to jail. et gel
         pTarget->TeleportTo(1,16226.5f,16403.6f,-64.5f,3.2f);
+		//me->DoCast(pPlayer, 9454);
+		handler->PSendSysMessage("OWNED Ptit moche !");
         handler->GetSession()->GetPlayer()->TeleportTo(1,16226.5f,16403.6f,-64.5f,3.2f);
 
         WorldLocation loc;
@@ -231,12 +233,12 @@ public:
         if (strCommand.compare("on") == 0)
         {
             sWorld->setBoolConfig(CONFIG_ANTICHEAT_ENABLE,true);
-            handler->SendSysMessage("Le Système anticheat est maintenant: Activé!");
+            handler->SendSysMessage("Le Systeme anticheat est maintenant: OK!");
         }
         else if (strCommand.compare("off") == 0)
         {
             sWorld->setBoolConfig(CONFIG_ANTICHEAT_ENABLE,false);
-            handler->SendSysMessage("Le Système anticheat est maintenant: Désactivé!");
+            handler->SendSysMessage("Le Systeme anticheat est maintenant: OFF!");
         }
         
         return true;
@@ -246,7 +248,7 @@ public:
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
         {
-            handler->PSendSysMessage("Le Système anticheat est Désactivé.");
+            handler->PSendSysMessage("Le Systeme anticheat est OFF.");
             return true;
         }
 
