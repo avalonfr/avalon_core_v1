@@ -332,7 +332,7 @@ void AnticheatMgr::BuildReport(Player* player,uint8 reportType)
     {
         // display warning at the center of the screen, hacky way?
         std::string str = "";
-        str = "|cFFFFFC00[AC]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Possible cheater!";
+        str = "|cFFFFFC00[ANTICHEAT]|cFF00FFFF[|cFF60FF00" + std::string(player->GetName()) + "|cFF00FFFF] Cheater possible !";
         WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
         data << str;
         sWorld->SendGlobalGMMessage(&data);
@@ -347,12 +347,12 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
     QueryResult resultDB = CharacterDatabase.Query("SELECT guid,average,total_reports FROM players_reports_status WHERE total_reports != 0 ORDER BY average ASC LIMIT 3;");
     if (!resultDB)
     {
-        handler->PSendSysMessage("No players found.");
+        handler->PSendSysMessage("Aucuns joueurs trouvés.");
         return;
     } else
     {
         handler->SendSysMessage("=============================");
-        handler->PSendSysMessage("Players with the lowest averages:");
+        handler->PSendSysMessage("Les joueurs avec les moyennes les plus basses:");
         do
         {
             Field *fieldsDB = resultDB->Fetch();
@@ -362,7 +362,7 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
             uint32 total_reports = fieldsDB[2].GetUInt32();
 
             if (Player* player = sObjectMgr->GetPlayerByLowGUID(guid))
-                handler->PSendSysMessage("Player: %s Average: %f Total Reports: %u",player->GetName(),average,total_reports);
+                handler->PSendSysMessage("Joueur: %s moyenne: %f Rapports Totals: %u",player->GetName(),average,total_reports);
 
         } while (resultDB->NextRow());
     }
@@ -372,12 +372,12 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
     // this should never happen
     if (!resultDB)
     {
-        handler->PSendSysMessage("No players found.");
+        handler->PSendSysMessage("Aucuns joueurs trouvés.");
         return;
     } else
     {
         handler->SendSysMessage("=============================");
-        handler->PSendSysMessage("Players with the more reports:");
+        handler->PSendSysMessage("Les joueurs avec les moyennes les plus heutes:");
         do
         {
             Field *fieldsDB = resultDB->Fetch();
@@ -387,7 +387,7 @@ void AnticheatMgr::AnticheatGlobalCommand(ChatHandler* handler)
             uint32 total_reports = fieldsDB[2].GetUInt32();
 
             if (Player* player = sObjectMgr->GetPlayerByLowGUID(guid))
-                handler->PSendSysMessage("Player: %s Total Reports: %u Average: %f",player->GetName(),total_reports,average);
+                handler->PSendSysMessage("Joueur: %s Rapports Totals: %u moyenne: %f",player->GetName(),total_reports,average);
 
         } while (resultDB->NextRow());
     }

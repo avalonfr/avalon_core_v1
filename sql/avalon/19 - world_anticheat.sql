@@ -1,5 +1,5 @@
 INSERT INTO `command` (`name`,`security`,`help`) VALUES 
-('anticheat global', '2', 'Syntax: .anticheat global returns the total amount reports and the average. (top three players)'),
-('anticheat player', '2', 'Syntax: .anticheat player $name returns the players''s total amount of warnings, the average and the amount of each cheat type.'),
-('anticheat handle', '2', 'Syntax: .anticheat handle [on|off] Turn on/off the AntiCheat-Detection .'),
-('anticheat delete', '2', 'Syntax: .anticheat delete [deleteall|$name] Deletes the report records of all the players or deletes all the reports of player $name.');
+('anticheat global', '2', 'Syntax: .anticheat global retourne les rapports montant total et la moyenne. (top 3 cheaters)'),
+('anticheat player', '2', 'Syntax: .anticheat player $name retourne le montant total d\'avertissements, la moyenne et le montant de chaque type de triche du joueur.'),
+('anticheat handle', '2', 'Syntax: .anticheat handle [on|off] Rend on/off la détection de cheat.'),
+('anticheat delete', '2', 'Syntax: .anticheat delete [deleteall|$name] Supprime les enregistrements de tous les joueurs ou supprime tous les rapports du joueur $name.');

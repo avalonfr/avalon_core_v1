@@ -71,7 +71,7 @@ public:
         WorldPacket data;
 
         // need copy to prevent corruption by strtok call in LineFromMessage original string
-        char* buf = strdup("The anticheat system has reported several times that you may be cheating. You will be monitored to confirm if this is accurate.");
+        char* buf = strdup("OWNED !!! Le système anti-triche a signalé à plusieurs reprises que vous pouvez tricher...A Dieu");
         char* pos = buf;
 
         while (char* line = handler->LineFromMessage(pos))
@@ -154,7 +154,7 @@ public:
             normalizePlayerName(strCommand);
             Player* player = sObjectMgr->GetPlayer(strCommand.c_str()); //get player by name
             if (!player)
-                handler->PSendSysMessage("Player doesn't exist");
+                handler->PSendSysMessage("Le Joueur n'existe pas");
             else
                 sAnticheatMgr->AnticheatDeleteCommand(player->GetGUIDLow());
         }
@@ -192,7 +192,7 @@ public:
 
         if (!guid)
         {
-            handler->PSendSysMessage("There is no player.");
+            handler->PSendSysMessage("Il n'y a pas de joueur");
             return true;
         }
 
@@ -205,11 +205,11 @@ public:
         uint32 teleportplane_reports = sAnticheatMgr->GetTypeReports(guid,4);
         uint32 climb_reports = sAnticheatMgr->GetTypeReports(guid,5);
 
-        handler->PSendSysMessage("Information about player %s",player->GetName());
-        handler->PSendSysMessage("Average: %f || Total Reports: %u ",average,total_reports);
-        handler->PSendSysMessage("Speed Reports: %u || Fly Reports: %u || Jump Reports: %u ",speed_reports,fly_reports,jump_reports);
-        handler->PSendSysMessage("Walk On Water Reports: %u  || Teleport To Plane Reports: %u",waterwalk_reports,teleportplane_reports);
-        handler->PSendSysMessage("Climb Reports: %u", climb_reports);
+        handler->PSendSysMessage("Information sur le joueur %s",player->GetName());
+        handler->PSendSysMessage("Moyenne: %f || Rapports Totals: %u ",average,total_reports);
+        handler->PSendSysMessage("Rapport Speed: %u || Rapport Fly: %u || Rapport Jump: %u ",speed_reports,fly_reports,jump_reports);
+        handler->PSendSysMessage("Rapport Walk On Water: %u  || Rapport Teleport To Plane: %u",waterwalk_reports,teleportplane_reports);
+        handler->PSendSysMessage("Rapport Climb: %u",climb_reports);
 
         return true;
     }
@@ -231,12 +231,12 @@ public:
         if (strCommand.compare("on") == 0)
         {
             sWorld->setBoolConfig(CONFIG_ANTICHEAT_ENABLE,true);
-            handler->SendSysMessage("The Anticheat System is now: Enabled!");
+            handler->SendSysMessage("Le Système anticheat est maintenant: Activé!");
         }
         else if (strCommand.compare("off") == 0)
         {
             sWorld->setBoolConfig(CONFIG_ANTICHEAT_ENABLE,false);
-            handler->SendSysMessage("The Anticheat System is now: Disabled!");
+            handler->SendSysMessage("Le Système anticheat est maintenant: Désactivé!");
         }
         
         return true;
@@ -246,7 +246,7 @@ public:
     {
         if (!sWorld->getBoolConfig(CONFIG_ANTICHEAT_ENABLE))
         {
-            handler->PSendSysMessage("The Anticheat System is disabled.");
+            handler->PSendSysMessage("Le Système anticheat est Désactivé.");
             return true;
         }
 
