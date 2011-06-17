@@ -353,6 +353,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
 
             my_spell = new Spell(_player, spellEntry, true);
             my_spell->m_CastItem = castItem;
+			my_spell->m_castItemGUID = castItem ? castItem->GetGUID() : 0;
             my_targets.setTradeItemTarget(_player);
             my_spell->m_targets = my_targets;
 
@@ -388,6 +389,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
 
             his_spell = new Spell(trader, spellEntry, true);
             his_spell->m_CastItem = castItem;
+			his_spell->m_castItemGUID = castItem ? castItem->GetGUID() : 0;
             his_targets.setTradeItemTarget(trader);
             his_spell->m_targets = his_targets;
 
