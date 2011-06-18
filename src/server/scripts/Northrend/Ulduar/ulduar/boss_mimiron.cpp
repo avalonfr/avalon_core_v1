@@ -998,7 +998,7 @@ public:
                 
             events.ScheduleEvent(EVENT_RAPID_BURST, 500, 0, PHASE_VX001_SOLO);
             events.ScheduleEvent(EVENT_PRE_LASER_BARRAGE, urand(35000, 40000), 0, PHASE_VX001_SOLO); // Not works in phase 4 :(
-            events.ScheduleEvent(EVENT_ROCKET_STRIKE, 20000);
+            events.ScheduleEvent(EVENT_ROCKET_STRIKE, 50000);
             events.ScheduleEvent(EVENT_HEAT_WAVE, urand(8000, 10000), 0, PHASE_VX001_SOLO);
             events.ScheduleEvent(EVENT_HAND_PULSE, 15000, 0, PHASE_VX001_ASSEMBLED);
         }
@@ -1104,13 +1104,14 @@ public:
                             events.CancelEvent(EVENT_LASER_BARRAGE);
                             break;
                         case EVENT_ROCKET_STRIKE:
+							
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                if (Creature *missile = CAST_CRE(vehicle->GetPassenger(5)))
-                                    missile->CastSpell(pTarget, SPELL_ROCKET_STRIKE, true);
+							{
+                                me->CastSpell(pTarget, SPELL_ROCKET_STRIKE, true);
+							}
                             if (phase == PHASE_VX001_ASSEMBLED)
                                 if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                                    if (Creature *missile = CAST_CRE(vehicle->GetPassenger(6)))
-                                        missile->CastSpell(pTarget, SPELL_ROCKET_STRIKE, true);
+                                        me->CastSpell(pTarget, SPELL_ROCKET_STRIKE, true);
                             events.RescheduleEvent(EVENT_ROCKET_STRIKE, urand(20000, 25000));
                             break;
                         case EVENT_HEAT_WAVE:
@@ -1119,7 +1120,9 @@ public:
                             break;
                         case EVENT_HAND_PULSE:
                             if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+							{
                                 DoCast(pTarget, SPELL_HAND_PULSE);
+							}
                             events.RescheduleEvent(EVENT_HAND_PULSE, urand(10000, 12000));
                             break;
                         case EVENT_FROST_BOMB:
@@ -1148,9 +1151,12 @@ public:
         npc_rocket_strikeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
         {
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_PACIFIED);
-            me->ForcedDespawn(10000);
-            DoCast(me, SPELL_ROCKET_STRIKE_AURA);
+           me->ForcedDespawn(10000);
+           DoCast(me, SPELL_ROCKET_STRIKE_AURA);
+		   DoCast(me, SPELL_ROCKET_STRIKE_DMG);
         }
+
+
     };
 };
 
