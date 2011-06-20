@@ -4239,6 +4239,10 @@ void SpellMgr::LoadSpellCustomAttr()
             spellInfo->EffectSpellClassMask[0] = flag96(0x00000040, 0x00000000, 0x00000000);
             ++count;
             break;
+		case 63163: // Apply Enchanted Bridle (Argent Tournament)
+            spellInfo->EffectDieSides[0] = 0;
+            ++count;
+            break;
         case 19970: // Entangling Roots (Rank 6) -- Nature's Grasp Proc
         case 19971: // Entangling Roots (Rank 5) -- Nature's Grasp Proc
         case 19972: // Entangling Roots (Rank 4) -- Nature's Grasp Proc
