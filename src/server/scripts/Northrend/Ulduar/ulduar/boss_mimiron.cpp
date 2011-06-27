@@ -1100,7 +1100,7 @@ public:
                             events.RescheduleEvent(EVENT_LASER_BARRAGE, 3000);
                             break;
                         case EVENT_LASER_BARRAGE:
-                            DoCastAOE(SPELL_LASER_BARRAGE);
+                            DoCast(SPELL_LASER_BARRAGE);
                             events.CancelEvent(EVENT_LASER_BARRAGE);
                             break;
                         case EVENT_ROCKET_STRIKE:

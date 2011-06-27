@@ -265,6 +265,13 @@ public:
                                 pTarget->setFaction(16);
                                 pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                                 construct_list.erase(itr);
+
+								pTarget->SetReactState(REACT_AGGRESSIVE);
+								pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
+								pTarget->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
+								pTarget->AI()->AttackStart(me->getVictim());
+								pTarget->AI()->DoZoneInCombat();
+
                             }
                         }
                         events.ScheduleEvent(EVENT_CONSTRUCT, RAID_MODE(40000, 30000));
@@ -346,17 +353,19 @@ public:
             }
         }
     
-        void SpellHit(Unit* caster, const SpellEntry *spell)
+       /* void SpellHit(Unit* caster, const SpellEntry *spell)
         {
+			sLog->outError("ds spell hit *****************************************************");
             if (spell->Id == SPELL_ACTIVATE_CONSTRUCT && me->HasReactState(REACT_PASSIVE))
             {
+				sLog->outError("ds activate *****************************************************");
                 me->SetReactState(REACT_AGGRESSIVE);
                 me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_DISABLE_MOVE);
                 me->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
                 me->AI()->AttackStart(caster->getVictim());
                 me->AI()->DoZoneInCombat();
             }
-        }
+        }*/
 
         void UpdateAI(const uint32 uiDiff)
         {
@@ -367,6 +376,7 @@ public:
 
             if (Aura * aur = me->GetAura((SPELL_HEAT)))
             {
+				aur->SetDuration(60*1000*24);
                 if (aur->GetStackAmount() >= 10)
                 {
                     me->RemoveAura(SPELL_HEAT);
