@@ -335,10 +335,12 @@ public:
         InstanceScript *pInstance;
 
         bool Brittled;
+		uint32 checkTimer;
 
         void Reset()
         {
             Brittled = false;
+			checkTimer = 1000;
         }
 
         void DamageTaken(Unit* /*attacker*/, uint32 &damage)
@@ -392,6 +394,31 @@ public:
                 me->RemoveAura(SPELL_MOLTEN);
                 Brittled = true;
             }
+
+			if(checkTimer < uiDiff)
+            {
+                if(Creature* c = me->FindNearestCreature(NPC_SCORCH_GROUND,10.0f,true))
+                {
+                        if(!me->HasAura(SPELL_HEAT))
+                        {
+                                c->AddAura(SPELL_HEAT, me);
+                        }
+                        else
+                        {
+                                if (Aura * aur = me->GetAura((SPELL_HEAT), GetGUID()))
+                                        aur->SetStackAmount(aur->GetStackAmount()+1);
+                        }
+                }
+
+                checkTimer = 1000;
+            }
+            else checkTimer -= uiDiff;
+
+
+
+
+
+
 
             DoMeleeAttackIfReady();
         }
