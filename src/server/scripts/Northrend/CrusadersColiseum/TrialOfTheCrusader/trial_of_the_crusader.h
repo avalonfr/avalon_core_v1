@@ -134,8 +134,6 @@ enum
 	NPC_PORTAL 						= 34825,
 	NPC_VOLCANO 					= 34813,
 
-
-
     GO_MAIN_GATE                    = 195647,
     GO_FLOOR                        = 195527,
     GO_DOOR_N                       = 195650,

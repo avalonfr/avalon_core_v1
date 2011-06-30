@@ -2982,6 +2982,83 @@ public:
     }
 };
 
+/*######
+## npc_torch_tossing_bunny
+######*/
+
+enum
+{
+    SPELL_TORCH_TOSSING_COMPLETE_A = 45719,
+    SPELL_TORCH_TOSSING_COMPLETE_H = 46651,
+    SPELL_TORCH_TOSSING_TRAINING = 45716,
+    SPELL_TORCH_TOSSING_PRACTICE = 46630,
+    SPELL_TORCH_TOSS = 46054,
+    SPELL_TARGET_INDICATOR = 45723,
+    SPELL_BRAZIERS_HIT = 45724
+};
+
+class npc_torch_tossing_bunny : public CreatureScript
+{
+    public:
+        npc_torch_tossing_bunny() : CreatureScript("npc_torch_tossing_bunny") { }
+
+        struct npc_torch_tossing_bunnyAI : public ScriptedAI
+        {
+            npc_torch_tossing_bunnyAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void Reset()
+            {
+                _targetTimer = urand(5000, 20000);
+            }
+
+            void SpellHit(Unit* caster, SpellEntry const* spell)
+            {
+                if (spell->Id == SPELL_TORCH_TOSS && me->HasAura(SPELL_TARGET_INDICATOR))
+                {
+                    uint8 neededHits;
+
+                    if (caster->HasAura(SPELL_TORCH_TOSSING_TRAINING))
+                        neededHits = 8;
+                    else if (caster->HasAura(SPELL_TORCH_TOSSING_PRACTICE))
+                        neededHits = 20;
+                    else
+                        return;
+
+                    DoCast(me, SPELL_BRAZIERS_HIT, true);
+                    caster->AddAura(SPELL_BRAZIERS_HIT, caster);
+
+                    if (caster->GetAuraCount(SPELL_BRAZIERS_HIT) >= neededHits)
+                    {
+                        // complete quest
+                        caster->CastSpell(caster, SPELL_TORCH_TOSSING_COMPLETE_A, true);
+                        caster->CastSpell(caster, SPELL_TORCH_TOSSING_COMPLETE_H, true);
+                        caster->RemoveAurasDueToSpell(SPELL_BRAZIERS_HIT);
+                        caster->RemoveAurasDueToSpell(neededHits == 8 ? SPELL_TORCH_TOSSING_TRAINING : SPELL_TORCH_TOSSING_PRACTICE);
+                    }
+                }
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (_targetTimer <= diff)
+                {
+                    DoCast(SPELL_TARGET_INDICATOR);
+                    _targetTimer = urand(10000, 20000);
+                }
+                else
+                    _targetTimer -= diff;
+            }
+
+        private:
+            uint32 _targetTimer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_torch_tossing_bunnyAI(creature);
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3016,5 +3093,6 @@ void AddSC_npcs_special()
 	new npc_argent_squire;
 	new npc_ghost_of_azuregos; // update creature_template set scriptname = 'npc_ghost_of_azuregos' where entry = 15481;
 	new vehicle_knight_gryphon; //UPDATE `creature_template` SET `speed_walk`='2',`spell1`='57403',`VehicleId`='200',`RegenHealth`='0',`ScriptName`='vehicle_knight_gryphon', `npcflag` = 0 WHERE (`entry`='33519');
+	new npc_torch_tossing_bunny();
 }
 
