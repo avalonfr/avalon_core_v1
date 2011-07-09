@@ -496,7 +496,7 @@ public:
 
         void Reset()
         {
-            vehicle->Reset();
+           // vehicle->Reset();
         }
 
         void WaypointReached(uint32 /*i*/)

@@ -309,7 +309,7 @@ public:
         std::list<uint64> Champion2List;
         std::list<uint64> Champion3List;
 
-        void NextStep(uint32 uiTimerStep,bool bNextStep = true,uint8 uiPhaseStep = 0)
+        void NextStep(uint32 uiTimerStep,bool bNextStep/* = true*/,uint8 uiPhaseStep = 0)
         {
             uiTimer = uiTimerStep;
             if (bNextStep)
