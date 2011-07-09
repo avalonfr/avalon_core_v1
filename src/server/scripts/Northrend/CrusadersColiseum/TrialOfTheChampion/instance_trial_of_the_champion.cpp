@@ -22,6 +22,7 @@ SDCategory: Trial Of the Champion
 EndScriptData */
 
 #include "ScriptPCH.h"
+#include "Group.h"
 #include "trial_of_the_champion.h"
 
 #define MAX_ENCOUNTER  4
@@ -107,10 +108,10 @@ public:
             Map::PlayerList const &players = instance->GetPlayers();
 
             if (!players.isEmpty())
-            {
                 if (Player* pPlayer = players.begin()->getSource())
-                    TeamInInstance = pPlayer->GetTeam();
-            }
+					if(Group * grp = pPlayer->GetGroup())
+						if (grp->IsLeader(pPlayer->GetGUID()))
+							TeamInInstance = pPlayer->GetTeam();
 
             switch(creature->GetEntry())
             {
