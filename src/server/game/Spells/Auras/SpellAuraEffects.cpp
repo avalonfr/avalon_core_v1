@@ -6288,6 +6288,20 @@ void AuraEffect::HandleAuraDummy(AuraApplication const * aurApp, uint8 mode, boo
                     caster->ToPlayer()->SetChampioningFaction(FactionID);
                     break;
                 }
+				case 57806: // Sprinkle Holy Water - Quest 13110
+
+                        if(target->GetTypeId() == TYPEID_UNIT)
+                        {
+                            if (apply)
+								{
+									if (caster && caster->ToPlayer())
+									{
+										target->CastSpell(caster, 57808, true);
+										caster->ToPlayer()->CastedCreatureOrGO(30546, target->GetGUID(), 57806);
+									}
+								}
+                        }
+                    break;
                 // LK Intro VO (1)
                 case 58204:
                     if (target->GetTypeId() == TYPEID_PLAYER)
