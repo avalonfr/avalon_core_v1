@@ -666,6 +666,100 @@ public:
     }
 };
 
+/*######
+## npc_mosswalker_victim
+######*/
+
+#define GOSSIP_ITEM_PULSE "<Check den Puls...>"
+
+enum
+{
+    QUEST_MOSSWALKER_SAVIOR         = 12580,
+    SPELL_DEAD_SOLDIER              = 45801,                // not clear what this does, but looks like all have it
+    SPELL_MOSSWALKER_QUEST_CREDIT   = 52157,
+
+    TEXT_ID_INJURED                 = 13318,
+
+    EMOTE_PAIN                      = -1000641,
+
+    SAY_RESCUE_1                    = -1000642,
+    SAY_RESCUE_2                    = -1000643,
+    SAY_RESCUE_3                    = -1000644,
+    SAY_RESCUE_4                    = -1000645,
+
+    SAY_DIE_1                       = -1000646,
+    SAY_DIE_2                       = -1000647,
+    SAY_DIE_3                       = -1000648,
+    SAY_DIE_4                       = -1000649,
+    SAY_DIE_5                       = -1000650,
+    SAY_DIE_6                       = -1000651,
+};
+
+class npc_mosswalker_victim : public CreatureScript
+{
+public:
+    npc_mosswalker_victim() : CreatureScript("npc_mosswalker_victim") { }
+
+	bool OnGossipHello(Player* pPlayer, Creature* pCreature)
+	{
+		if (pPlayer->GetQuestStatus(QUEST_MOSSWALKER_SAVIOR) == QUEST_STATUS_INCOMPLETE)
+		{
+			// doesn't appear they always emote
+			if (urand(0,3) == 0)
+				DoScriptText(EMOTE_PAIN, pCreature);
+
+			pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_PULSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+		}
+
+		pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INJURED, pCreature->GetGUID());
+		return true;
+	}
+
+	bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+	{
+		pPlayer->PlayerTalkClass->ClearMenus();
+		if (uiAction == GOSSIP_ACTION_INFO_DEF)
+		{
+			pPlayer->CLOSE_GOSSIP_MENU();
+
+			// just to prevent double credit
+			if (pCreature->GetLootRecipient())
+				return true;
+			else
+				pCreature->SetLootRecipient(pPlayer);
+
+			if (urand(0,2))                                     // die
+			{
+				switch(urand(0,5))
+				{
+					case 0: DoScriptText(SAY_DIE_1, pCreature, pPlayer); break;
+					case 1: DoScriptText(SAY_DIE_2, pCreature, pPlayer); break;
+					case 2: DoScriptText(SAY_DIE_3, pCreature, pPlayer); break;
+					case 3: DoScriptText(SAY_DIE_4, pCreature, pPlayer); break;
+					case 4: DoScriptText(SAY_DIE_5, pCreature, pPlayer); break;
+					case 5: DoScriptText(SAY_DIE_6, pCreature, pPlayer); break;
+				}
+			}
+			else                                                // survive
+			{
+				switch(urand(0,3))
+				{
+					case 0: DoScriptText(SAY_RESCUE_1, pCreature, pPlayer); break;
+					case 1: DoScriptText(SAY_RESCUE_2, pCreature, pPlayer); break;
+					case 2: DoScriptText(SAY_RESCUE_3, pCreature, pPlayer); break;
+					case 3: DoScriptText(SAY_RESCUE_4, pCreature, pPlayer); break;
+				}
+
+				pCreature->CastSpell(pPlayer, SPELL_MOSSWALKER_QUEST_CREDIT, true);
+			}
+
+			// more details may apply, instead of just despawn
+			pCreature->ForcedDespawn(5000);
+		}
+		return true;
+	}
+};
+
 void AddSC_sholazar_basin()
 {
     new npc_injured_rainspeaker_oracle();
@@ -675,4 +769,5 @@ void AddSC_sholazar_basin()
     new npc_engineer_helice();
     new npc_adventurous_dwarf();
     new npc_jungle_punch_target();
+	new npc_mosswalker_victim();
 }
