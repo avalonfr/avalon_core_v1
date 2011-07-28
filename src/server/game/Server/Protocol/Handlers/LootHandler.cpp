@@ -140,6 +140,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
             break;
         }
         case HIGHGUID_UNIT:
+        case HIGHGUID_VEHICLE:
         {
             Creature* creature = player->GetMap()->GetCreature(guid);
             bool lootAllowed = creature && creature->isAlive() == (player->getClass() == CLASS_ROGUE && creature->lootForPickPocketed);
@@ -176,7 +177,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
 
             for (std::vector<Player*>::const_iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
-                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4);
+                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
                 data << uint32(goldPerPlayer);
                 data << uint8(0);                       // Controls the text displayed 0 is "Your share is...", 1 "You loot..."
                 (*i)->GetSession()->SendPacket(&data);
@@ -187,7 +188,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket & /*recv_data*/)
         }
         else
         {
-            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4);
+            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
             data << uint32(loot->gold);
             data << uint8(1);
             SendPacket(&data);
@@ -491,7 +492,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket & recv_data)
     AllowedLooterSet* looters = item.GetAllowedLooters();
 
     // not move item from loot to target inventory
-    Item * newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, (looters->size() > 1) ? looters : NULL);
+    Item* newitem = target->StoreNewItem(dest, item.itemid, true, item.randomPropertyId, (looters->size() > 1) ? looters : NULL);
     target->SendNewItem(newitem, uint32(item.count), false, false, true);
     target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_ITEM, item.itemid, item.count);
     target->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE, pLoot->loot_type, item.count);

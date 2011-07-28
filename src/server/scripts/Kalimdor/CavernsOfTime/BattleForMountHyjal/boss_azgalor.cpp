@@ -48,14 +48,14 @@ class boss_azgalor : public CreatureScript
 public:
     boss_azgalor() : CreatureScript("boss_azgalor") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_azgalorAI (pCreature);
+        return new boss_azgalorAI (creature);
     }
 
     struct boss_azgalorAI : public hyjal_trashAI
     {
-        boss_azgalorAI(Creature *c) : hyjal_trashAI(c)
+        boss_azgalorAI(Creature* c) : hyjal_trashAI(c)
         {
             pInstance = c->GetInstanceScript();
             pGo = false;
@@ -89,7 +89,7 @@ public:
                 pInstance->SetData(DATA_AZGALOREVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (pInstance && IsEvent)
                 pInstance->SetData(DATA_AZGALOREVENT, IN_PROGRESS);
@@ -97,7 +97,7 @@ public:
             me->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, 0);
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             switch (urand(0, 2))
             {
@@ -121,13 +121,13 @@ public:
             pos = i;
             if (i == 7 && pInstance)
             {
-                Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_THRALL));
-                if (pTarget && pTarget->isAlive())
-                    me->AddThreat(pTarget, 0.0f);
+                Unit* target = Unit::GetUnit((*me), pInstance->GetData64(DATA_THRALL));
+                if (target && target->isAlive())
+                    me->AddThreat(target, 0.0f);
             }
         }
 
-        void JustDied(Unit *victim)
+        void JustDied(Unit* victim)
         {
             hyjal_trashAI::JustDied(victim);
             if (pInstance && IsEvent)
@@ -211,14 +211,14 @@ class mob_lesser_doomguard : public CreatureScript
 public:
     mob_lesser_doomguard() : CreatureScript("mob_lesser_doomguard") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_lesser_doomguardAI (pCreature);
+        return new mob_lesser_doomguardAI (creature);
     }
 
     struct mob_lesser_doomguardAI : public hyjal_trashAI
     {
-        mob_lesser_doomguardAI(Creature *c) : hyjal_trashAI(c)
+        mob_lesser_doomguardAI(Creature* c) : hyjal_trashAI(c)
         {
             pInstance = c->GetInstanceScript();
             if (pInstance)
@@ -239,11 +239,11 @@ public:
             CheckTimer = 5000;
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
         }
 
@@ -251,13 +251,13 @@ public:
         {
         }
 
-        void MoveInLineOfSight(Unit *who)
+        void MoveInLineOfSight(Unit* who)
         {
             if (me->IsWithinDist(who, 50) && !me->isInCombat() && me->IsHostileTo(who))
                 AttackStart(who);
         }
 
-        void JustDied(Unit * /*victim*/)
+        void JustDied(Unit* /*victim*/)
         {
         }
 

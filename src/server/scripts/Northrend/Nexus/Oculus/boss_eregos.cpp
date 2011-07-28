@@ -115,9 +115,9 @@ class boss_eregos : public CreatureScript
 public:
     boss_eregos() : CreatureScript("boss_eregos") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_eregosAI (pCreature);
+        return new boss_eregosAI (creature);
     }
 
     struct boss_eregosAI : public BossAI
@@ -254,8 +254,9 @@ class spell_eregos_planar_shift : public SpellScriptLoader
 
             void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
             {
-                if (Creature* caster = GetCaster()->ToCreature())
-                    caster->AI()->DoAction(ACTION_SET_NORMAL_EVENTS);
+                if (Unit* caster = GetCaster())
+                    if (Creature* creatureCaster = caster->ToCreature())
+                        creatureCaster->AI()->DoAction(ACTION_SET_NORMAL_EVENTS);
             }
 
             void Register()

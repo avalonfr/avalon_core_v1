@@ -206,7 +206,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "create",         SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleCreatePetCommand>,           "", NULL },
         { "learn",          SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandlePetLearnCommand>,            "", NULL },
         { "unlearn",        SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandlePetUnlearnCommand>,          "", NULL },
-        { "tp",             SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandlePetTpCommand>,               "", NULL },
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
@@ -378,7 +377,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "die",            SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleDieCommand>,                 "", NULL },
         { "revive",         SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleReviveCommand>,              "", NULL },
         { "dismount",       SEC_PLAYER,         false, OldHandler<&ChatHandler::HandleDismountCommand>,            "", NULL },
-        { "gps",            SEC_MODERATOR,      false, OldHandler<&ChatHandler::HandleGPSCommand>,                 "", NULL },
         { "guid",           SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleGUIDCommand>,                "", NULL },
         { "help",           SEC_PLAYER,         true,  OldHandler<&ChatHandler::HandleHelpCommand>,                "", NULL },
         { "itemmove",       SEC_GAMEMASTER,     false, OldHandler<&ChatHandler::HandleItemMoveCommand>,            "", NULL },
@@ -1076,7 +1074,7 @@ void ChatHandler::FillMessageData(WorldPacket *data, WorldSession* session, uint
         *data << uint8(0);
 }
 
-Player * ChatHandler::getSelectedPlayer()
+Player* ChatHandler::getSelectedPlayer()
 {
     if (!m_session)
         return NULL;

@@ -81,14 +81,14 @@ class boss_cannon_master_willey : public CreatureScript
 public:
     boss_cannon_master_willey() : CreatureScript("boss_cannon_master_willey") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_cannon_master_willeyAI (pCreature);
+        return new boss_cannon_master_willeyAI (creature);
     }
 
     struct boss_cannon_master_willeyAI : public ScriptedAI
     {
-        boss_cannon_master_willeyAI(Creature *c) : ScriptedAI(c) {}
+        boss_cannon_master_willeyAI(Creature* c) : ScriptedAI(c) {}
 
         uint32 KnockAway_Timer;
         uint32 Pummel_Timer;
@@ -114,7 +114,7 @@ public:
             me->SummonCreature(11054, ADD_9X, ADD_9Y, ADD_9Z, ADD_9O, TEMPSUMMON_TIMED_DESPAWN, 240000);
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
         }
 

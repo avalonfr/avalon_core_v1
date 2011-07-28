@@ -99,14 +99,14 @@ class boss_thaddius : public CreatureScript
 public:
     boss_thaddius() : CreatureScript("boss_thaddius") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_thaddiusAI (pCreature);
+        return new boss_thaddiusAI (creature);
     }
 
     struct boss_thaddiusAI : public BossAI
     {
-        boss_thaddiusAI(Creature *c) : BossAI(c, BOSS_THADDIUS)
+        boss_thaddiusAI(Creature* c) : BossAI(c, BOSS_THADDIUS)
         {
             // init is a bit tricky because thaddius shall track the life of both adds, but not if there was a wipe
             // and, in particular, if there was a crash after both adds were killed (should not respawn)
@@ -114,11 +114,11 @@ public:
             // Moreover, the adds may not yet be spawn. So just track down the status if mob is spawn
             // and each mob will send its status at reset (meaning that it is alive)
             checkFeugenAlive = false;
-            if (Creature *pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
+            if (Creature* pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
                 checkFeugenAlive = pFeugen->isAlive();
 
             checkStalaggAlive = false;
-            if (Creature *pStalagg = me->GetCreature(*me, instance->GetData64(DATA_STALAGG)))
+            if (Creature* pStalagg = me->GetCreature(*me, instance->GetData64(DATA_STALAGG)))
                 checkStalaggAlive = pStalagg->isAlive();
 
             if (!checkFeugenAlive && !checkStalaggAlive)
@@ -180,7 +180,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             _EnterCombat();
             DoScriptText(RAND(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3), me);
@@ -189,7 +189,7 @@ public:
             events.ScheduleEvent(EVENT_BERSERK, 360000);
         }
 
-        void DamageTaken(Unit * /*pDoneBy*/, uint32 & /*uiDamage*/)
+        void DamageTaken(Unit* /*pDoneBy*/, uint32 & /*uiDamage*/)
         {
             me->SetReactState(REACT_AGGRESSIVE);
         }
@@ -207,13 +207,13 @@ public:
                     if (!checkStalaggAlive)
                     {
                         if (instance)
-                            if (Creature *pStalagg = me->GetCreature(*me, instance->GetData64(DATA_STALAGG)))
+                            if (Creature* pStalagg = me->GetCreature(*me, instance->GetData64(DATA_STALAGG)))
                                 pStalagg->Respawn();
                     }
                     else
                     {
                         if (instance)
-                            if (Creature *pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
+                            if (Creature* pFeugen = me->GetCreature(*me, instance->GetData64(DATA_FEUGEN)))
                                 pFeugen->Respawn();
                     }
                 }
@@ -259,14 +259,14 @@ class mob_stalagg : public CreatureScript
 public:
     mob_stalagg() : CreatureScript("mob_stalagg") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_stalaggAI(pCreature);
+        return new mob_stalaggAI(creature);
     }
 
     struct mob_stalaggAI : public ScriptedAI
     {
-        mob_stalaggAI(Creature *c) : ScriptedAI(c)
+        mob_stalaggAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
         }
@@ -279,22 +279,22 @@ public:
         void Reset()
         {
             if (pInstance)
-                if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
+                if (Creature* pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_STALAGG_RESET);
             powerSurgeTimer = urand(20000, 25000);
             magneticPullTimer = 20000;
         }
 
-        void EnterCombat(Unit * /*pWho*/)
+        void EnterCombat(Unit* /*who*/)
         {
             DoCast(SPELL_STALAGG_TESLA);
         }
 
-        void JustDied(Unit * /*killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (pInstance)
-                if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
+                if (Creature* pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_STALAGG_DIED);
         }
@@ -306,7 +306,7 @@ public:
 
             if (magneticPullTimer <= uiDiff)
             {
-                if (Creature *pFeugen = me->GetCreature(*me, pInstance->GetData64(DATA_FEUGEN)))
+                if (Creature* pFeugen = me->GetCreature(*me, pInstance->GetData64(DATA_FEUGEN)))
                 {
                     Unit* pStalaggVictim = me->getVictim();
                     Unit* pFeugenVictim = pFeugen->getVictim();
@@ -345,14 +345,14 @@ class mob_feugen : public CreatureScript
 public:
     mob_feugen() : CreatureScript("mob_feugen") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new mob_feugenAI(pCreature);
+        return new mob_feugenAI(creature);
     }
 
     struct mob_feugenAI : public ScriptedAI
     {
-        mob_feugenAI(Creature *c) : ScriptedAI(c)
+        mob_feugenAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
         }
@@ -364,21 +364,21 @@ public:
         void Reset()
         {
             if (pInstance)
-                if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
+                if (Creature* pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_FEUGEN_RESET);
             staticFieldTimer = 5000;
         }
 
-        void EnterCombat(Unit * /*pWho*/)
+        void EnterCombat(Unit* /*who*/)
         {
             DoCast(SPELL_FEUGEN_TESLA);
         }
 
-        void JustDied(Unit * /*killer*/)
+        void JustDied(Unit* /*killer*/)
         {
             if (pInstance)
-                if (Creature *pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
+                if (Creature* pThaddius = me->GetCreature(*me, pInstance->GetData64(DATA_THADDIUS)))
                     if (pThaddius->AI())
                         pThaddius->AI()->DoAction(ACTION_FEUGEN_DIED);
         }

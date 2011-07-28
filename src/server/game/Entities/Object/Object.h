@@ -309,8 +309,6 @@ class Object
 
         void ClearUpdateMask(bool remove);
 
-        bool LoadValues(const char* data);
-
         uint16 GetValuesCount() const { return m_valuesCount; }
 
         virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
@@ -470,8 +468,10 @@ struct Position
     bool IsInDist(const Position *pos, float dist) const
         { return GetExactDistSq(pos) < dist * dist; }
     bool HasInArc(float arcangle, const Position *pos) const;
+
 	bool HasInArc(const float arcangle, const float x, const float y) const;
     bool HasInLine(const Unit *target, float distance, float width) const;
+
     std::string ToString() const;
 };
 ByteBuffer &operator>>(ByteBuffer& buf, Position::PositionXYZOStreamer const & streamer);

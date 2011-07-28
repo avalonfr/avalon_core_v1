@@ -62,14 +62,14 @@ class boss_skarvald_the_constructor : public CreatureScript
 public:
     boss_skarvald_the_constructor() : CreatureScript("boss_skarvald_the_constructor") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_skarvald_the_constructorAI (pCreature);
+        return new boss_skarvald_the_constructorAI (creature);
     }
 
     struct boss_skarvald_the_constructorAI : public ScriptedAI
     {
-        boss_skarvald_the_constructorAI(Creature *c) : ScriptedAI(c)
+        boss_skarvald_the_constructorAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
         }
@@ -101,7 +101,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit * who)
+        void EnterCombat(Unit* who)
         {
             if (!ghost && pInstance)
             {
@@ -145,7 +145,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             if (!ghost)
             {
@@ -214,14 +214,14 @@ class boss_dalronn_the_controller : public CreatureScript
 public:
     boss_dalronn_the_controller() : CreatureScript("boss_dalronn_the_controller") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_dalronn_the_controllerAI (pCreature);
+        return new boss_dalronn_the_controllerAI (creature);
     }
 
     struct boss_dalronn_the_controllerAI : public ScriptedAI
     {
-        boss_dalronn_the_controllerAI(Creature *c) : ScriptedAI(c)
+        boss_dalronn_the_controllerAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
         }
@@ -258,7 +258,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit * who)
+        void EnterCombat(Unit* who)
         {
             if (!ghost && pInstance)
             {
@@ -304,7 +304,7 @@ public:
             }
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             if (!ghost)
             {

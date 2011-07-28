@@ -83,14 +83,14 @@ class boss_mother_shahraz : public CreatureScript
 public:
     boss_mother_shahraz() : CreatureScript("boss_mother_shahraz") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_shahrazAI (pCreature);
+        return new boss_shahrazAI (creature);
     }
 
     struct boss_shahrazAI : public ScriptedAI
     {
-        boss_shahrazAI(Creature *c) : ScriptedAI(c)
+        boss_shahrazAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
         }
@@ -135,7 +135,7 @@ public:
             Enraged = false;
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_MOTHERSHAHRAZEVENT, IN_PROGRESS);
@@ -144,12 +144,12 @@ public:
             DoScriptText(SAY_AGGRO, me);
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             DoScriptText(RAND(SAY_SLAY1, SAY_SLAY2), me);
         }
 
-        void JustDied(Unit * /*victim*/)
+        void JustDied(Unit* /*victim*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_MOTHERSHAHRAZEVENT, DONE);
@@ -190,8 +190,8 @@ public:
             //Randomly cast one beam.
             if (BeamTimer <= diff)
             {
-                Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0);
-                if (!pTarget || !pTarget->isAlive())
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                if (!target || !target->isAlive())
                     return;
 
                 BeamTimer = 9000;
@@ -199,16 +199,16 @@ public:
                 switch(CurrentBeam)
                 {
                     case 0:
-                        DoCast(pTarget, SPELL_BEAM_SINISTER);
+                        DoCast(target, SPELL_BEAM_SINISTER);
                         break;
                     case 1:
-                        DoCast(pTarget, SPELL_BEAM_VILE);
+                        DoCast(target, SPELL_BEAM_VILE);
                         break;
                     case 2:
-                        DoCast(pTarget, SPELL_BEAM_WICKED);
+                        DoCast(target, SPELL_BEAM_WICKED);
                         break;
                     case 3:
-                        DoCast(pTarget, SPELL_BEAM_SINFUL);
+                        DoCast(target, SPELL_BEAM_SINFUL);
                         break;
                 }
                 ++BeamCount;

@@ -384,7 +384,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
     {
         uint32 owner = GUID_LOPART(GetOwnerGUID());
         std::string name = m_name;
-        CharacterDatabase.escape_string(name);
+        CharacterDatabase.EscapeString(name);
         SQLTransaction trans = CharacterDatabase.BeginTransaction();
         // remove current data
         trans->PAppend("DELETE FROM character_pet WHERE owner = '%u' AND id = '%u'", owner, m_charmInfo->GetPetNumber());
@@ -762,7 +762,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     return true;
 }
 
-bool Pet::CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit * owner)
+bool Pet::CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit* owner)
 {
     if (!CreateBaseAtTamed(cinfo, owner->GetMap(), owner->GetPhaseMask()))
         return false;
@@ -775,7 +775,7 @@ bool Pet::CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit * owner)
     return true;
 }
 
-bool Pet::CreateBaseAtTamed(CreatureTemplate const * cinfo, Map * map, uint32 phaseMask)
+bool Pet::CreateBaseAtTamed(CreatureTemplate const* cinfo, Map * map, uint32 phaseMask)
 {
     sLog->outDebug(LOG_FILTER_PETS, "Pet::CreateBaseForTamed");
     uint32 guid=sObjectMgr->GenerateLowGuid(HIGHGUID_PET);
@@ -1564,7 +1564,7 @@ bool Pet::resetTalents()
     if (owner->ToPlayer()->HasAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS))
         owner->ToPlayer()->RemoveAtLoginFlag(AT_LOGIN_RESET_PET_TALENTS, true);
 
-    CreatureTemplate const * ci = GetCreatureInfo();
+    CreatureTemplate const* ci = GetCreatureInfo();
     if (!ci)
         return false;
     // Check pet talent type
@@ -1572,7 +1572,7 @@ bool Pet::resetTalents()
     if (!pet_family || pet_family->petTalentType < 0)
         return false;
 
-    Player *player = owner->ToPlayer();
+    Player* player = owner->ToPlayer();
 
     uint8 level = getLevel();
     uint32 talentPointsForLevel = GetMaxTalentPointsForLevel(level);

@@ -310,7 +310,7 @@ struct RuneInfo
     uint8 BaseRune;
     uint8 CurrentRune;
     uint32 Cooldown;
-    AuraEffect const * ConvertAura;
+    AuraEffect const* ConvertAura;
 };
 
 struct Runes
@@ -331,10 +331,10 @@ struct Runes
 struct EnchantDuration
 {
     EnchantDuration() : item(NULL), slot(MAX_ENCHANTMENT_SLOT), leftduration(0) {};
-    EnchantDuration(Item * _item, EnchantmentSlot _slot, uint32 _leftduration) : item(_item), slot(_slot),
+    EnchantDuration(Item* _item, EnchantmentSlot _slot, uint32 _leftduration) : item(_item), slot(_slot),
         leftduration(_leftduration){ ASSERT(item); };
 
-    Item * item;
+    Item* item;
     EnchantmentSlot slot;
     uint32 leftduration;
 };
@@ -1030,8 +1030,8 @@ private:
 class Player : public Unit, public GridObject<Player>
 {
     friend class WorldSession;
-    friend void Item::AddToUpdateQueueOf(Player *player);
-    friend void Item::RemoveFromUpdateQueueOf(Player *player);
+    friend void Item::AddToUpdateQueueOf(Player* player);
+    friend void Item::RemoveFromUpdateQueueOf(Player* player);
     public:
         explicit Player (WorldSession *session);
         ~Player ();
@@ -1066,7 +1066,7 @@ class Player : public Unit, public GridObject<Player>
         }
         void SummonIfPossible(bool agree);
 
-        bool Create(uint32 guidlow, const std::string& name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId);
+        bool Create(uint32 guidlow, CharacterCreateInfo* createInfo);
 
         void Update(uint32 time);
 
@@ -1252,7 +1252,7 @@ class Player : public Unit, public GridObject<Player>
         void AddRefundReference(uint32 it);
         void DeleteRefundReference(uint32 it);
 
-        void ApplyEquipCooldown(Item * pItem);
+        void ApplyEquipCooldown(Item* pItem);
         void SetAmmo(uint32 item);
         void RemoveAmmo();
         float GetAmmoDPS() const { return m_ammoDPS; }
@@ -1270,7 +1270,7 @@ class Player : public Unit, public GridObject<Player>
                                                             // in trade, auction, guild bank, mail....
         void MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool update, bool in_characterInventoryDB = false);
                                                             // in trade, guild bank, mail....
-        void RemoveItemDependentAurasAndCasts(Item * pItem);
+        void RemoveItemDependentAurasAndCasts(Item* pItem);
         void DestroyItem(uint8 bag, uint8 slot, bool update);
         void DestroyItemCount(uint32 item, uint32 count, bool update, bool unequip_check = false);
         void DestroyItemCount(Item* item, uint32& count, bool update);
@@ -1341,8 +1341,8 @@ class Player : public Unit, public GridObject<Player>
         void OnGossipSelect(WorldObject* source, uint32 gossipListId, uint32 menuId);
 
         uint32 GetGossipTextId(uint32 menuId);
-        uint32 GetGossipTextId(WorldObject *pSource);
-        uint32 GetDefaultGossipMenuForSource(WorldObject *pSource);
+        uint32 GetGossipTextId(WorldObject* source);
+        static uint32 GetDefaultGossipMenuForSource(WorldObject* source);
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -1381,7 +1381,7 @@ class Player : public Unit, public GridObject<Player>
         bool SatisfyQuestDay(Quest const* qInfo, bool msg);
         bool SatisfyQuestWeek(Quest const* qInfo, bool msg);
         bool GiveQuestSourceItem(Quest const *pQuest);
-        bool TakeQuestSourceItem(uint32 quest_id, bool msg);
+        bool TakeQuestSourceItem(uint32 questId, bool msg);
         bool GetQuestRewardStatus(uint32 quest_id) const;
         QuestStatus GetQuestStatus(uint32 quest_id) const;
         void SetQuestStatus(uint32 quest_id, QuestStatus status);
@@ -1527,8 +1527,14 @@ class Player : public Unit, public GridObject<Player>
             UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
         }
 
-        RewardedQuestSet& getRewardedQuests() { return m_RewardedQuests; }
+        RewardedQuestSet const& getRewardedQuests() const { return m_RewardedQuests; }
         QuestStatusMap& getQuestStatusMap() { return m_QuestStatus; };
+
+        size_t GetRewardedQuestCount() const { return m_RewardedQuests.size(); }
+        bool IsQuestRewarded(uint32 quest_id) const
+        {
+            return m_RewardedQuests.find(quest_id) != m_RewardedQuests.end();
+        }
 
         const uint64& GetSelection() const { return m_curSelection; }
         Unit *GetSelectedUnit() const;
@@ -1538,7 +1544,7 @@ class Player : public Unit, public GridObject<Player>
         uint8 GetComboPoints() { return m_comboPoints; }
         const uint64& GetComboTarget() const { return m_comboTarget; }
 
-        void AddComboPoints(Unit* target, int8 count, Spell * spell = NULL);
+        void AddComboPoints(Unit* target, int8 count, Spell* spell = NULL);
         void GainSpellComboPoints(int8 count);
         void ClearComboPoints();
         void SendComboPoints();
@@ -1600,7 +1606,7 @@ class Player : public Unit, public GridObject<Player>
 
         void SendProficiency(ItemClass itemClass, uint32 itemSubclassMask);
         void SendInitialSpells();
-        bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled);
+        bool addSpell(uint32 spell_id, bool active, bool learning, bool dependent, bool disabled, bool loading = false);
         void learnSpell(uint32 spell_id, bool dependent);
         void removeSpell(uint32 spell_id, bool disabled = false, bool learn_low_rank = true);
         void resetSpells(bool myClassOnly = false);
@@ -1657,11 +1663,12 @@ class Player : public Unit, public GridObject<Player>
         SpellCooldowns const& GetSpellCooldownMap() const { return m_spellCooldowns; }
 
         void AddSpellMod(SpellModifier* mod, bool apply);
-        bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod, Spell * spell = NULL);
-        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell * spell = NULL);
-        void RemoveSpellMods(Spell * spell);
-        void RestoreSpellMods(Spell *spell, uint32 ownerAuraId=0);
-        void DropModCharge(SpellModifier * mod, Spell * spell);
+        bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod, Spell* spell = NULL);
+        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell* spell = NULL);
+        void RemoveSpellMods(Spell* spell);
+        void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura* aura = NULL);
+        void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura* aura = NULL);
+        void DropModCharge(SpellModifier* mod, Spell* spell);
         void SetSpellModTakingSpell(Spell* spell, bool apply);
 
         static uint32 const infinityCooldownDelay = MONTH;  // used for set "infinity cooldowns" for spells and check
@@ -1696,7 +1703,7 @@ class Player : public Unit, public GridObject<Player>
         void UpdatePotionCooldown(Spell* spell = NULL);
 
         // global cooldown
-        void AddGlobalCooldown(SpellEntry const *spellInfo, Spell *spell);
+        void AddGlobalCooldown(SpellEntry const *spellInfo, Spell* spell);
         bool HasGlobalCooldown(SpellEntry const *spellInfo) const;
         void RemoveGlobalCooldown(SpellEntry const *spellInfo);
 
@@ -1869,6 +1876,7 @@ class Player : public Unit, public GridObject<Player>
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void ApplyHealthRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
+        void UpdateRuneRegen(RuneType rune);
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
@@ -1887,7 +1895,7 @@ class Player : public Unit, public GridObject<Player>
         void SendAttackSwingDeadTarget();
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
-        void SendAutoRepeatCancel(Unit *target);
+        void SendAutoRepeatCancel(Unit* target);
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         void SendDungeonDifficulty(bool IsInGroup);
@@ -2044,8 +2052,8 @@ class Player : public Unit, public GridObject<Player>
         void ResetAllPowers();
 
         void _ApplyWeaponDependentAuraMods(Item *item, WeaponAttackType attackType, bool apply);
-        void _ApplyWeaponDependentAuraCritMod(Item *item, WeaponAttackType attackType, AuraEffect const * aura, bool apply);
-        void _ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType attackType, AuraEffect const * aura, bool apply);
+        void _ApplyWeaponDependentAuraCritMod(Item *item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
+        void _ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType attackType, AuraEffect const* aura, bool apply);
 
         void _ApplyItemMods(Item *item, uint8 slot, bool apply);
         void _RemoveAllItemMods();
@@ -2062,9 +2070,9 @@ class Player : public Unit, public GridObject<Player>
         void ApplyItemEquipSpell(Item *item, bool apply, bool form_change = false);
         void ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply, bool form_change = false);
         void UpdateEquipSpellsAtFormChange();
-        void CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
+        void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx);
         void CastItemUseSpell(Item *item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex);
-        void CastItemCombatSpell(Unit *target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item *item, ItemTemplate const * proto);
+        void CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 procVictim, uint32 procEx, Item *item, ItemTemplate const* proto);
 
         void SendEquipmentSetList();
         void SetEquipmentSet(uint32 index, EquipmentSet eqset);
@@ -2075,7 +2083,7 @@ class Player : public Unit, public GridObject<Player>
         void SendDirectMessage(WorldPacket *data);
         void SendBGWeekendWorldStates();
 
-        void SendAurasForTarget(Unit *target);
+        void SendAurasForTarget(Unit* target);
 
         PlayerMenu* PlayerTalkClass;
         std::vector<ItemSetEffect *> ItemSetEff;
@@ -2343,7 +2351,7 @@ class Player : public Unit, public GridObject<Player>
         bool HasPendingBind() const { return _pendingBind != NULL; }
         void SendRaidInfo();
         void SendSavedInstances();
-        static void ConvertInstancesToGroup(Player *player, Group *group, bool switchLeader);
+        static void ConvertInstancesToGroup(Player* player, Group* group, bool switchLeader);
         bool Satisfy(AccessRequirement const* ar, uint32 target_map, bool report = false);
         bool CheckInstanceLoginValid();
         bool CheckInstanceCount(uint32 instanceId) const
@@ -2368,11 +2376,11 @@ class Player : public Unit, public GridObject<Player>
         /*********************************************************/
 
         Group * GetGroupInvite() { return m_groupInvite; }
-        void SetGroupInvite(Group *group) { m_groupInvite = group; }
+        void SetGroupInvite(Group* group) { m_groupInvite = group; }
         Group * GetGroup() { return m_group.getTarget(); }
         const Group * GetGroup() const { return (const Group*)m_group.getTarget(); }
         GroupReference& GetGroupRef() { return m_group; }
-        void SetGroup(Group *group, int8 subgroup = -1);
+        void SetGroup(Group* group, int8 subgroup = -1);
         uint8 GetSubGroup() const { return m_group.getSubGroup(); }
         uint32 GetGroupUpdateFlag() const { return m_groupUpdateMask; }
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag; }
@@ -2381,12 +2389,12 @@ class Player : public Unit, public GridObject<Player>
         Player* GetNextRandomRaidMember(float radius);
         PartyResult CanUninviteFromGroup() const;
         // Battleground Group System
-        void SetBattlegroundRaid(Group *group, int8 subgroup = -1);
+        void SetBattlegroundRaid(Group* group, int8 subgroup = -1);
         void RemoveFromBattlegroundRaid();
         Group * GetOriginalGroup() { return m_originalGroup.getTarget(); }
         GroupReference& GetOriginalGroupRef() { return m_originalGroup; }
         uint8 GetOriginalSubGroup() const { return m_originalGroup.getSubGroup(); }
-        void SetOriginalGroup(Group *group, int8 subgroup = -1);
+        void SetOriginalGroup(Group* group, int8 subgroup = -1);
 
         void SetPassOnGroupLoot(bool bPassOnGroupLoot) { m_bPassOnGroupLoot = bPassOnGroupLoot; }
         bool GetPassOnGroupLoot() const { return m_bPassOnGroupLoot; }
@@ -2411,9 +2419,9 @@ class Player : public Unit, public GridObject<Player>
         void SetBaseRune(uint8 index, RuneType baseRune) { m_runes->runes[index].BaseRune = baseRune; }
         void SetCurrentRune(uint8 index, RuneType currentRune) { m_runes->runes[index].CurrentRune = currentRune; }
         void SetRuneCooldown(uint8 index, uint32 cooldown) { m_runes->runes[index].Cooldown = cooldown; m_runes->SetRuneState(index, (cooldown == 0) ? true : false); }
-        void SetRuneConvertAura(uint8 index, AuraEffect const * aura) { m_runes->runes[index].ConvertAura = aura; }
-        void AddRuneByAuraEffect(uint8 index, RuneType newType, AuraEffect const * aura) { SetRuneConvertAura(index, aura); ConvertRune(index, newType); }
-        void RemoveRunesByAuraEffect(AuraEffect const * aura);
+        void SetRuneConvertAura(uint8 index, AuraEffect const* aura) { m_runes->runes[index].ConvertAura = aura; }
+        void AddRuneByAuraEffect(uint8 index, RuneType newType, AuraEffect const* aura) { SetRuneConvertAura(index, aura); ConvertRune(index, newType); }
+        void RemoveRunesByAuraEffect(AuraEffect const* aura);
         void RestoreBaseRune(uint8 index);
         void ConvertRune(uint8 index, RuneType newType);
         void ResyncRunes(uint8 count);
@@ -2423,7 +2431,7 @@ class Player : public Unit, public GridObject<Player>
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = NULL);
-        void CompletedAchievement(AchievementEntry const* entry, bool ignoreGMAllowAchievementConfig = false);
+        void CompletedAchievement(AchievementEntry const* entry);
 
         bool HasTitle(uint32 bitIndex);
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }
@@ -2434,7 +2442,7 @@ class Player : public Unit, public GridObject<Player>
 
         uint32 GetChampioningFaction() const { return m_ChampioningFaction; }
         void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }
-        Spell * m_spellModTakingSpell;
+        Spell* m_spellModTakingSpell;
 
         float GetAverageItemLevel();
         bool isDebugAreaTriggers;
@@ -2601,7 +2609,7 @@ class Player : public Unit, public GridObject<Player>
 
         SpellModList m_spellMods[MAX_SPELLMOD];
         //uint32 m_pad;
-//        Spell * m_spellModTakingSpell;  // Spell for which charges are dropped in spell::finish
+//        Spell* m_spellModTakingSpell;  // Spell for which charges are dropped in spell::finish
 
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;

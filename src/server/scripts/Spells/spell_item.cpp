@@ -42,7 +42,7 @@ public:
     public:
         spell_item_trigger_spell_SpellScript(uint32 triggeredSpellId) : SpellScript(), _triggeredSpellId(triggeredSpellId) { }
 
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(_triggeredSpellId))
                 return false;
@@ -87,7 +87,7 @@ public:
     {
         PrepareSpellScript(spell_item_deviate_fish_SpellScript)
     public:
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             for (uint32 spellId = SPELL_SLEEPY; spellId <= SPELL_HEALTHY_SPIRIT; ++spellId)
                 if (!sSpellStore.LookupEntry(spellId))
@@ -135,7 +135,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_flask_of_the_north_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_FLASK_OF_THE_NORTH_SP))
                 return false;
@@ -211,7 +211,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_gnomish_death_ray_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_GNOMISH_DEATH_RAY_SELF))
                 return false;
@@ -222,13 +222,13 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* pTarget = GetHitUnit())
+            if (Unit* target = GetHitUnit())
             {
                 Unit* pCaster = GetCaster();
                 if (urand(0, 99) < 15)
                     pCaster->CastSpell(pCaster, SPELL_GNOMISH_DEATH_RAY_SELF, true, NULL);    // failure
                 else
-                    pCaster->CastSpell(pTarget, SPELL_GNOMISH_DEATH_RAY_TARGET, true, NULL);
+                    pCaster->CastSpell(target, SPELL_GNOMISH_DEATH_RAY_TARGET, true, NULL);
             }
         }
 
@@ -264,7 +264,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_make_a_wish_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_MR_PINCHYS_BLESSING))
                 return false;
@@ -381,7 +381,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_net_o_matic_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_NET_O_MATIC_TRIGGERED1))
                 return false;
@@ -394,7 +394,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* pTarget = GetHitUnit())
+            if (Unit* target = GetHitUnit())
             {
                 uint32 spellId = SPELL_NET_O_MATIC_TRIGGERED3;
                 uint32 roll = urand(0, 99);
@@ -403,7 +403,7 @@ public:
                 else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like chance unknown)
                     spellId = SPELL_NET_O_MATIC_TRIGGERED2;
 
-                GetCaster()->CastSpell(pTarget, spellId, true, NULL);
+                GetCaster()->CastSpell(target, spellId, true, NULL);
             }
         }
 
@@ -437,7 +437,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_noggenfogger_elixir_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_NOGGENFOGGER_ELIXIR_TRIGGERED1))
                 return false;
@@ -495,7 +495,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_savory_deviate_delight_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             for (uint32 spellId = SPELL_FLIP_OUT_MALE; spellId <= SPELL_YAAARRRR_FEMALE; ++spellId)
                 if (!sSpellStore.LookupEntry(spellId))
@@ -553,7 +553,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_six_demon_bag_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_FROSTBOLT))
                 return false;
@@ -572,7 +572,7 @@ public:
 
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
-            if (Unit* pTarget = GetHitUnit())
+            if (Unit* target = GetHitUnit())
             {
                 Unit* pCaster = GetCaster();
 
@@ -588,17 +588,17 @@ public:
                 {
                     spellId = SPELL_POLYMORPH;
                     if (urand(0, 100) <= 30)        // 30% chance to self-cast
-                        pTarget = pCaster;
+                        target = pCaster;
                 }
                 else if (rand < 95)                 // Enveloping Winds (15% chance)
                     spellId = SPELL_ENVELOPING_WINDS;
                 else                                // Summon Felhund minion (5% chance)
                 {
                     spellId = SPELL_SUMMON_FELHOUND_MINION;
-                    pTarget = pCaster;
+                    target = pCaster;
                 }
 
-                pCaster->CastSpell(pTarget, spellId, true, GetCastItem());
+                pCaster->CastSpell(target, spellId, true, GetCastItem());
             }
         }
 
@@ -632,7 +632,7 @@ public:
     {
     public:
         PrepareSpellScript(spell_item_underbelly_elixir_SpellScript)
-        bool Validate(SpellEntry const * /*spellEntry*/)
+        bool Validate(SpellEntry const* /*spellEntry*/)
         {
             if (!sSpellStore.LookupEntry(SPELL_UNDERBELLY_ELIXIR_TRIGGERED1))
                 return false;
@@ -728,7 +728,7 @@ public:
 
         void Register()
         {
-            AfterEffectApply += AuraEffectApplyFn(spell_item_shadowmourne_AuraScript::OnStackChange, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectApply += AuraEffectApplyFn(spell_item_shadowmourne_AuraScript::OnStackChange, EFFECT_0, SPELL_AURA_MOD_STAT, AuraEffectHandleModes(AURA_EFFECT_HANDLE_REAL | AURA_EFFECT_HANDLE_REAPPLY));
             AfterEffectRemove += AuraEffectRemoveFn(spell_item_shadowmourne_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_MOD_STAT, AURA_EFFECT_HANDLE_REAL);
         }
     };

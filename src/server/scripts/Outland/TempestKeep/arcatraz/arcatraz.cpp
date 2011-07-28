@@ -76,9 +76,9 @@ class npc_millhouse_manastorm : public CreatureScript
         }
         struct npc_millhouse_manastormAI : public ScriptedAI
         {
-            npc_millhouse_manastormAI(Creature* pCreature) : ScriptedAI(pCreature)
+            npc_millhouse_manastormAI(Creature* creature) : ScriptedAI(creature)
             {
-                pInstance = pCreature->GetInstanceScript();
+                pInstance = creature->GetInstanceScript();
             }
 
             InstanceScript* pInstance;
@@ -111,25 +111,25 @@ class npc_millhouse_manastorm : public CreatureScript
                 }
             }
 
-            void AttackStart(Unit* pWho)
+            void AttackStart(Unit* who)
             {
-                if (me->Attack(pWho, true))
+                if (me->Attack(who, true))
                 {
-                    me->AddThreat(pWho, 0.0f);
-                    me->SetInCombatWith(pWho);
-                    pWho->SetInCombatWith(me);
-                    me->GetMotionMaster()->MoveChase(pWho, 25.0f);
+                    me->AddThreat(who, 0.0f);
+                    me->SetInCombatWith(who);
+                    who->SetInCombatWith(me);
+                    me->GetMotionMaster()->MoveChase(who, 25.0f);
                 }
             }
 
-            void EnterCombat(Unit * /*who*/){}
+            void EnterCombat(Unit* /*who*/){}
 
-            void KilledUnit(Unit * /*victim*/)
+            void KilledUnit(Unit* /*victim*/)
             {
                 DoScriptText(RAND(SAY_KILL_1, SAY_KILL_2), me);
             }
 
-            void JustDied(Unit * /*victim*/)
+            void JustDied(Unit* /*victim*/)
             {
                 DoScriptText(SAY_DEATH, me);
 
@@ -280,9 +280,9 @@ class npc_warden_mellichar : public CreatureScript
         }
         struct npc_warden_mellicharAI : public ScriptedAI
         {
-            npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
+            npc_warden_mellicharAI(Creature* creature) : ScriptedAI(creature)
             {
-                pInstance = pCreature->GetInstanceScript();
+                pInstance = creature->GetInstanceScript();
             }
 
             InstanceScript* pInstance;
@@ -310,7 +310,7 @@ class npc_warden_mellichar : public CreatureScript
 
             void AttackStart(Unit* /*who*/) {}
 
-            void MoveInLineOfSight(Unit *who)
+            void MoveInLineOfSight(Unit* who)
             {
                 if (IsRunning)
                     return;
@@ -328,7 +328,7 @@ class npc_warden_mellichar : public CreatureScript
                 }
             }
 
-            void EnterCombat(Unit * /*who*/)
+            void EnterCombat(Unit* /*who*/)
             {
                 DoScriptText(YELL_INTRO1, me);
                 DoCast(me, SPELL_BUBBLE_VISUAL);
@@ -536,7 +536,7 @@ class mob_zerekethvoidzone : public CreatureScript
         }
         struct mob_zerekethvoidzoneAI : public ScriptedAI
         {
-            mob_zerekethvoidzoneAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+            mob_zerekethvoidzoneAI(Creature* creature) : ScriptedAI(creature) {}
 
             void Reset()
             {

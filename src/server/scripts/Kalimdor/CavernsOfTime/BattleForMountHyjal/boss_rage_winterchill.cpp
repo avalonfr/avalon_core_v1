@@ -51,14 +51,14 @@ class boss_rage_winterchill : public CreatureScript
 public:
     boss_rage_winterchill() : CreatureScript("boss_rage_winterchill") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const
+    CreatureAI* GetAI(Creature* creature) const
     {
-        return new boss_rage_winterchillAI (pCreature);
+        return new boss_rage_winterchillAI (creature);
     }
 
     struct boss_rage_winterchillAI : public hyjal_trashAI
     {
-        boss_rage_winterchillAI(Creature *c) : hyjal_trashAI(c)
+        boss_rage_winterchillAI(Creature* c) : hyjal_trashAI(c)
         {
             pInstance = c->GetInstanceScript();
             pGo = false;
@@ -84,7 +84,7 @@ public:
                 pInstance->SetData(DATA_RAGEWINTERCHILLEVENT, NOT_STARTED);
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (pInstance && IsEvent)
                 pInstance->SetData(DATA_RAGEWINTERCHILLEVENT, IN_PROGRESS);
@@ -92,7 +92,7 @@ public:
             me->MonsterYell(SAY_ONAGGRO, LANG_UNIVERSAL, 0);
         }
 
-        void KilledUnit(Unit * /*victim*/)
+        void KilledUnit(Unit* /*victim*/)
         {
             switch (urand(0, 1))
             {
@@ -112,13 +112,13 @@ public:
             pos = i;
             if (i == 7 && pInstance)
             {
-                Unit *pTarget = Unit::GetUnit((*me), pInstance->GetData64(DATA_JAINAPROUDMOORE));
-                if (pTarget && pTarget->isAlive())
-                    me->AddThreat(pTarget, 0.0f);
+                Unit* target = Unit::GetUnit((*me), pInstance->GetData64(DATA_JAINAPROUDMOORE));
+                if (target && target->isAlive())
+                    me->AddThreat(target, 0.0f);
             }
         }
 
-        void JustDied(Unit *victim)
+        void JustDied(Unit* victim)
         {
             hyjal_trashAI::JustDied(victim);
             if (pInstance && IsEvent)

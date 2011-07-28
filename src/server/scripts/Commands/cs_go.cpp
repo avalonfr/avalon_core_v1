@@ -113,7 +113,7 @@ public:
             if (!guid)
             {
                 std::string name = pParam1;
-                WorldDatabase.escape_string(name);
+                WorldDatabase.EscapeString(name);
                 whereClause << ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name "_LIKE_" '" << name << "'";
             }
             else
@@ -143,7 +143,7 @@ public:
         uint32 id = fields[6].GetUInt32();
 
         // if creature is in same map with caster go at its current location
-        if (Creature * creature = sObjectAccessor->GetCreature(*_player, MAKE_NEW_GUID(guid, id, HIGHGUID_UNIT)))
+        if (Creature* creature = sObjectAccessor->GetCreature(*_player, MAKE_NEW_GUID(guid, id, HIGHGUID_UNIT)))
         {
             x = creature->GetPositionX();
             y = creature->GetPositionY();

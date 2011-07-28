@@ -64,7 +64,7 @@ uint8 _SpellScript::EffectHook::GetAffectedEffectsMask(SpellEntry const* spellEn
     uint8 mask = 0;
     if ((effIndex == EFFECT_ALL) || (effIndex == EFFECT_FIRST_FOUND))
     {
-        for(uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
         {
             if ((effIndex == EFFECT_FIRST_FOUND) && mask)
                 return mask;
@@ -213,7 +213,7 @@ void SpellScript::UnitTargetHandler::Call(SpellScript* spellScript, std::list<Un
     (spellScript->*pUnitTargetHandlerScript)(unitTargets);
 }
 
-bool SpellScript::_Validate(SpellEntry const * entry)
+bool SpellScript::_Validate(SpellEntry const* entry)
 {
     for (std::list<EffectHandler>::iterator itr = OnEffect.begin(); itr != OnEffect.end();  ++itr)
         if (!(*itr).GetAffectedEffectsMask(entry))
@@ -266,26 +266,31 @@ SpellEntry const* SpellScript::GetSpellInfo()
     return m_spell->GetSpellInfo();
 }
 
-WorldLocation* SpellScript::GetTargetDest()
+WorldLocation const* SpellScript::GetTargetDest()
 {
     if (m_spell->m_targets.HasDst())
-        return &m_spell->m_targets.m_dstPos;
+        return m_spell->m_targets.GetDst();
     return NULL;
+}
+
+void SpellScript::SetTargetDest(WorldLocation& loc)
+{
+    m_spell->m_targets.SetDst(loc);
 }
 
 Unit* SpellScript::GetTargetUnit()
 {
-    return m_spell->m_targets.getUnitTarget();
+    return m_spell->m_targets.GetUnitTarget();
 }
 
 GameObject* SpellScript::GetTargetGObj()
 {
-    return m_spell->m_targets.getGOTarget();
+    return m_spell->m_targets.GetGOTarget();
 }
 
 Item* SpellScript::GetTargetItem()
 {
-    return m_spell->m_targets.getItemTarget();
+    return m_spell->m_targets.GetItemTarget();
 }
 
 Unit* SpellScript::GetHitUnit()
@@ -467,7 +472,7 @@ void SpellScript::SetCustomCastResultMessage(SpellCustomErrors result)
     m_spell->m_customError = result;
 }
 
-bool AuraScript::_Validate(SpellEntry const * entry)
+bool AuraScript::_Validate(SpellEntry const* entry)
 {
     for (std::list<CheckAreaTargetHandler>::iterator itr = DoCheckAreaTarget.begin(); itr != DoCheckAreaTarget.end();  ++itr)
         if (!HasAreaAuraEffect(entry))
@@ -533,7 +538,7 @@ AuraScript::CheckAreaTargetHandler::CheckAreaTargetHandler(AuraCheckAreaTargetFn
     pHandlerScript = _pHandlerScript;
 }
 
-bool AuraScript::CheckAreaTargetHandler::Call(AuraScript* auraScript, Unit * _target)
+bool AuraScript::CheckAreaTargetHandler::Call(AuraScript* auraScript, Unit* _target)
 {
     return (auraScript->*pHandlerScript)(_target);
 }
@@ -615,7 +620,7 @@ AuraScript::EffectApplyHandler::EffectApplyHandler(AuraEffectApplicationModeFnTy
     mode = _mode;
 }
 
-void AuraScript::EffectApplyHandler::Call(AuraScript* auraScript, AuraEffect const * _aurEff, AuraEffectHandleModes _mode)
+void AuraScript::EffectApplyHandler::Call(AuraScript* auraScript, AuraEffect const* _aurEff, AuraEffectHandleModes _mode)
 {
     if (_mode & mode)
         (auraScript->*pEffectHandlerScript)(_aurEff, _mode);

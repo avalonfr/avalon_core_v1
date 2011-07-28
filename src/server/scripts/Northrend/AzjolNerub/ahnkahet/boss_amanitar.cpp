@@ -48,7 +48,7 @@ public:
 
     struct boss_amanitarAI : public ScriptedAI
     {
-        boss_amanitarAI(Creature *c) : ScriptedAI(c)
+        boss_amanitarAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
             bFirstTime = true;
@@ -83,7 +83,7 @@ public:
             }
         }
 
-        void JustDied(Unit * /*Killer*/)
+        void JustDied(Unit* /*Killer*/)
         {
             if (pInstance)
             {
@@ -92,7 +92,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit * /*who*/)
+        void EnterCombat(Unit* /*who*/)
         {
             if (pInstance)
                 pInstance->SetData(DATA_AMANITAR_EVENT, IN_PROGRESS);
@@ -132,8 +132,8 @@ public:
 
             if (uiRootTimer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                    DoCast(pTarget, SPELL_ENTANGLING_ROOTS);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    DoCast(target, SPELL_ENTANGLING_ROOTS);
                 uiRootTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
             } else uiRootTimer -= diff;
 
@@ -145,8 +145,8 @@ public:
 
             if (uiBoltTimer <= diff)
             {
-                if (Unit *pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
-                    DoCast(pTarget, SPELL_VENOM_BOLT_VOLLEY);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100, true))
+                    DoCast(target, SPELL_VENOM_BOLT_VOLLEY);
                 uiBoltTimer = urand(15*IN_MILLISECONDS, 30*IN_MILLISECONDS);
             } else uiBoltTimer -= diff;
 
@@ -154,7 +154,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature *creature) const
+    CreatureAI *GetAI(Creature* creature) const
     {
         return new boss_amanitarAI(creature);
     }
@@ -183,7 +183,7 @@ public:
             uiDeathTimer = 30*IN_MILLISECONDS;
         }
 
-        void JustDied(Unit *killer)
+        void JustDied(Unit* killer)
         {
             if (!killer)
                 return;
@@ -195,8 +195,8 @@ public:
             }
         }
 
-        void EnterCombat(Unit * /*who*/) {}
-        void AttackStart(Unit * /*victim*/) {}
+        void EnterCombat(Unit* /*who*/) {}
+        void AttackStart(Unit* /*victim*/) {}
 
         void UpdateAI(const uint32 diff)
         {
@@ -215,7 +215,7 @@ public:
         }
     };
 
-    CreatureAI *GetAI(Creature *creature) const
+    CreatureAI *GetAI(Creature* creature) const
     {
         return new mob_amanitar_mushroomsAI(creature);
     }
