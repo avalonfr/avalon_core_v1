@@ -5094,6 +5094,23 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->ToPlayer()->SetChampioningFaction(FactionID);
                     break;
                 }
+
+				case 57806: // Sprinkle Holy Water - Quest 13110
+
+                     if(target->GetTypeId() == TYPEID_UNIT)
+                     {
+                         if (apply)
+						{
+							if (caster && caster->ToPlayer())
+							{
+								target->CastSpell(caster, 57808, true);
+								caster->ToPlayer()->CastedCreatureOrGO(30546, target->GetGUID(), 57806);
+							}
+						}
+                     }
+                    break;
+  
+
                 // LK Intro VO (1)
                 case 58204:
                     if (target->GetTypeId() == TYPEID_PLAYER)
@@ -5962,6 +5979,7 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                         target->Kill(target);
                         return;
                     }
+
                     // Spellcloth
                     case 31373:
                     {
@@ -5969,6 +5987,7 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                         target->SummonCreature(17870, 0, 0, 0, target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
                         return;
                     }
+
                     // Flame Quills
                     case 34229:
                     {
