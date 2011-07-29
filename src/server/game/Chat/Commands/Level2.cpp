@@ -915,7 +915,7 @@ bool ChatHandler::HandlePetUnlearnCommand(const char *args)
 }
 
 
-bool ChatHandler::HandlePetTpCommand(const char *args)
+/*bool ChatHandler::HandlePetTpCommand(const char *args)
 {
     if (!*args)
         return false;
@@ -936,7 +936,7 @@ bool ChatHandler::HandlePetTpCommand(const char *args)
 
     PSendSysMessage("Pet's tp changed to %u", tp);
     return true;
-}
+}*/
 
 bool ChatHandler::HandleWintergraspStatusCommand(const char* /*args*/)
 {

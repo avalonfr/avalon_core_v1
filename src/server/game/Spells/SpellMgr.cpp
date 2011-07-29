@@ -775,15 +775,11 @@ bool SpellMgr::_isPositiveEffect(uint32 spellId, uint32 effIndex, bool deep) con
                 case 61988: // Divine Shield exclude aura
 				case 50524: // Runic Power Feed
                 case 34709: // Shadow Sight
-                    return false;
-                case 30877: // Tag Murloc
 				case 62478: // Frozen Blows
-
                 case 62532: // Conservator's Grip
                     return false;
                 case 30877: // Tag Murloc
                 case 62344: // Fists of Stone
-
                     return true;
                 default:
                     break;
@@ -3161,12 +3157,6 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
                 return DIMINISHING_CONTROLLED_STUN;
 
         }
-		case SPELLFAMILY_PRIEST:
-        {
-            break;
-        }
-        default:
-            break;
     }
 
     // Lastly - Set diminishing depending on mechanic
@@ -3851,55 +3841,55 @@ void SpellMgr::LoadSpellCustomAttr()
 			if (spellInfo->Mechanic != 0 &&
 				spellInfo->Mechanic != MECHANIC_INFECTED)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->EffectMechanic[0] != 0 &&
 					 spellInfo->EffectMechanic[0] != MECHANIC_INFECTED &&
 					 spellInfo->Effect[1] != SPELL_EFFECT_SCHOOL_DAMAGE)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->EffectMechanic[1] != 0 &&
 					spellInfo->EffectMechanic[1] != MECHANIC_INFECTED)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->Effect[0] == SPELL_EFFECT_DISPEL ||
 					spellInfo->Effect[1] == SPELL_EFFECT_DISPEL ||
 					spellInfo->Effect[2] == SPELL_EFFECT_DISPEL)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->Effect[0] == SPELL_EFFECT_STEAL_BENEFICIAL_BUFF ||
 					spellInfo->Effect[1] == SPELL_EFFECT_STEAL_BENEFICIAL_BUFF ||
 					spellInfo->Effect[2] == SPELL_EFFECT_STEAL_BENEFICIAL_BUFF)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->Effect[0] == SPELL_EFFECT_POWER_BURN ||
 					spellInfo->Effect[1] == SPELL_EFFECT_POWER_BURN ||
 					spellInfo->Effect[2] == SPELL_EFFECT_POWER_BURN)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->Effect[0] == SPELL_EFFECT_POWER_DRAIN ||
 					spellInfo->Effect[1] == SPELL_EFFECT_POWER_DRAIN ||
 					spellInfo->Effect[2] == SPELL_EFFECT_POWER_DRAIN)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if (spellInfo->EffectApplyAuraName[0] == SPELL_AURA_PERIODIC_MANA_LEECH ||
 					spellInfo->EffectApplyAuraName[1] == SPELL_AURA_PERIODIC_MANA_LEECH ||
 					spellInfo->EffectApplyAuraName[2] == SPELL_AURA_PERIODIC_MANA_LEECH)
 			{
-				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+				mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 				count++;
 			}
 			else if ((spellInfo->Dispel == DISPEL_POISON) ||
@@ -3913,7 +3903,7 @@ void SpellMgr::LoadSpellCustomAttr()
 					spellInfo->EffectApplyAuraName[1] != SPELL_AURA_PERIODIC_DAMAGE &&
 					spellInfo->EffectApplyAuraName[2] != SPELL_AURA_PERIODIC_DAMAGE)
 				{
-					mSpellCustomAttr[i] |= SPELL_ATTR0_CU_BINARY;
+					mSpellCustomAttr[i] |= SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER;
 					count++;
 				}
 			}
@@ -4418,13 +4408,6 @@ void SpellMgr::LoadSpellCustomAttr()
 			break;
         case 25771: // Forbearance - wrong mechanic immunity in DBC since 3.0.x
             spellInfo->EffectMiscValue[0] = MECHANIC_IMMUNE_SHIELD;
-            ++count;
-            break;
-        case 64321: // Potent Pheromones
-            // spell should dispel area aura, but doesn't have the attribute
-            // may be db data bug, or blizz may keep reapplying area auras every update with checking immunity
-            // that will be clear if we get more spells with problem like this
-            spellInfo->AttributesEx |= SPELL_ATTR1_DISPEL_AURAS_ON_IMMUNITY;
             ++count;
             break;
 		case 66532:

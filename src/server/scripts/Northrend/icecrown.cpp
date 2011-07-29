@@ -187,8 +187,8 @@ public:
 
            if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
            {
-               pPlayer->CLOSE_GOSSIP_MENU();
-               pCreature->SummonCreature(NPC_ARGENT_VALIANT,8575.451f,952.472f,547.554f,0.38f);
+               player->CLOSE_GOSSIP_MENU();
+               creature->SummonCreature(NPC_ARGENT_VALIANT,8575.451f,952.472f,547.554f,0.38f);
            }
            //else
                //pPlayer->SEND_GOSSIP_MENU(???, pCreature->GetGUID()); Missing text

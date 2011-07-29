@@ -1771,7 +1771,7 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
                         passenger->ExitVehicle();
                     passenger->AddAura(66251,passenger);
                         float x, y, z;
-                        m_targets.m_dstPos.GetPosition(x, y, z);
+                        m_targets.GetDst()->GetPosition(x, y, z);
                         passenger->GetMotionMaster()->MoveJump(x, y, z, m_targets.GetSpeedXY(), m_targets.GetSpeedZ());
                     }                    
                 return;    
@@ -2107,7 +2107,7 @@ void Spell::EffectTeleportUnits(SpellEffIndex /*effIndex*/)
 				{
 					Position pos;
 					target->GetFirstCollisionPosition(pos, 2, M_PI);
-					m_targets.setDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
+					m_targets.SetDst(pos.GetPositionX(),pos.GetPositionY(),pos.GetPositionZ(),target->GetOrientation());
 				}
 			}
 			break;

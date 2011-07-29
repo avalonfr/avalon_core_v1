@@ -111,8 +111,8 @@ const uint32 SPELL_PRE_SECONDARY_H[]            = {62417, 62444, 16496, 62442, 6
 #define MAX_HARD_MODE_TIME                      180000 // 3 Minutes
 
 // Achievements
-#define ACHIEVEMENT_SIFFED                      RAID_MODE(2977, 2978)
-#define ACHIEVEMENT_LOSE_ILLUSION               RAID_MODE(3176, 3183)
+#define DATA_SIFFED                 2977
+#define DATA_LOSE_ILLUSION						3176
 
 // Thorim Arena Phase Adds
 enum ArenaAdds
@@ -169,7 +169,9 @@ enum ThorimChests
     CACHE_OF_STORMS_10                          = 194312,
     CACHE_OF_STORMS_HARDMODE_10                 = 194313,
     CACHE_OF_STORMS_25                          = 194314,
-    CACHE_OF_STORMS_HARDMODE_25                 = 194315
+    CACHE_OF_STORMS_HARDMODE_25                 = 194315,
+	CACHE_OF_STORM_HARMODE,
+	CACHE_OF_STORM
 };
 
 const Position Pos[7] =
@@ -271,6 +273,7 @@ public:
         uint32 EncounterTime;
         bool bWipe;
         bool HardMode;
+		bool siffed;
 
         void Reset()
         {
@@ -283,6 +286,7 @@ public:
             me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NON_ATTACKABLE);
             bWipe = false;
             HardMode = false;
+			siffed = false;
             PreAddsCount = 0;
             spawnedAdds = 0;
         
@@ -313,16 +317,6 @@ public:
             {
                 // Kill credit
                 instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, 64985);
-                // Lose Your Illusion
-                if (HardMode)
-                {
-                    instance->DoCompleteAchievement(ACHIEVEMENT_LOSE_ILLUSION);
-                    me->SummonGameObject(RAID_MODE(CACHE_OF_STORMS_HARDMODE_10, CACHE_OF_STORMS_HARDMODE_25), 2134.58f, -286.908f, 419.495f, 1.55988f, 0, 0, 1, 1, 604800);
-                }
-                else
-                {
-                    me->SummonGameObject(RAID_MODE(CACHE_OF_STORMS_10, CACHE_OF_STORMS_25), 2134.58f, -286.908f, 419.495f, 1.55988f, 0, 0, 1, 1, 604800);
-                }
             }
         }
 
@@ -459,6 +453,28 @@ public:
             }
         }
         
+
+		uint32 GetData(uint32 type)
+       {
+           switch (type)
+           {
+               case DATA_LOSE_ILLUSION :
+                   return HardMode ? 1 : 0;
+			   case DATA_SIFFED :
+				   return siffed ? 1 : 0;
+			   case CACHE_OF_STORM_HARMODE:
+				   return RAID_MODE(CACHE_OF_STORMS_HARDMODE_10, CACHE_OF_STORMS_HARDMODE_25);
+			   case CACHE_OF_STORM	:
+				   return RAID_MODE(CACHE_OF_STORMS_10, CACHE_OF_STORMS_25);
+           }
+           return 0;
+		}
+
+
+
+
+
+
         void DamageTaken(Unit* pKiller, uint32 &damage)
         {
             if (phase == PHASE_1 && pKiller && instance)
@@ -488,8 +504,7 @@ public:
                                         // Summon Sif
                                         me->SummonCreature(NPC_SIF, 2149.27f, -260.55f, 419.69f, 2.527f, TEMPSUMMON_CORPSE_DESPAWN);
                                         // Achievement Siffed
-                                        if (instance)
-                                            instance->DoCompleteAchievement(ACHIEVEMENT_SIFFED);
+                                        siffed = true;
                                     }
                                     else me->AddAura(SPELL_TOUCH_OF_DOMINION, me);
                                 }
@@ -935,6 +950,57 @@ public:
 
 };
 
+class achievement_Lose_Your_Illusion : public AchievementCriteriaScript
+{
+    public:
+        achievement_Lose_Your_Illusion() : AchievementCriteriaScript("achievement_Lose_Your_Illusion")
+        {
+        }
+
+        bool OnCheck(Player* /*player*/, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (Creature* Thorim = target->ToCreature())
+                if (Thorim->AI()->GetData(DATA_LOSE_ILLUSION))
+				{	if(!(Thorim->FindNearestGameObject(Thorim->AI()->GetData(CACHE_OF_STORM_HARMODE),50.0f)))
+						Thorim->SummonGameObject(Thorim->AI()->GetData(CACHE_OF_STORM_HARMODE), 2134.58f, -286.908f, 419.495f, 1.55988f, 0, 0, 1, 1, 604800);
+                    return true;
+				}
+				else
+					if(!(Thorim->FindNearestGameObject(Thorim->AI()->GetData(CACHE_OF_STORM),50.0f)))
+						Thorim->SummonGameObject(Thorim->AI()->GetData(CACHE_OF_STORM), 2134.58f, -286.908f, 419.495f, 1.55988f, 0, 0, 1, 1, 604800);
+
+            return false;
+        }
+};
+
+class achievement_siffed : public AchievementCriteriaScript
+{
+    public:
+        achievement_siffed() : AchievementCriteriaScript("achievement_siffed")
+        {
+        }
+
+        bool OnCheck(Player* /*player*/, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (Creature* Thorim = target->ToCreature())
+                if (Thorim->AI()->GetData(DATA_SIFFED ))
+				{	if(!(Thorim->FindNearestGameObject(Thorim->AI()->GetData(CACHE_OF_STORM_HARMODE),50.0f)))
+						Thorim->SummonGameObject(Thorim->AI()->GetData(CACHE_OF_STORM_HARMODE), 2134.58f, -286.908f, 419.495f, 1.55988f, 0, 0, 1, 1, 604800);
+                    return true;
+				}
+				else
+					if(!(Thorim->FindNearestGameObject(Thorim->AI()->GetData(CACHE_OF_STORM),50.0f)))
+						Thorim->SummonGameObject(Thorim->AI()->GetData(CACHE_OF_STORM), 2134.58f, -286.908f, 419.495f, 1.55988f, 0, 0, 1, 1, 604800);
+
+            return false;
+        }
+};
 
 
 void AddSC_boss_thorim()
@@ -945,4 +1011,6 @@ void AddSC_boss_thorim()
     new npc_runic_colossus();
     new npc_ancient_rune_giant();
     new npc_sif();
+	new achievement_Lose_Your_Illusion();
+	new achievement_siffed();
 }

@@ -1413,7 +1413,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         if (m_caster->IsHostileTo(unit))
         {
 		// spell misses if target has Invisibility or Vanish and isn't visible for caster
-            if (m_spellInfo->speed > 0.0f && unit == m_targets.getUnitTarget()
+            if (m_spellInfo->speed > 0.0f && unit == m_targets.GetUnitTarget()
                 && ((unit->HasInvisibilityAura() || m_caster->HasInvisibilityAura())
                 || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, SPELLFAMILYFLAG_ROGUE_VANISH))
                 && !m_caster->canSeeOrDetect(unit))
@@ -1425,7 +1425,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
             if ((m_customAttr & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer())
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 
-			bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_BINARY) > 0);
+			bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
             m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
             if (m_resist >= 100)
                 return SPELL_MISS_RESIST;
@@ -1454,7 +1454,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
     }
 	else if (!IsPositiveSpell(m_spellInfo->Id))
 	{
-		bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_BINARY) > 0);
+		bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
 		m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
 		if (m_resist >= 100)
 			return SPELL_MISS_RESIST;

@@ -733,18 +733,18 @@ uint32 Unit::DealDamage(Unit* victim, uint32 damage, CleanDamage const* cleanDam
 
         // in bg, count dmg if victim is also a player
 
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        if (victim->GetTypeId() == TYPEID_PLAYER)
         {    if (Battleground *bg = killer->GetBattleground())
              {   
 				bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
 				
                 /** World of Warcraft Armory **/
-                if (Battleground *bgV = ((Player*)pVictim)->GetBattleground())
-                    bgV->UpdatePlayerScore(((Player*)pVictim), SCORE_DAMAGE_TAKEN, damage);
+                if (Battleground *bgV = ((Player*)victim)->GetBattleground())
+                    bgV->UpdatePlayerScore(((Player*)victim), SCORE_DAMAGE_TAKEN, damage);
                 /** World of Warcraft Armory **/
             }
         }
-        killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, damage, 0, pVictim);
+        killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, damage, 0, victim);
         killer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HIT_DEALT, damage);
     }
 
@@ -1732,7 +1732,7 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 }		
 
 	
-void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo, int32 calc_resist)
+void Unit::CalcAbsorbResist(Unit *victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo, int32 calc_resist)
 
 {
     if (!victim || !victim->isAlive() || !damage)
@@ -1740,13 +1740,13 @@ void Unit::CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEff
 
     DamageInfo dmgInfo = DamageInfo(this, victim, damage, spellInfo, schoolMask, damagetype);
 
-	bool binary = (spellInfo && (uint32(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_BINARY) > 0));
+	bool binary = (spellInfo && (uint32(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0));
 	
 	if (!binary)
 		if (calc_resist >= 0)
 			dmgInfo.ResistDamage(damage * calc_resist / 100);
 		else
-			dmgInfo.ResistDamage(damage * CalcSpellResistance(pVictim, schoolMask, binary, spellInfo) / 100); 
+			dmgInfo.ResistDamage(damage * CalcSpellResistance(victim, schoolMask, binary, spellInfo) / 100); 
 
 	// Ignore Absorption Auras
     float auraAbsorbMod = 0;
@@ -2565,7 +2565,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellEntry const* spell)
 {
 
  // Can`t miss on dead target (on skinning for example)
-    if (!pVictim->isAlive() && pVictim->GetTypeId() != TYPEID_PLAYER)
+    if (!victim->isAlive() && victim->GetTypeId() != TYPEID_PLAYER)
         return SPELL_MISS_NONE;
 
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
@@ -2586,17 +2586,17 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellEntry const* spell)
 	ignoredResistance = std::min(ignoredResistance, int32(100));
 	
 	// cast by caster in front of victim
-	int32 deflect_chance = (pVictim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * (100 - ignoredResistance) / 100) * 100;
+	int32 deflect_chance = (victim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * (100 - ignoredResistance) / 100) * 100;
 	
 	if (deflect_chance > 0)
-		if (pVictim->HasInArc(M_PI, this) || pVictim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
+		if (victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
 		{
 			int32 rand = irand(0, 10000);
 			if (rand < deflect_chance)
 				return SPELL_MISS_DEFLECT;
 		}
 		
-	int32 tmp = (10000 - CalcMagicSpellHitChance(pVictim, schoolMask, spell)) * (100 - ignoredResistance) / 100;
+	int32 tmp = (10000 - CalcMagicSpellHitChance(victim, schoolMask, spell)) * (100 - ignoredResistance) / 100;
 	int32 rand = irand(0, 10000);
 	
 	    if (rand < tmp)
@@ -2711,20 +2711,6 @@ uint32 Unit::CalcMagicSpellHitChance(Unit * pVictim, SpellSchoolMask schoolMask,
         }
     }
 */
-
-// Roll chance
-    if (rand < tmp)
-        return SPELL_MISS_RESIST;
-
-    // cast by caster in front of victim
-    if (victim->HasInArc(M_PI, this) || victim->HasAuraType(SPELL_AURA_IGNORE_HIT_DIRECTION))
-    {
-        int32 deflect_chance = victim->GetTotalAuraModifier(SPELL_AURA_DEFLECT_SPELLS) * 100;
-        tmp += deflect_chance;
-        if (rand < tmp)
-            return SPELL_MISS_DEFLECT;
-    }
-
 
 // Calculate spell hit result can be:
 // Every spell can: Evade/Immune/Reflect/Sucesful hit
@@ -10339,7 +10325,7 @@ int32 Unit::DealHeal(Unit* victim, uint32 addhealth)
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
         player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
 		/** World of Warcraft Armory **/
-        if (Battleground *bgV = pVictim->ToPlayer()->GetBattleground())
+        if (Battleground *bgV = victim->ToPlayer()->GetBattleground())
             bgV->UpdatePlayerScore(player, SCORE_HEALING_TAKEN, gain);
         /** World of Warcraft Armory **/
 
