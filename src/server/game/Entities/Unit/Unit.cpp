@@ -1140,8 +1140,12 @@ void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 dama
     // Calculate absorb resist
     if (damage > 0)
     {
-        CalcAbsorbResist(victim, damageSchoolMask, SPELL_DIRECT_DAMAGE, damage, &damageInfo->absorb, &damageInfo->resist, spellInfo);
-        damage -= damageInfo->absorb + damageInfo->resist;
+		// Chaos Bolt - "Chaos Bolt cannot be resisted, and pierces through all absorption effects."
+        if (spellInfo->SpellIconID != 3178)
+        {
+			CalcAbsorbResist(victim, damageSchoolMask, SPELL_DIRECT_DAMAGE, damage, &damageInfo->absorb, &damageInfo->resist, spellInfo, calc_resist);
+			damage -= damageInfo->absorb + damageInfo->resist;
+		}
     }
     else
         damage = 0;
@@ -1655,10 +1659,7 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 	else
 		resistanceConstant = getLevel() * 5;
 	
-	int32 levelDiff = 0;
-		
-		if(getLevel() < DEFAULT_MAX_LEVEL)
-			levelDiff = std::max<int32>(pVictim->getLevel() - getLevel(), 0);
+	int32 levelDiff = std::max(pVictim->getLevel() - getLevel(), 0);
 	
 	int32 baseVictimResistance = pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
 	uint32 spellPenetration = GetSpellPenetration(schoolMask);
@@ -1686,8 +1687,7 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 	}
 	
 	victimResistance = victimResistance * (100 - ignoredResistance) / 100;
-
-	if( pVictim->GetTypeId() != TYPEID_PLAYER && !pVictim->ToCreature()->isWorldBoss())
+	if(pVictim->GetTypeId() == TYPEID_PLAYER || levelDiff > 6)
 		victimResistance += (levelDiff * 5); // Level diff resistance cannot be pierced
 	
 	if (victimResistance <= 0)

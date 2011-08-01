@@ -1451,13 +1451,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
             }
         }
-    }
-	else if (!IsPositiveSpell(m_spellInfo->Id))
-	{
-		bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
-		m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
-		if (m_resist >= 100)
-			return SPELL_MISS_RESIST;
+		else if (!IsPositiveSpell(m_spellInfo->Id))
+		{
+			bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
+			m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
+			if (m_resist >= 100)
+				return SPELL_MISS_RESIST;
+		}
 	}
 
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
