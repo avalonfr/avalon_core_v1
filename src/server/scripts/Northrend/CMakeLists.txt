@@ -192,6 +192,7 @@ set(scripts_STAT_SRCS
   Northrend/DraktharonKeep/drak_tharon_keep.h
   Northrend/DraktharonKeep/boss_tharon_ja.cpp
   Northrend/DraktharonKeep/boss_dred.cpp
+  Northrend/ArgentTournament.cpp
 )
 SOURCE_GROUP(Northrend FILES
   Northrend/borean_tundra.cpp
