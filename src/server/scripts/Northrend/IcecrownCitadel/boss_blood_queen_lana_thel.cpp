@@ -153,17 +153,11 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance->CheckRequiredBosses(DATA_BLOOD_QUEEN_LANA_THEL, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
                 me->setActive(true);
                 DoZoneInCombat();
                 Talk(SAY_AGGRO);
                 instance->SetBossState(DATA_BLOOD_QUEEN_LANA_THEL, IN_PROGRESS);
+                instance->SetData(DATA_BLOOD_QUEEN_LANA_THEL, IN_PROGRESS);
 
                 DoCast(me, SPELL_SHROUD_OF_SORROW, true);
                 DoCast(me, SPELL_FRENZIED_BLOODTHIRST_VISUAL, true);
@@ -172,6 +166,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void JustDied(Unit* killer)
             {
+                instance->SetData(DATA_BLOOD_QUEEN_LANA_THEL, DONE);
                 _JustDied();
                 Talk(SAY_DEATH);
                 instance->DoRemoveAurasDueToSpellOnPlayers(ESSENCE_OF_BLOOD_QUEEN);
@@ -245,6 +240,7 @@ class boss_blood_queen_lana_thel : public CreatureScript
                 _JustReachedHome();
                 Talk(SAY_WIPE);
                 instance->SetBossState(DATA_BLOOD_QUEEN_LANA_THEL, FAIL);
+                instance->SetData(DATA_BLOOD_QUEEN_LANA_THEL, FAIL);
             }
 
             void KilledUnit(Unit* victim)
