@@ -84,6 +84,12 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
+	static ChatCommand boutiqueCommandTable[] =
+    {
+        { "item",          SEC_PLAYER,			true,  OldHandler<&ChatHandler::BoutiqueAdditem>,					   "", NULL },
+        { NULL,             0,                  false, NULL,                                               "", NULL }
+    };
+	
     static ChatCommand banlistCommandTable[] =
     {
         { "account",        SEC_ADMINISTRATOR,  true,  OldHandler<&ChatHandler::HandleBanListAccountCommand>,      "", NULL },
@@ -430,6 +436,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "unbindsight",    SEC_ADMINISTRATOR,  false, OldHandler<&ChatHandler::HandleUnbindSightCommand>,         "", NULL },
         { "playall",        SEC_GAMEMASTER,  false, OldHandler<&ChatHandler::HandlePlayAllCommand>,             "", NULL },
         { "wg",             SEC_ADMINISTRATOR,  false, NULL,                                 "", wintergraspCommandTable },
+		{ "boutique",       SEC_PLAYER,         true,  NULL,                                           "", boutiqueCommandTable  },
 		{ "valide", SEC_PLAYER, false, OldHandler<&ChatHandler::HandlePlayerQuestCompleteCommand>, "", NULL },
 		{ "questbug", SEC_GAMEMASTER, false, NULL, "", questBugTable },
        { NULL,             0,                  false, NULL,                                           "", NULL }

@@ -351,6 +351,20 @@ class ChatHandler
 
         //bool HandleSet32Bit(const char* args);
         bool HandleSaveAllCommand(const char* args);
+		
+		//Boutique
+		
+		char** split(const char* chaine,const char* delim,int vide, int* sizeTabRet);
+        bool Levelup(int levelcount);
+        uint32 getItemId(const char* args);
+        bool Additem(int itemid, int count, int type, bool remplacement);
+        int coutlevel(int level);
+        bool BoutiqueLevel(const char* args);
+        bool BoutiqueAdditem(const char* args);
+        bool BoutiqueGold(const char* args);
+		bool BoutiqueSet(const char* args);
+        bool AddGold(int gold);
+		bool BoutiqueCustomize(const char* args);
 
         // Utility methods for commands
         bool LookupPlayerSearchCommand(QueryResult result, int32 limit);
