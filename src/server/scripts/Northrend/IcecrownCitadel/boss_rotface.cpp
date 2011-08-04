@@ -106,13 +106,6 @@ class boss_rotface : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
-                if (!instance->CheckRequiredBosses(DATA_ROTFACE, who->ToPlayer()))
-                {
-                    EnterEvadeMode();
-                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
-                    return;
-                }
-
                 me->setActive(true);
                 Talk(SAY_AGGRO);
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
@@ -124,6 +117,9 @@ class boss_rotface : public CreatureScript
             {
                 _JustDied();
                 Talk(SAY_DEATH);
+                instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_MUTATED_INFECTION);
+                instance->SetBossState(DATA_ROTFACE, DONE);
+                instance->SetData(DATA_ROTFACE, DONE);
                 if (Creature* professor = Unit::GetCreature(*me, instance->GetData64(DATA_PROFESSOR_PUTRICIDE)))
                     professor->AI()->DoAction(ACTION_ROTFACE_DEATH);
             }
@@ -132,6 +128,7 @@ class boss_rotface : public CreatureScript
             {
                 _JustReachedHome();
                 instance->SetBossState(DATA_ROTFACE, FAIL);
+                instance->SetData(DATA_ROTFACE, FAIL);
                 instance->SetData(DATA_OOZE_DANCE_ACHIEVEMENT, uint32(true));   // reset
             }
 
@@ -354,9 +351,9 @@ class npc_precious_icc : public CreatureScript
             void Reset()
             {
                 _events.Reset();
-                _events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
+                _events.ScheduleEvent(EVENT_DECIMATE, urand(31000, 33000));
                 _events.ScheduleEvent(EVENT_MORTAL_WOUND, urand(3000, 7000));
-                _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(20000, 22000));
+                _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(31000, 33000));
             }
 
             void UpdateAI(const uint32 diff)
@@ -375,7 +372,7 @@ class npc_precious_icc : public CreatureScript
                     {
                         case EVENT_DECIMATE:
                             DoCastVictim(SPELL_DECIMATE);
-                            _events.ScheduleEvent(EVENT_DECIMATE, urand(20000, 25000));
+                            _events.ScheduleEvent(EVENT_DECIMATE, urand(31000, 33000));
                             break;
                         case EVENT_MORTAL_WOUND:
                             DoCastVictim(SPELL_MORTAL_WOUND);
@@ -385,7 +382,7 @@ class npc_precious_icc : public CreatureScript
                             Talk(EMOTE_PRECIOUS_ZOMBIES);
                             for (uint32 i = 0; i < 11; ++i)
                                 DoCast(me, SPELL_AWAKEN_PLAGUED_ZOMBIES, false);
-                            _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(20000, 22000));
+                           _events.ScheduleEvent(EVENT_SUMMON_ZOMBIES, urand(31000, 33000));
                             break;
                         default:
                             break;
