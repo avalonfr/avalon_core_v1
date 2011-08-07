@@ -163,7 +163,7 @@ class boss_lord_marrowgar : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_BONE_SPIKE_GRAVEYARD:
-                            if (IsHeroic() || !me->HasAura(SPELL_BONE_STORM))
+                            if (!me->HasAura(SPELL_BONE_STORM))
                                 DoCast(me, SPELL_BONE_SPIKE_GRAVEYARD);
                             events.ScheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(15000, 20000), EVENT_GROUP_SPECIAL);
                             break;
@@ -204,12 +204,12 @@ class boss_lord_marrowgar : public CreatureScript
                         case EVENT_BONE_STORM_END:
                             if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                                 me->GetMotionMaster()->MovementExpired();
+							me->getThreatManager().resetAllAggro();
                             DoStartMovement(me->getVictim());
                             me->SetSpeed(MOVE_RUN, _baseSpeed, true);
                             events.CancelEvent(EVENT_BONE_STORM_MOVE);
                             events.ScheduleEvent(EVENT_ENABLE_BONE_SLICE, 10000);
-                            if (!IsHeroic())
-                                events.RescheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(15000, 20000), EVENT_GROUP_SPECIAL);
+                            events.RescheduleEvent(EVENT_BONE_SPIKE_GRAVEYARD, urand(15000, 20000), EVENT_GROUP_SPECIAL);
                             break;
                         case EVENT_ENABLE_BONE_SLICE:
                             _boneSlice = true;
@@ -273,6 +273,13 @@ class npc_coldflame : public CreatureScript
             {
             }
 
+			int8 AntiCac;
+
+			void reset ()
+			{
+
+				AntiCac = 0;
+			}
             void IsSummonedBy(Unit* owner)
             {
                 if (owner->GetTypeId() != TYPEID_UNIT)
@@ -292,7 +299,7 @@ class npc_coldflame : public CreatureScript
                         me->DespawnOrUnsummon();
                         return;
                     }
-
+					AntiCac = 0 ;
                     me->SetOrientation(me->GetAngle(target));
                     owner->GetNearPosition(pos, owner->GetObjectSize() / 2.0f, 0.0f);
                 }
@@ -306,6 +313,9 @@ class npc_coldflame : public CreatureScript
                         me->SetOrientation(ang);
                         owner->GetNearPosition(pos, 2.5f, 0.0f);
                     }
+
+					//on desactive anticac pendant la tempete d os
+					AntiCac = 2;
                 }
 
                 me->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), me->GetPositionZ(), me->GetOrientation());
@@ -321,8 +331,14 @@ class npc_coldflame : public CreatureScript
                     Position newPos;
                     me->GetNearPosition(newPos, 5.5f, 0.0f);
                     me->NearTeleportTo(newPos.GetPositionX(), newPos.GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-                    DoCast(SPELL_COLDFLAME_SUMMON);
-                    _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 450);
+					// les flammes ne sont pas actives au CaC on attends deux cycles soit 11.0f
+					if (AntiCac > 1 )
+					{
+						DoCast(SPELL_COLDFLAME_SUMMON);
+					}
+					else AntiCac++;
+
+;                    _events.ScheduleEvent(EVENT_COLDFLAME_TRIGGER, 450);
                 }
             }
 
