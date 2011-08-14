@@ -2794,6 +2794,24 @@ void Spell::SelectEffectTargets(uint32 i, uint32 cur)
                     unitList.remove(m_targets.GetUnitTarget());
                 Trinity::RandomResizeList(unitList, maxTargets);
             }
+			 else
+            {
+                switch (m_spellInfo->Id)
+                {
+					                    case 72255: // Mark of the Fallen Champion (Deathbringer Saurfang)
+                    case 72444:
+                    case 72445:
+                    case 72446:
+                        for (std::list<Unit*>::iterator itr = unitList.begin() ; itr != unitList.end();)
+                        {
+                            if (!(*itr)->HasAura(72293))
+                                itr = unitList.erase(itr);
+                            else
+                                ++itr;
+                        }
+                        break;
+                }
+			}
 
             CallScriptAfterUnitTargetSelectHandlers(unitList, SpellEffIndex(i));
 

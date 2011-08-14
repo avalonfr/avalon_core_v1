@@ -109,7 +109,7 @@ enum Spells
     SPELL_BLOOD_LINK_BEAST              = 72176,
     SPELL_RESISTANT_SKIN                = 72723,
     SPELL_SCENT_OF_BLOOD                = 72769, // Heroic only
-
+	
     SPELL_RIDE_VEHICLE                  = 70640, // Outro
     SPELL_ACHIEVEMENT                   = 72928,
 };
@@ -373,7 +373,7 @@ class boss_deathbringer_saurfang : public CreatureScript
 
                 instance->HandleGameObject(instance->GetData64(GO_SAURFANG_S_DOOR), false);
             }
-
+			
             void SpellHitTarget(Unit* target, SpellEntry const* spell)
             {
                 switch (spell->Id)
@@ -430,7 +430,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                             break;
                         case EVENT_INTRO_FINISH:
                             events.SetPhase(PHASE_COMBAT);
-                            _introDone = true;
+                            _introDone  = true;
                             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
                             break;
                         case EVENT_SUMMON_BLOOD_BEAST:
@@ -458,9 +458,18 @@ class boss_deathbringer_saurfang : public CreatureScript
                             events.ScheduleEvent(EVENT_RUNE_OF_BLOOD, urand(20000, 25000), 0, PHASE_COMBAT);
                             break;
                         case EVENT_BOILING_BLOOD:
-                            DoCast(me, SPELL_BOILING_BLOOD);
-                            events.ScheduleEvent(EVENT_BOILING_BLOOD, urand(15000, 20000), 0, PHASE_COMBAT);
-                            break;
+							{	//correction boiling blood
+								Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0, true);
+								if(!target)
+									target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0, true);
+								if(target)
+								{
+									DoCast(target, SPELL_BOILING_BLOOD);
+									me->AddAura(SPELL_BOILING_BLOOD,target);
+								}
+								events.ScheduleEvent(EVENT_BOILING_BLOOD,  15000, 0, PHASE_COMBAT);
+								break;
+							}
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);
                             Talk(SAY_BERSERK);
@@ -524,14 +533,18 @@ class boss_deathbringer_saurfang : public CreatureScript
                     }
                     case ACTION_MARK_OF_THE_FALLEN_CHAMPION:
                     {
-                        if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION))
-                        {
-                            ++_fallenChampionCastCount;
-                            DoCast(target, SPELL_MARK_OF_THE_FALLEN_CHAMPION);
-                            me->SetPower(POWER_ENERGY, 0);
-                            if (Aura* bloodPower = me->GetAura(SPELL_BLOOD_POWER))
-                                bloodPower->RecalculateAmountOfEffects();
-                        }
+                        Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+                        if(!target)
+							target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+						if(target)
+						{
+							++_fallenChampionCastCount;
+							DoCast(target, SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+							me->SetPower(POWER_ENERGY, 0);
+							if (Aura* bloodPower = me->GetAura(SPELL_BLOOD_POWER))
+								bloodPower->RecalculateAmountOfEffects();
+						}
+                        
                         break;
                     }
                     default:
@@ -965,6 +978,69 @@ class npc_saurfang_event : public CreatureScript
         }
 };
 
+
+class npc_bloodbeast : public CreatureScript
+{
+    public:
+        npc_bloodbeast() : CreatureScript("npc_bloodbeast") { }
+
+        struct npc_bloodbeastAI : public ScriptedAI
+        {
+            npc_bloodbeastAI(Creature* pCreature) : ScriptedAI(pCreature)
+            {
+                pInstance = pCreature->GetInstanceScript();
+            }
+
+			uint32 MeleeAttackTimer;
+
+            void Reset()
+            {
+				MeleeAttackTimer = 1000;    //timer for autoaatack to 1s
+                DoCast(me, SPELL_BLOOD_LINK_BEAST, true);
+                DoCast(me, SPELL_RESISTANT_SKIN, true);
+
+                if (IsHeroic())
+                    DoCast(me, SPELL_SCENT_OF_BLOOD);
+            }
+
+            void EnterCombat(Unit* /*pWho*/) { }
+
+            void KilledUnit(Unit* /*pVictim*/)
+            {
+                Creature* Saurfang = me->GetCreature(*me, pInstance->GetData64(DATA_DEATHBRINGER_SAURFANG));
+                if (Saurfang && Saurfang->isAlive())
+                {
+                    Saurfang->ModifyHealth(uint32(Saurfang->GetMaxHealth() * 0.05));
+                }
+            }
+
+            void UpdateAI(const uint32 uiDiff)
+            {
+                DoMeleeAttackIfReady();
+
+				//bloodbeast increase runicpoweer of saufrang on melee autoattack necessary to be kitting
+				if (MeleeAttackTimer <= uiDiff)
+				{	Unit *target = SelectTarget(SELECT_TARGET_TOPAGGRO,0, 0.0f, true);
+				if (target)
+					if ( (me->GetDistance2d(target)) < (me->GetObjectSize()/2)) 
+					{
+						me->CastCustomSpell(SPELL_BLOOD_LINK_DUMMY, SPELLVALUE_BASE_POINT0, 1,(me->GetCreature(*me, pInstance->GetData64(DATA_DEATHBRINGER_SAURFANG))), true);
+						MeleeAttackTimer = 1000;
+					}
+				} else MeleeAttackTimer -= uiDiff;
+            }
+
+            private:
+                InstanceScript* pInstance;
+        };
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_bloodbeastAI(pCreature);
+        }
+};
+
+
 class spell_deathbringer_blood_link : public SpellScriptLoader
 {
     public:
@@ -1290,6 +1366,7 @@ void AddSC_boss_deathbringer_saurfang()
     new npc_high_overlord_saurfang_icc();
     new npc_muradin_bronzebeard_icc();
     new npc_saurfang_event();
+	new npc_bloodbeast();
     new spell_deathbringer_blood_link();
     new spell_deathbringer_blood_link_aura();
     new spell_deathbringer_blood_power();
