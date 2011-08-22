@@ -87,6 +87,7 @@ ChatCommand * ChatHandler::getCommandTable()
 	static ChatCommand boutiqueCommandTable[] =
     {
         { "item",          SEC_PLAYER,			true,  OldHandler<&ChatHandler::BoutiqueAdditem>,					   "", NULL },
+		{ "custom",          SEC_PLAYER,			true,  OldHandler<&ChatHandler::BoutiqueCustomize>,					   "", NULL },
         { NULL,             0,                  false, NULL,                                               "", NULL }
     };
 	

@@ -773,7 +773,7 @@ bool ChatHandler::BoutiqueCustomize(const char* args)
 
       points = fields[0].GetUInt32();
 
-      if(points < 200)
+      if(points < 150)
       {
       m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 200 points pour votre demande.");
 	  return false;
