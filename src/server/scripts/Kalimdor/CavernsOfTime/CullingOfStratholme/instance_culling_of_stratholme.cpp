@@ -35,18 +35,18 @@ enum Texts
 
 const char* zombiefestWarnings[12] =
 {
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFF00FFFF iniciado.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFFE6C00 progreso: 10/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFFF9000 progreso: 20/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFFDB900 progreso: 30/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFFFCC00 progreso: 40/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFFFF600 progreso: 50/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFDDFE00 progreso: 60/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFC6FF00 progreso: 70/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFF96FF00 progreso: 80/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFF6CFF00 progreso: 90/100.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFF33FF00 completado.",
-    "|cFFFFFC00 [Fiesta de Zombis!] |cFFFF0000 fallido.",
+    "|cFFFFFC00 [Zombiefest!] |cFF00FFFF started.",
+    "|cFFFFFC00 [Zombiefest!] |cFFFE6C00 progress: 10/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFFFF9000 progress: 20/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFFFDB900 progress: 30/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFFFFCC00 progress: 40/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFFFFF600 progress: 50/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFFDDFE00 progress: 60/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFFC6FF00 progress: 70/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFF96FF00 progress: 80/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFF6CFF00 progress: 90/100.",
+    "|cFFFFFC00 [Zombiefest!] |cFF33FF00 completed.",
+    "|cFFFFFC00 [Zombiefest!] |cFFFF0000 failed.",
 };
 
 class instance_culling_of_stratholme : public InstanceMapScript
