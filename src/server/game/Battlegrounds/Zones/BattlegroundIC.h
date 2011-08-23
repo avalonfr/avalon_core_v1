@@ -857,17 +857,15 @@ class BattlegroundICScore : public BattlegroundScore
 
 class BattlegroundIC : public Battleground
 {
-    friend class BattlegroundMgr;
-
     public:
         BattlegroundIC();
         ~BattlegroundIC();
-        void Update(uint32 diff);
 
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player *plr);
         virtual void StartingEventCloseDoors();
         virtual void StartingEventOpenDoors();
+        virtual void PostUpdateImpl(uint32 diff);
 
         void RemovePlayer(Player *plr, uint64 guid, uint32 team);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
@@ -879,7 +877,7 @@ class BattlegroundIC : public Battleground
         void EventPlayerClickedOnFlag(Player *source, GameObject* /*target_obj*/);
 
         void EventPlayerDamagedGO(Player* /*plr*/, GameObject* go, uint32 eventType);
-        void DestroyGate(Player* pl, GameObject* /*go*/, uint32 destroyedEvent);
+        void DestroyGate(Player* player, GameObject* go);
 
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player);
 
@@ -888,7 +886,7 @@ class BattlegroundIC : public Battleground
 
         void FillInitialWorldStates(WorldPacket& data);
 
-        void DoAction(uint32 action, uint64 const& var);
+        void DoAction(uint32 action, uint64 var);
 
         virtual void HandlePlayerResurrect(Player* player);
 

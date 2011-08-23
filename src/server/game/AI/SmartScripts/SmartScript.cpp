@@ -31,6 +31,7 @@
 #include "SmartScript.h"
 #include "SmartAI.h"
 #include "Group.h"
+#include "Vehicle.h"
 
 SmartScript::SmartScript()
 {
@@ -74,7 +75,7 @@ void SmartScript::OnReset()
     mLastInvoker = 0;
 }
 
-void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellEntry* spell, GameObject* gob)
+void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellInfo* spell, GameObject* gob)
 {
     if (e == SMART_EVENT_AGGRO)
     {
@@ -103,7 +104,7 @@ void SmartScript::ProcessEventsFor(SMART_EVENT e, Unit* unit, uint32 var0, uint3
     }
 }
 
-void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellEntry* spell, GameObject* gob)
+void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellInfo* spell, GameObject* gob)
 {
     //calc random
     if (e.GetEventType() != SMART_EVENT_LINK && e.event.event_chance < 100 && e.event.event_chance)
@@ -1211,12 +1212,12 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
             CAST_AI(SmartAI, me->AI())->SetRun(e.action.setRun.run ? true : false);
             break;
         }
-        case SMART_ACTION_SET_SWIMM:
+        case SMART_ACTION_SET_SWIM:
         {
             if (!IsSmart())
                 return;
 
-            CAST_AI(SmartAI, me->AI())->SetSwimm(e.action.setSwimm.swimm ? true : false);
+            CAST_AI(SmartAI, me->AI())->SetSwim(e.action.setSwim.swim ? true : false);
             break;
         }
         case SMART_ACTION_WP_START:
@@ -1945,9 +1946,9 @@ ObjectList* SmartScript::GetTargets(SmartScriptHolder const& e, Unit* invoker /*
             if (trigger)
             {
                 l->push_back(trigger);
-                if (Player* plr = trigger->ToPlayer())
-                    if (Group* pGroup = plr->GetGroup())
-                        for (GroupReference* groupRef = pGroup->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
+                if (Player* player = trigger->ToPlayer())
+                    if (Group* group = player->GetGroup())
+                        for (GroupReference* groupRef = group->GetFirstMember(); groupRef != NULL; groupRef = groupRef->next())
                             if (Player* member = groupRef->getSource())
                                 l->push_back(member);
             }
@@ -2164,7 +2165,7 @@ ObjectList* SmartScript::GetWorldObjectsInDist(float dist)
     return targets;
 }
 
-void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellEntry* spell, GameObject* gob)
+void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, uint32 var1, bool bvar, const SpellInfo* spell, GameObject* gob)
 {
     if (!e.active && e.GetEventType() != SMART_EVENT_LINK)
         return;
@@ -2262,10 +2263,10 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
             if (!me || !me->isInCombat())
                 return;
 
-            Unit* pUnit = DoSelectLowestHpFriendly((float)e.event.friendlyHealt.radius, e.event.friendlyHealt.hpDeficit);
-            if (!pUnit)
+            Unit* unit = DoSelectLowestHpFriendly((float)e.event.friendlyHealt.radius, e.event.friendlyHealt.hpDeficit);
+            if (!unit)
                 return;
-            ProcessAction(e, pUnit);
+            ProcessAction(e, unit);
             RecalcTimer(e, e.event.friendlyHealt.repeatMin, e.event.friendlyHealt.repeatMax);
             break;
         }
@@ -2845,7 +2846,7 @@ void SmartScript::SetData(uint32 id, uint32 value)
 {
 }
 
-void SmartScript::SetGUID(const uint64& guid, int32 id)
+void SmartScript::SetGUID(const uint64 guid, int32 id)
 {
 }
 
@@ -2880,15 +2881,15 @@ Unit* SmartScript::DoSelectLowestHpFriendly(float range, uint32 MinHPDiff)
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
-    Unit* pUnit = NULL;
+    Unit* unit = NULL;
 
     Trinity::MostHPMissingInRange u_check(me, range, MinHPDiff);
-    Trinity::UnitLastSearcher<Trinity::MostHPMissingInRange> searcher(me, pUnit, u_check);
+    Trinity::UnitLastSearcher<Trinity::MostHPMissingInRange> searcher(me, unit, u_check);
 
     TypeContainerVisitor<Trinity::UnitLastSearcher<Trinity::MostHPMissingInRange>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
     cell.Visit(p, grid_unit_searcher, *me->GetMap(), *me, range);
-    return pUnit;
+    return unit;
 }
 
 void SmartScript::DoFindFriendlyCC(std::list<Creature*>& _list, float range)

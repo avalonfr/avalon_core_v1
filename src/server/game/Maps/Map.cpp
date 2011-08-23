@@ -32,6 +32,19 @@
 #include "Group.h"
 #include "PathFactory.h"
 
+
+union u_map_magic
+{
+    char asChar[4];
+    uint32 asUInt;
+};
+
+u_map_magic MapMagic        = { {'M','A','P','S'} };
+u_map_magic MapVersionMagic = { {'v','1','.','1'} };
+u_map_magic MapAreaMagic    = { {'A','R','E','A'} };
+u_map_magic MapHeightMagic  = { {'M','H','G','T'} };
+u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
+
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
 #define MAX_CREATURE_ATTACK_RADIUS  (45.0f * sWorld->getRate(RATE_CREATURE_AGGRO))
@@ -79,12 +92,12 @@ bool Map::ExistMap(uint32 mapid, int gx, int gy)
         map_fileheader header;
         if (fread(&header, sizeof(header), 1, pf) == 1)
         {
-            if (header.mapMagic != uint32(MAP_MAGIC) || header.versionMagic != uint32(MAP_VERSION_MAGIC))
+            if (header.mapMagic != MapMagic.asUInt || header.versionMagic != MapVersionMagic.asUInt)
                 sLog->outError("Map file '%s' is from an incompatible clientversion. Please recreate using the mapextractor.", tmp);
             else
                 ret = true;
         }
-       fclose(pf);
+        fclose(pf);
     }
     delete [] tmp;
     return ret;
@@ -512,7 +525,7 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::Obj
     }
 }
 
-void Map::Update(const uint32 &t_diff)
+void Map::Update(const uint32 t_diff)
 {
     /// update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
@@ -541,7 +554,7 @@ void Map::Update(const uint32 &t_diff)
     {
         Player* plr = m_mapRefIter->getSource();
 
-        if (!plr->IsInWorld())
+        if (!plr || !plr->IsInWorld())
             continue;
 
         // update players at tick
@@ -556,7 +569,7 @@ void Map::Update(const uint32 &t_diff)
         WorldObject* obj = *m_activeNonPlayersIter;
         ++m_activeNonPlayersIter;
 
-        if (!obj->IsInWorld())
+        if (!obj || !obj->IsInWorld())
             continue;
 
         VisitNearbyCellsOf(obj, grid_object_update, world_object_update);
@@ -590,7 +603,7 @@ struct ResetNotifier
     void Visit(PlayerMapType &m) { resetNotify<Player>(m);}
 };
 
-void Map::ProcessRelocationNotifies(const uint32 & diff)
+void Map::ProcessRelocationNotifies(const uint32 diff)
 {
     for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); ++i)
     {
@@ -809,15 +822,10 @@ void Map::MoveAllCreaturesInMoveList()
         // get data and remove element;
         CreatureMoveList::iterator iter = i_creaturesToMove.begin();
         Creature* c = iter->first;
-        CreatureMover cm = iter->second;
-        i_creaturesToMove.erase(iter);
-
-        // calculate cells
-        CellPair new_val = Trinity::ComputeCellPair(cm.x, cm.y);
-        Cell new_cell(new_val);
+        const CreatureMover &cm = iter->second;
 
         // do move or do move to respawn or remove creature if previous all fail
-        if (CreatureCellRelocation(c, new_cell))
+        if (CreatureCellRelocation(c, Cell(Trinity::ComputeCellPair(cm.x, cm.y))))
         {
             // update pos
             c->Relocate(cm.x, cm.y, cm.z, cm.ang);
@@ -837,6 +845,8 @@ void Map::MoveAllCreaturesInMoveList()
                 AddObjectToRemoveList(c);
             }
         }
+
+        i_creaturesToMove.erase(iter);
     }
 }
 
@@ -929,7 +939,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
         return false;
 }
 
-bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool unloadAll)
+bool Map::UnloadGrid(const uint32 x, const uint32 y, bool unloadAll)
 {
     NGridType *grid = getNGrid(x, y);
     ASSERT(grid != NULL);
@@ -1070,7 +1080,7 @@ bool GridMap::loadData(char *filename)
         return false;
     }
 
-    if (header.mapMagic == uint32(MAP_MAGIC) && header.versionMagic == uint32(MAP_VERSION_MAGIC))
+    if (header.mapMagic == MapMagic.asUInt && header.versionMagic == MapVersionMagic.asUInt)
     {
         // loadup area data
         if (header.areaMapOffset && !loadAreaData(in, header.areaMapOffset, header.areaMapSize))
@@ -1121,7 +1131,7 @@ bool GridMap::loadAreaData(FILE *in, uint32 offset, uint32 /*size*/)
     map_areaHeader header;
     fseek(in, offset, SEEK_SET);
 
-    if (fread(&header, sizeof(header), 1, in) != 1 || header.fourcc != uint32(MAP_AREA_MAGIC))
+    if (fread(&header, sizeof(header), 1, in) != 1 || header.fourcc != MapAreaMagic.asUInt)
         return false;
 
     m_gridArea = header.gridArea;
@@ -1139,7 +1149,7 @@ bool GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 /*size*/)
     map_heightHeader header;
     fseek(in, offset, SEEK_SET);
 
-    if (fread(&header, sizeof(header), 1, in) != 1 || header.fourcc != uint32(MAP_HEIGHT_MAGIC))
+    if (fread(&header, sizeof(header), 1, in) != 1 || header.fourcc != MapHeightMagic.asUInt)
         return false;
 
     m_gridHeight = header.gridHeight;
@@ -1185,7 +1195,7 @@ bool  GridMap::loadLiquidData(FILE *in, uint32 offset, uint32 /*size*/)
     map_liquidHeader header;
     fseek(in, offset, SEEK_SET);
 
-    if (fread(&header, sizeof(header), 1, in) != 1 || header.fourcc != uint32(MAP_LIQUID_MAGIC))
+    if (fread(&header, sizeof(header), 1, in) != 1 || header.fourcc != MapLiquidMagic.asUInt)
         return false;
 
     m_liquidType   = header.liquidType;
@@ -1870,8 +1880,8 @@ void Map::UpdateObjectsVisibilityFor(Player* player, Cell cell, CellPair cellpai
     cell.SetNoCreate();
     TypeContainerVisitor<Trinity::VisibleNotifier, WorldTypeMapContainer > world_notifier(notifier);
     TypeContainerVisitor<Trinity::VisibleNotifier, GridTypeMapContainer  > grid_notifier(notifier);
-    cell.Visit(cellpair, world_notifier, *this, *player, player->GetVisibilityRange());
-    cell.Visit(cellpair, grid_notifier,  *this, *player, player->GetVisibilityRange());
+    cell.Visit(cellpair, world_notifier, *this, *player, player->GetSightRange());
+    cell.Visit(cellpair, grid_notifier,  *this, *player, player->GetSightRange());
 
     // send data
     notifier.SendToSelf();
@@ -2389,7 +2399,7 @@ bool InstanceMap::Add(Player* player)
     return true;
 }
 
-void InstanceMap::Update(const uint32& t_diff)
+void InstanceMap::Update(const uint32 t_diff)
 {
     Map::Update(t_diff);
 
@@ -2490,7 +2500,7 @@ void InstanceMap::PermBindAllPlayers(Player* player)
     InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
     if (!save)
     {
-        sLog->outError("Cannot bind players, no instance save available for map!");
+        sLog->outError("Cannot bind player (GUID: %u, Name: %s), because no instance save is available for instance map (Name: %s, Entry: %u, InstanceId: %u)!", player->GetGUIDLow(), player->GetName(), player->GetMap()->GetMapName(), player->GetMapId(), GetInstanceId());
         return;
     }
 
@@ -2542,8 +2552,8 @@ void InstanceMap::SetResetSchedule(bool on)
         if (InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId()))
             sInstanceSaveMgr->ScheduleReset(on, save->GetResetTime(), InstanceSaveManager::InstResetEvent(0, GetId(), Difficulty(GetSpawnMode()), GetInstanceId()));
         else
-            sLog->outError("InstanceMap::SetResetSchedule: cannot turn schedule %s, there is no save information for instance (map [id: %u, name: %s], instance id: %u)",
-                on ? "on" : "off", GetId(), GetMapName(), GetInstanceId());
+            sLog->outError("InstanceMap::SetResetSchedule: cannot turn schedule %s, there is no save information for instance (map [id: %u, name: %s], instance id: %u, difficulty: %u)",
+                on ? "on" : "off", GetId(), GetMapName(), GetInstanceId(), Difficulty(GetSpawnMode()));
     }
 }
 

@@ -30,7 +30,9 @@ void PointMovementGenerator<T>::Initialize(T &unit)
 {
     unit.StopMoving();
     Traveller<T> traveller(unit);
-    // knockback effect has UNIT_STAT_JUMPING set, so if here we disable sentmonstermove there will be creature position sync problem between client and server
+
+    // OLD: knockback effect has UNIT_STAT_JUMPING set, so if here we disable sentmonstermove there will be creature position sync problem between client and server
+    // NEW: reactivated this check - UNIT_STAT_JUMPING is only used in MoveJump, which sends its own packet
 	//i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z, !m_usePathfinding);
 	
 	if (m_usePathfinding)
@@ -48,11 +50,11 @@ void PointMovementGenerator<T>::Initialize(T &unit)
 		 i_destinationHolder.SetDestination(traveller, p.x, p.y, p.z, false);
 	}
 	else
-       i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z, true);
+       i_destinationHolder.SetDestination(traveller, i_x, i_y, i_z, /*true*/ !unit.HasUnitState(UNIT_STAT_JUMPING));
 }
 
 template<class T>
-bool PointMovementGenerator<T>::Update(T &unit, const uint32 &diff)
+bool PointMovementGenerator<T>::Update(T &unit, const uint32 diff)
 {
     if (!&unit)
         return false;
@@ -105,12 +107,12 @@ template <> void PointMovementGenerator<Creature>::MovementInform(Creature &unit
 }
 
 template void PointMovementGenerator<Player>::Initialize(Player&);
-template bool PointMovementGenerator<Player>::Update(Player &, const uint32 &diff);
+template bool PointMovementGenerator<Player>::Update(Player &, const uint32 diff);
 template void PointMovementGenerator<Player>::MovementInform(Player&);
 template void PointMovementGenerator<Player>::Finalize(Player&);
 
 template void PointMovementGenerator<Creature>::Initialize(Creature&);
-template bool PointMovementGenerator<Creature>::Update(Creature&, const uint32 &diff);
+template bool PointMovementGenerator<Creature>::Update(Creature&, const uint32 diff);
 template void PointMovementGenerator<Creature>::Finalize(Creature&);
 
 void AssistanceMovementGenerator::Finalize(Unit &unit)

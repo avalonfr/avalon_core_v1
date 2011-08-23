@@ -701,16 +701,16 @@ class spell_ooze_zap : public SpellScriptLoader
         {
             PrepareSpellScript(spell_ooze_zap_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_OOZE_ZAP))
+                if (!sSpellMgr->GetSpellInfo(SPELL_OOZE_ZAP))
                     return false;
                 return true;
             }
 
             SpellCastResult CheckRequirement()
             {
-                if (!GetCaster()->HasAura(SpellMgr::CalculateSpellEffectAmount(GetSpellInfo(), EFFECT_1)))
+                if (!GetCaster()->HasAura(GetSpellInfo()->Effects[EFFECT_1].CalcValue()))
                     return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW; // This is actually correct
 
                 if (!GetTargetUnit())
@@ -748,9 +748,9 @@ class spell_ooze_zap_channel_end : public SpellScriptLoader
         {
             PrepareSpellScript(spell_ooze_zap_channel_end_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_OOZE_ZAP_CHANNEL_END))
+                if (!sSpellMgr->GetSpellInfo(SPELL_OOZE_ZAP_CHANNEL_END))
                     return false;
                 return true;
             }
@@ -784,9 +784,9 @@ class spell_energize_aoe : public SpellScriptLoader
         {
             PrepareSpellScript(spell_energize_aoe_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellEntry*/)
+            bool Validate(SpellInfo const* /*spellEntry*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_ENERGIZED))
+                if (!sSpellMgr->GetSpellInfo(SPELL_ENERGIZED))
                     return false;
                 return true;
             }
@@ -795,7 +795,7 @@ class spell_energize_aoe : public SpellScriptLoader
             {
                 for (std::list<Unit*>::iterator itr = unitList.begin(); itr != unitList.end();)
                 {
-                    if ((*itr)->GetTypeId() == TYPEID_PLAYER && (*itr)->ToPlayer()->GetQuestStatus(SpellMgr::CalculateSpellEffectAmount(GetSpellInfo(), EFFECT_1)) == QUEST_STATUS_INCOMPLETE)
+                    if ((*itr)->GetTypeId() == TYPEID_PLAYER && (*itr)->ToPlayer()->GetQuestStatus(GetSpellInfo()->Effects[EFFECT_1].CalcValue()) == QUEST_STATUS_INCOMPLETE)
                         ++itr;
                     else
                         unitList.erase(itr++);
@@ -812,8 +812,8 @@ class spell_energize_aoe : public SpellScriptLoader
             void Register()
             {
                 OnEffect += SpellEffectFn(spell_energize_aoe_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_energize_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENTRY_SRC);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_energize_aoe_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_ENTRY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_energize_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_energize_aoe_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
             }
         };
 

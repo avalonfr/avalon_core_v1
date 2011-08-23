@@ -205,7 +205,7 @@ public:
 
 struct CreatureMover
 {
-    CreatureMover() : x(0), y(0), z(0), ang(0) {}
+    CreatureMover() : x(0.0f), y(0.0f), z(0.0f), ang(0.0f) {}
     CreatureMover(float _x, float _y, float _z, float _ang) : x(_x), y(_y), z(_z), ang(_ang) {}
 
     float x, y, z, ang;
@@ -270,7 +270,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> void Remove(T *, bool);
 
         void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<Trinity::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<Trinity::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
-        virtual void Update(const uint32&);
+        virtual void Update(const uint32);
 
         float GetVisibilityRange() const { return m_VisibleDistance; }
         //function for setting up visibility distance for maps on per-type/per-Id basis
@@ -296,7 +296,7 @@ class Map : public GridRefManager<NGridType>
         bool GetUnloadLock(const GridPair &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadLock(); }
         void SetUnloadLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadExplicitLock(on); }
         void LoadGrid(float x, float y);
-        bool UnloadGrid(const uint32 &x, const uint32 &y, bool pForce);
+        bool UnloadGrid(const uint32 x, const uint32 y, bool pForce);
         virtual void UnloadAll();
 
         void ResetGridExpiry(NGridType &grid, float factor = 1) const
@@ -426,6 +426,7 @@ class Map : public GridRefManager<NGridType>
 
         template<class T> void SwitchGridContainers(T* obj, bool active);
         template<class NOTIFIER> void VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier);
+        template<class NOTIFIER> void VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitWorld(const float &x, const float &y, float radius, NOTIFIER &notifier);
         template<class NOTIFIER> void VisitGrid(const float &x, const float &y, float radius, NOTIFIER &notifier);
         CreatureGroupHolderType CreatureGroupHolder;
@@ -483,7 +484,7 @@ class Map : public GridRefManager<NGridType>
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
-        void UpdateActiveCells(const float &x, const float &y, const uint32 &t_diff);
+        void UpdateActiveCells(const float &x, const float &y, const uint32 t_diff);
     protected:
         void SetUnloadReferenceLock(const GridPair &p, bool on) { getNGrid(p.x_coord, p.y_coord)->setUnloadReferenceLock(on); }
 
@@ -526,7 +527,7 @@ class Map : public GridRefManager<NGridType>
 
         //these functions used to process player/mob aggro reactions and
         //visibility calculations. Highly optimized for massive calculations
-        void ProcessRelocationNotifies(const uint32 &diff);
+        void ProcessRelocationNotifies(const uint32 diff);
 
         bool i_scriptLock;
         std::set<WorldObject *> i_objectsToRemove;
@@ -587,7 +588,7 @@ class InstanceMap : public Map
         ~InstanceMap();
         bool Add(Player *);
         void Remove(Player *, bool);
-        void Update(const uint32&);
+        void Update(const uint32);
         void CreateInstanceData(bool load);
         bool Reset(uint8 method);
         uint32 GetScriptId() { return i_script_id; }
@@ -629,16 +630,6 @@ class BattlegroundMap : public Map
         Battleground* m_bg;
 };
 
-/*inline
-uint64
-Map::CalculateGridMask(const uint32 &y) const
-{
-    uint64 mask = 1;
-    mask <<= y;
-    return mask;
-}
-*/
-
 template<class T, class CONTAINER>
 inline void
 Map::Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER> &visitor)
@@ -668,6 +659,25 @@ Map::VisitAll(const float &x, const float &y, float radius, NOTIFIER &notifier)
     cell.Visit(p, world_object_notifier, *this, radius, x, y);
     TypeContainerVisitor<NOTIFIER, GridTypeMapContainer >  grid_object_notifier(notifier);
     cell.Visit(p, grid_object_notifier, *this, radius, x, y);
+}
+
+// should be used with Searcher notifiers, tries to search world if nothing found in grid
+template<class NOTIFIER>
+inline void
+Map::VisitFirstFound(const float &x, const float &y, float radius, NOTIFIER &notifier)
+{
+    CellPair p(Trinity::ComputeCellPair(x, y));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    TypeContainerVisitor<NOTIFIER, WorldTypeMapContainer> world_object_notifier(notifier);
+    cell.Visit(p, world_object_notifier, *this, radius, x, y);
+    if (!notifier.i_object)
+    {
+        TypeContainerVisitor<NOTIFIER, GridTypeMapContainer >  grid_object_notifier(notifier);
+        cell.Visit(p, grid_object_notifier, *this, radius, x, y);
+    }
 }
 
 template<class NOTIFIER>

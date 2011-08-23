@@ -143,7 +143,7 @@ class boss_ick : public CreatureScript
 
             void InitializeAI()
             {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(PoSScriptName))
+                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != sObjectMgr->GetScriptId(PoSScriptName))
                     me->IsAIEnabled = false;
                 else if (!me->isDead())
                     Reset();
@@ -297,7 +297,7 @@ class boss_krick : public CreatureScript
 
             void InitializeAI()
             {
-                if (!_instanceScript || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(PoSScriptName))
+                if (!_instanceScript || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != sObjectMgr->GetScriptId(PoSScriptName))
                     me->IsAIEnabled = false;
                 else if (!me->isDead())
                     Reset();
@@ -598,7 +598,6 @@ class spell_exploding_orb_hasty_grow : public SpellScriptLoader
                 if (GetStackAmount() == 15)
                 {
                     Unit* target = GetTarget(); // store target because aura gets removed
-                    PreventDefaultAction();
                     target->CastSpell(target, SPELL_EXPLOSIVE_BARRAGE_DAMAGE, false);
                     target->RemoveAurasDueToSpell(SPELL_HASTY_GROW);
                     target->RemoveAurasDueToSpell(SPELL_AUTO_GROW);

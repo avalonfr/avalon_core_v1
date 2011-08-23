@@ -71,7 +71,7 @@ class boss_bronjahm : public CreatureScript
 
             void InitializeAI()
             {
-                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != GetScriptId(FoSScriptName))
+                if (!instance || static_cast<InstanceMap*>(me->GetMap())->GetScriptId() != sObjectMgr->GetScriptId(FoSScriptName))
                     me->IsAIEnabled = false;
                 else if (!me->isDead())
                     Reset();
@@ -390,8 +390,8 @@ class spell_bronjahm_soulstorm_targeting : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsInitial, EFFECT_1, TARGET_UNIT_AREA_ENEMY_DST);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_2, TARGET_UNIT_AREA_ENEMY_DST);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsInitial, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_bronjahm_soulstorm_targeting_SpellScript::FilterTargetsSubsequent, EFFECT_2, TARGET_UNIT_DEST_AREA_ENEMY);
             }
 
             std::list<Unit*> sharedUnitList;
