@@ -18,10 +18,11 @@
 
 #include "CombatAI.h"
 #include "SpellMgr.h"
+#include "SpellInfo.h"
 #include "Vehicle.h"
 #include "ObjectAccessor.h"
 
-int AggressorAI::Permissible(const Creature *creature)
+int AggressorAI::Permissible(const Creature* creature)
 {
     // have some hostile factions, it will be selected by IsHostileTo check at MoveInLineOfSight
     if (!creature->isCivilian() && !creature->IsNeutralToAll())
@@ -62,7 +63,7 @@ int VehicleAI::Permissible(const Creature* /*creature*/)
 void CombatAI::InitializeAI()
 {
     for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-        if (me->m_spells[i] && GetSpellStore()->LookupEntry(me->m_spells[i]))
+        if (me->m_spells[i] && sSpellMgr->GetSpellInfo(me->m_spells[i]))
             spells.push_back(me->m_spells[i]);
 
     CreatureAI::InitializeAI();
@@ -80,7 +81,7 @@ void CombatAI::JustDied(Unit* killer)
             me->CastSpell(killer, *i, true);
 }
 
-void CombatAI::EnterCombat(Unit *who)
+void CombatAI::EnterCombat(Unit* who)
 {
     for (SpellVct::iterator i = spells.begin(); i != spells.end(); ++i)
     {
@@ -126,7 +127,7 @@ void CasterAI::InitializeAI()
         m_attackDist = MELEE_RANGE;
 }
 
-void CasterAI::EnterCombat(Unit *who)
+void CasterAI::EnterCombat(Unit* who)
 {
     if (spells.empty())
         return;
@@ -172,19 +173,21 @@ void CasterAI::UpdateAI(const uint32 diff)
 //ArcherAI
 //////////////
 
-ArcherAI::ArcherAI(Creature *c) : CreatureAI(c)
+ArcherAI::ArcherAI(Creature* c) : CreatureAI(c)
 {
     if (!me->m_spells[0])
         sLog->outError("ArcherAI set for creature (entry = %u) with spell1=0. AI will do nothing", me->GetEntry());
 
-    m_minRange = GetSpellMinRange(me->m_spells[0], false);
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->m_spells[0]);
+    m_minRange = spellInfo ? spellInfo->GetMinRange(false) : 0;
+
     if (!m_minRange)
         m_minRange = MELEE_RANGE;
-    me->m_CombatDistance = GetSpellMaxRange(me->m_spells[0], false);
+    me->m_CombatDistance = spellInfo ? spellInfo->GetMaxRange(false) : 0;
     me->m_SightDistance = me->m_CombatDistance;
 }
 
-void ArcherAI::AttackStart(Unit *who)
+void ArcherAI::AttackStart(Unit* who)
 {
     if (!who)
         return;
@@ -219,13 +222,14 @@ void ArcherAI::UpdateAI(const uint32 /*diff*/)
 //TurretAI
 //////////////
 
-TurretAI::TurretAI(Creature *c) : CreatureAI(c)
+TurretAI::TurretAI(Creature* c) : CreatureAI(c)
 {
     if (!me->m_spells[0])
         sLog->outError("TurretAI set for creature (entry = %u) with spell1=0. AI will do nothing", me->GetEntry());
 
-    m_minRange = GetSpellMinRange(me->m_spells[0], false);
-    me->m_CombatDistance = GetSpellMaxRange(me->m_spells[0], false);
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(me->m_spells[0]);
+    m_minRange = spellInfo ? spellInfo->GetMinRange(false) : 0;
+    me->m_CombatDistance = spellInfo ? spellInfo->GetMaxRange(false) : 0;
     me->m_SightDistance = me->m_CombatDistance;
 }
 
@@ -238,7 +242,7 @@ bool TurretAI::CanAIAttack(const Unit* /*who*/) const
     return true;
 }
 
-void TurretAI::AttackStart(Unit *who)
+void TurretAI::AttackStart(Unit* who)
 {
     if (who)
         me->Attack(who, false);
@@ -256,7 +260,7 @@ void TurretAI::UpdateAI(const uint32 /*diff*/)
 //VehicleAI
 //////////////
 
-VehicleAI::VehicleAI(Creature *c) : CreatureAI(c), m_vehicle(c->GetVehicleKit()), m_IsVehicleInUse(false), m_ConditionsTimer(VEHICLE_CONDITION_CHECK_TIME)
+VehicleAI::VehicleAI(Creature* c) : CreatureAI(c), m_vehicle(c->GetVehicleKit()), m_IsVehicleInUse(false), m_ConditionsTimer(VEHICLE_CONDITION_CHECK_TIME)
 {
     LoadConditions();
     m_DoDismiss = false;
@@ -314,11 +318,11 @@ void VehicleAI::CheckConditions(const uint32 diff)
             for (SeatMap::iterator itr = m_vehicle->Seats.begin(); itr != m_vehicle->Seats.end(); ++itr)
                 if (Unit* passenger = ObjectAccessor::GetUnit(*m_vehicle->GetBase(), itr->second.Passenger))
                 {
-                    if (Player* plr = passenger->ToPlayer())
+                    if (Player* player = passenger->ToPlayer())
                     {
-                        if (!sConditionMgr->IsPlayerMeetToConditions(plr, conditions))
+                        if (!sConditionMgr->IsPlayerMeetToConditions(player, conditions))
                         {
-                            plr->ExitVehicle();
+                            player->ExitVehicle();
                             return;//check other pessanger in next tick
                         }
                     }

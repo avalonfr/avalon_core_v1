@@ -136,7 +136,7 @@ public:
                     if (m_auiEncounter[1] == DONE)
                     {
                         HandleGameObject(0, true, go);
-                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK1);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
                     break;
             }
@@ -211,8 +211,8 @@ public:
             OUT_SAVE_INST_DATA;
 
             std::ostringstream saveStream;
-            saveStream << "U P " << m_auiEncounter[0] << " " << m_auiEncounter[1] << " "
-                << m_auiEncounter[2] << " " << m_auiEncounter[3];
+            saveStream << "U P " << m_auiEncounter[0] << ' ' << m_auiEncounter[1] << ' '
+                << m_auiEncounter[2] << ' ' << m_auiEncounter[3];
 
             str_data = saveStream.str();
 

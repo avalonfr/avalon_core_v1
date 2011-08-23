@@ -91,7 +91,7 @@ bool findnth(std::string &str, int n, std::string::size_type &s, std::string::si
 
     do
     {
-        e = str.find("'", s);
+        e = str.find('\'', s);
         if (e == std::string::npos) return false;
     } while (str[e-1] == '\\');
 
@@ -100,7 +100,7 @@ bool findnth(std::string &str, int n, std::string::size_type &s, std::string::si
         do
         {
             s = e+4;
-            e = str.find("'", s);
+            e = str.find('\'', s);
             if (e == std::string::npos) return false;
         } while (str[e-1] == '\\');
     }
@@ -202,14 +202,14 @@ std::string CreateDumpString(char const* tableName, QueryResult result)
     Field *fields = result->Fetch();
     for (uint32 i = 0; i < result->GetFieldCount(); ++i)
     {
-        if (i == 0) ss << "'";
+        if (i == 0) ss << '\'';
         else ss << ", '";
 
         std::string s = fields[i].GetString();
         CharacterDatabase.EscapeString(s);
         ss << s;
 
-        ss << "'";
+        ss << '\'';
     }
     ss << ");";
     return ss.str();
@@ -218,7 +218,7 @@ std::string CreateDumpString(char const* tableName, QueryResult result)
 std::string PlayerDumpWriter::GenerateWhereStr(char const* field, uint32 guid)
 {
     std::ostringstream wherestr;
-    wherestr << field << " = '" << guid << "'";
+    wherestr << field << " = '" << guid << '\'';
     return wherestr.str();
 }
 
@@ -520,11 +520,11 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                     ROLLBACK(DUMP_FILE_BROKEN);
 
                 const char null[5] = "NULL";
-                if (!changenth(line, 68, null))             // characters.deleteInfos_Account
+                if (!changenth(line, 69, null))             // characters.deleteInfos_Account
                     ROLLBACK(DUMP_FILE_BROKEN);
-                if (!changenth(line, 69, null))             // characters.deleteInfos_Name
+                if (!changenth(line, 70, null))             // characters.deleteInfos_Name
                     ROLLBACK(DUMP_FILE_BROKEN);
-                if (!changenth(line, 70, null))             // characters.deleteDate
+                if (!changenth(line, 71, null))             // characters.deleteDate
                     ROLLBACK(DUMP_FILE_BROKEN);
                 break;
             }

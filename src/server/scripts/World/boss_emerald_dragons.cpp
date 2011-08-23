@@ -246,7 +246,7 @@ class spell_dream_fog_sleep : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_dream_fog_sleep_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_DST);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_dream_fog_sleep_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
             }
         };
 
@@ -281,11 +281,11 @@ class spell_mark_of_nature : public SpellScriptLoader
         {
             PrepareSpellScript(spell_mark_of_nature_SpellScript);
 
-            bool Validate(SpellEntry const* /*spellInfo*/)
+            bool Validate(SpellInfo const* /*spellInfo*/)
             {
-                if (!sSpellStore.LookupEntry(SPELL_MARK_OF_NATURE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_MARK_OF_NATURE))
                     return false;
-                if (!sSpellStore.LookupEntry(SPELL_AURA_OF_NATURE))
+                if (!sSpellMgr->GetSpellInfo(SPELL_AURA_OF_NATURE))
                     return false;
                 return true;
             }
@@ -305,7 +305,7 @@ class spell_mark_of_nature : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_mark_of_nature_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_mark_of_nature_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffect += SpellEffectFn(spell_mark_of_nature_SpellScript::HandleEffect, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             }
         };

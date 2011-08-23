@@ -20,6 +20,7 @@
 #include "CharacterDatabaseCleaner.h"
 #include "World.h"
 #include "Database/DatabaseEnv.h"
+#include "SpellMgr.h"
 #include "DBCStores.h"
 
 void CharacterDatabaseCleaner::CleanDatabase()
@@ -79,7 +80,6 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
     std::ostringstream ss;
     do
     {
-
         Field *fields = result->Fetch();
 
         uint32 id = fields[0].GetUInt32();
@@ -92,7 +92,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
                 found = true;
             }
             else
-                ss << ", ";
+                ss << ',';
 
             ss << id;
         }
@@ -101,7 +101,7 @@ void CharacterDatabaseCleaner::CheckUnique(const char* column, const char* table
 
     if (found)
     {
-        ss << ")";
+        ss << ')';
         CharacterDatabase.Execute(ss.str().c_str());
     }
 }
@@ -128,7 +128,7 @@ void CharacterDatabaseCleaner::CleanCharacterSkills()
 
 bool CharacterDatabaseCleaner::SpellCheck(uint32 spell_id)
 {
-    return sSpellStore.LookupEntry(spell_id) && !GetTalentSpellPos(spell_id);
+    return sSpellMgr->GetSpellInfo(spell_id) && !GetTalentSpellPos(spell_id);
 }
 
 void CharacterDatabaseCleaner::CleanCharacterSpell()
