@@ -132,8 +132,8 @@ enum BattlegroundBuffObjects
 
 enum BattlegroundRandomRewards
 {
-    BG_REWARD_WINNER_HONOR_FIRST    = 30,
-    BG_REWARD_WINNER_ARENA_FIRST    = 25,
+    BG_REWARD_WINNER_HONOR_FIRST    = 50,
+    BG_REWARD_WINNER_ARENA_FIRST    = 50,
     BG_REWARD_WINNER_HONOR_LAST     = 15,
     BG_REWARD_WINNER_ARENA_LAST     = 0,
     BG_REWARD_LOSER_HONOR_FIRST    = 5,

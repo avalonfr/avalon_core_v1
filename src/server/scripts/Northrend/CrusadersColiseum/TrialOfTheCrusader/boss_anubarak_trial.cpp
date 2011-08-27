@@ -167,14 +167,14 @@ public:
             m_uiPenetratingColdTimer = 20*IN_MILLISECONDS;
             m_uiNerubianShadowStrikeTimer = 30*IN_MILLISECONDS;
             m_uiSummonNerubianTimer = 10*IN_MILLISECONDS;
-            m_uiSubmergeTimer = 80*IN_MILLISECONDS;
+            m_uiSubmergeTimer = 60*IN_MILLISECONDS;
 
             m_uiPursuingSpikeTimer = 2*IN_MILLISECONDS;
             m_uiSummonScarabTimer = 2*IN_MILLISECONDS;
 
             m_uiSummonFrostSphereTimer = 20*IN_MILLISECONDS;
 
-            m_uiBerserkTimer = 15*MINUTE*IN_MILLISECONDS;
+            m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
             m_uiStage = 0;
             m_uiScarabSummoned = 0;
             m_bIntro = true;

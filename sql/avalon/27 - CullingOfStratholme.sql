@@ -145,3 +145,6 @@ INSERT INTO `creature_loot_template` VALUES
 (32273, 47241, 100, 1, 0, 1, 1);
 
 UPDATE `creature_template` SET `lootid` = 32273 WHERE `entry` IN (32273, 32313);
+
+UPDATE `conditions` SET `ConditionValue2`=27827,`Comment`='Dispelling Illusions: Crate Dummy target' WHERE `SourceEntry`=49590;
+UPDATE `creature_template` SET `ScriptName`='npc_create_helper_cot' WHERE `entry`=27827;
