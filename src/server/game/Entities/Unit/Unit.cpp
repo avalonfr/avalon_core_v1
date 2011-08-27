@@ -1053,7 +1053,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit* victim, uint32 spellID, uint32 damage)
     return damageInfo.damage;
 }
 
-void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 damage, SpellEntry const *spellInfo, WeaponAttackType attackType, bool crit, int32 calc_resist)
+void Unit::CalculateSpellDamageTaken(SpellNonMeleeDamage *damageInfo, int32 damage, SpellInfo const *spellInfo, WeaponAttackType attackType, bool crit, int32 calc_resist)
 
 {
     if (damage < 0)
@@ -1655,7 +1655,7 @@ uint32 Unit::GetSpellPenetration(SpellSchoolMask schoolMask) const
 	return uint32(std::max<int32>(spellPenetration, 0));
 }
 
-uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, bool binary, SpellEntry const * spellProto) const
+uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, bool binary, SpellInfo const * spellInfo) const
 {
 	// Magic damage, check for resists
 	if (uint32(schoolMask & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_HOLY)) > 0)
@@ -1683,7 +1683,7 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 		AuraEffectList const & aurasA = GetAuraEffectsByType(SPELL_AURA_MOD_ABILITY_IGNORE_TARGET_RESIST);
 		for (AuraEffectList::const_iterator itr = aurasA.begin(); itr != aurasA.end(); ++itr)
 		{
-			if (((*itr)->GetMiscValue() & schoolMask) && (*itr)->IsAffectedOnSpell(spellProto))
+			if (((*itr)->GetMiscValue() & schoolMask) && (*itr)->IsAffectedOnSpell(spellInfo))
 				ignoredResistance += (*itr)->GetAmount();
 		}
 	
@@ -1743,14 +1743,14 @@ uint32 Unit::CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, boo
 }		
 
 	
-void Unit::CalcAbsorbResist(Unit *victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellEntry const *spellInfo, int32 calc_resist)
+void Unit::CalcAbsorbResist(Unit *victim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist, SpellInfo const *spellInfo, int32 calc_resist)
 {
     if (!victim || !victim->isAlive() || !damage)
         return;
 
     DamageInfo dmgInfo = DamageInfo(this, victim, damage, spellInfo, schoolMask, damagetype);
 
-	bool binary = (spellInfo && (uint32(sSpellMgr->GetSpellCustomAttr(spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0));
+	bool binary = (spellInfo && (uint32(spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0));
 	
 	if (!binary)
 		if (calc_resist >= 0)
@@ -2578,7 +2578,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
  // Can`t miss on dead target (on skinning for example)
     if (!victim->isAlive() && victim->GetTypeId() != TYPEID_PLAYER)
         return SPELL_MISS_NONE;
-    SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
+    SpellSchoolMask schoolMask = spell->GetSchoolMask();
 	int32 ignoredResistance = 0;
 
 	AuraEffectList const & aurasA = GetAuraEffectsByType(SPELL_AURA_MOD_ABILITY_IGNORE_TARGET_RESIST);
@@ -2615,7 +2615,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spell)
 	     return SPELL_MISS_NONE;
 }
 
-uint32 Unit::CalcMagicSpellHitChance(Unit * pVictim, SpellSchoolMask schoolMask, SpellEntry const * spellProto)
+uint32 Unit::CalcMagicSpellHitChance(Unit * pVictim, SpellSchoolMask schoolMask, SpellInfo const * spellInfo)
 {
 	// PvP - PvE spell misschances per leveldif > 2
 	int32 levelChance = pVictim->ToPlayer() ? 7 : 11;
@@ -2645,7 +2645,7 @@ uint32 Unit::CalcMagicSpellHitChance(Unit * pVictim, SpellSchoolMask schoolMask,
 	}
 	
 	if (source && !isTotem())
-		source->ToPlayer()->ApplySpellMod(spellProto->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
+		source->ToPlayer()->ApplySpellMod(spellInfo->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);
 	else
 		source = this;
 	
@@ -2654,17 +2654,17 @@ uint32 Unit::CalcMagicSpellHitChance(Unit * pVictim, SpellSchoolMask schoolMask,
 	// Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
 	modHitChance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
 	// Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
-	if (IsAreaOfEffectSpell(spellProto))
+	if (spellInfo->IsAOE())
 		modHitChance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
 	// Chance resist mechanic (select max value from every mechanic spell effect)
-	modHitChance -= pVictim->GetMechanicResistChance(spellProto);
+	modHitChance -= pVictim->GetMechanicResistChance(spellInfo);
 	// Chance resist debuff
-	if (!IsPositiveSpell(spellProto->Id))
+	if (!spellInfo->IsPositive())
 	{
 		bool bNegativeAura = false;
 		for (uint8 i = 0; i < 3; ++i)
 		{
-			if (spellProto->EffectApplyAuraName[i] != 0)
+			if (spellInfo->Effects[i].ApplyAuraName != 0)
 				{
 					bNegativeAura = true;
 					break;
@@ -2673,8 +2673,8 @@ uint32 Unit::CalcMagicSpellHitChance(Unit * pVictim, SpellSchoolMask schoolMask,
 			
 		if (bNegativeAura)
 		{
-			modHitChance -= pVictim->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spellProto->Dispel));
-			modHitChance -= pVictim->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spellProto->Dispel));
+			modHitChance -= pVictim->GetMaxPositiveAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spellInfo->Dispel));
+			modHitChance -= pVictim->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spellInfo->Dispel));
 		}
 	}
 	

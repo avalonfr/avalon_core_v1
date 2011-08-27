@@ -305,7 +305,7 @@ void MotionMaster::MoveLand(uint32 id, Position const& pos, float speed)
     float x, y, z;
     pos.GetPosition(x, y, z);
     sLog->outStaticDebug("Creature (Entry: %u) landing point (ID: %u X: %f Y: %f Z: %f)", i_owner->GetEntry(), id, x, y, z);
-    Mutate(new PointMovementGenerator<Creature>(id, x, y, z), MOTION_SLOT_ACTIVE);
+	Mutate(new PointMovementGenerator<Creature> (id, x, y, z,true) , MOTION_SLOT_ACTIVE);
 
     MonsterMoveData data;
     data.DestLocation.Relocate(pos);
@@ -331,7 +331,7 @@ void MotionMaster::MoveTakeoff(uint32 id, Position const& pos, float speed)
     float x, y, z;
     pos.GetPosition(x, y, z);
     sLog->outStaticDebug("Creature (Entry: %u) landing point (ID: %u X: %f Y: %f Z: %f)", i_owner->GetEntry(), id, x, y, z);
-    Mutate(new PointMovementGenerator<Creature>(id, x, y, z), MOTION_SLOT_ACTIVE);
+    Mutate(new PointMovementGenerator<Creature>(id, x, y, z,true), MOTION_SLOT_ACTIVE);
 
     MonsterMoveData data;
     data.DestLocation.Relocate(pos);

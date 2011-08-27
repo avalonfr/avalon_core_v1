@@ -595,14 +595,14 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             if (!caster)
                 break;
             // Earth Shield
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellProto->SpellFamilyFlags[1] & 0x400)
+            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellFamilyFlags[1] & 0x400)
                 {
 					// return to unmodified by spellmods value
-					amount = m_spellProto->EffectBasePoints[m_effIndex];
+					amount = m_spellInfo->Effects[m_effIndex].BasePoints;
 					// apply spell healing bonus
-					amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellProto(), amount, SPELL_DIRECT_DAMAGE);
+					amount = caster->SpellHealingBonus(GetBase()->GetUnitOwner(), GetSpellInfo(), amount, SPELL_DIRECT_DAMAGE);
 					// apply spellmods
-					amount = caster->ApplyEffectModifiers(GetSpellProto(), m_effIndex, float(amount));
+					amount = caster->ApplyEffectModifiers(GetSpellInfo(), m_effIndex, float(amount));
 				}
 			break;
 
@@ -610,9 +610,9 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
             if (!caster)
                 break;
             // Thorns
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags[0] & 0x100)
+            if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellFamilyFlags[0] & 0x100)
                 // 3.3% from sp bonus
-                DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.033f;
+                DoneActualBenefit = caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()) * 0.033f;
             break;
 
         case SPELL_AURA_PERIODIC_DAMAGE:

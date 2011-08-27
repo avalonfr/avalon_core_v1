@@ -1191,7 +1191,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 break;
 			case SPELLFAMILY_HUNTER:
 				// Rapid Killing
-				if (GetSpellProto()->SpellFamilyFlags[1] & 0x01000000)
+				if (GetSpellInfo()->SpellFamilyFlags[1] & 0x01000000)
 				{
 					// Rapid Recuperation
 					// FIXME: this is completely wrong way to fixing this talent
@@ -1556,7 +1556,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (GetId() == 1784)
                     target->RemoveAurasWithFamily(SPELLFAMILY_ROGUE, 0x0000800, 0, 0, target->GetGUID());
                 // Remove Savage Combat triggered aura at poisons remove
-				else if (GetSpellProto()->SpellFamilyFlags[1] & 0x80000 &&
+				else if (GetSpellInfo()->SpellFamilyFlags[1] & 0x80000 &&
 					caster && (caster->HasAura(51682) || caster->HasAura(58413)))
 				{
 					// this is just temp solution and has some problems
@@ -1611,7 +1611,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             break;
 			case SPELLFAMILY_DRUID:
 				// Enrage - armor reduction implemented here
-				if (GetSpellProto()->SpellFamilyFlags[0] & 0x80000)
+				if (GetSpellInfo()->SpellFamilyFlags[0] & 0x80000)
 					{
 						if (AuraEffect * auraEff = target->GetAuraEffectOfRankedSpell(1178, 0))
 						{

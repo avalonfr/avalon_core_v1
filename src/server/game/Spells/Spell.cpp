@@ -945,7 +945,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex, bool checkIfValid /*=t
     }
 
     // Calculate hit result
-   target.missCondition = m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
+   target.missCondition = m_originalCaster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
 	if (m_skipCheck && target.missCondition != SPELL_MISS_IMMUNE)
 		target.missCondition = SPELL_MISS_NONE;
 
@@ -1272,7 +1272,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         caster->DealSpellDamage(&damageInfo, true);
 
 		 // unleashed dark & light
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC && m_spellInfo->EffectTriggerSpell[1] == 3617 && (m_spellInfo->SpellIconID == 1988 || m_spellInfo->SpellIconID == 1874))
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_GENERIC && m_spellInfo->Effects[1].TriggerSpell == 3617 && (m_spellInfo->SpellIconID == 1988 || m_spellInfo->SpellIconID == 1874))
         {
             AuraEffect const* pAurEff;
             if ((pAurEff = unitTarget->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE,SPELLFAMILY_GENERIC,1,0)) && !damageInfo.damage)
@@ -1400,7 +1400,7 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
         if (m_caster->IsHostileTo(unit))
         {
 		// spell misses if target has Invisibility or Vanish and isn't visible for caster
-            if (m_spellInfo->speed > 0.0f && unit == m_targets.GetUnitTarget()
+            if (m_spellInfo->Speed > 0.0f && unit == m_targets.GetUnitTarget()
                 && ((unit->HasInvisibilityAura() || m_caster->HasInvisibilityAura())
                 || unit->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_STEALTH, SPELLFAMILY_ROGUE, SPELLFAMILYFLAG_ROGUE_VANISH))
                 && !m_caster->canSeeOrDetect(unit))
@@ -1412,8 +1412,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer())
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 
-			bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
-            m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
+			bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
+            m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask() , binary, m_spellInfo);
             if (m_resist >= 100)
                 return SPELL_MISS_RESIST;
 
@@ -1438,10 +1438,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask, bool 
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
             }
         }
-		else if (!IsPositiveSpell(m_spellInfo->Id))
+		else if (!m_spellInfo->IsPositive())
 		{
-			bool binary = (uint32(sSpellMgr->GetSpellCustomAttr(m_spellInfo->Id) & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
-			m_resist = m_caster->CalcSpellResistance(unit, GetSpellSchoolMask(m_spellInfo), binary, m_spellInfo);
+			bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
+			m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask(), binary, m_spellInfo);
 			if (m_resist >= 100)
 				return SPELL_MISS_RESIST;
 		}

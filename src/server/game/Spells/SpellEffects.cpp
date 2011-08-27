@@ -461,21 +461,7 @@ void Spell::SpellDamageSchoolDmg(SpellEffIndex effIndex)
 							damage *= pow(1.0f - distance / 100.0f, 2);
 						break;
 					}
-                    // Loken Pulsing Shockwave
-                    case 59837:
-                    case 52942:
-                    {
-                        // don't damage self and only players
-                        if (unitTarget->GetGUID() == m_caster->GetGUID() || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                            return;
-
-                        float radius = GetSpellRadiusForHostile(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[0]));
-                        if (!radius)
-                            return;
-                        float distance = m_caster->GetDistance2d(unitTarget);
-                        damage = (distance > radius) ? 0 : int32(SpellMgr::CalculateSpellEffectAmount(m_spellInfo, 0) * distance);
-                        break;
-                    }
+				}
             }
             case SPELLFAMILY_WARRIOR:
             {
@@ -793,7 +779,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 {
                     if (effIndex==0)
                     {
-                            unitTarget->ToPlayer()->SetReputation(m_spellInfo->EffectBasePoints[0]+1,21000);
+                            unitTarget->ToPlayer()->SetReputation(m_spellInfo->Effects[0].BasePoints+1,21000);
                     }
                     return;
                 }
@@ -1618,7 +1604,7 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 case 45176: // Master Poisoner Proc Trigger (SERVERSIDE)
                 {
                     uint32 spellId = damage;
-                    uint32 value = SpellMgr::CalculateSpellEffectAmount(m_triggeredByAuraSpell, EFFECT_0);
+                    uint32 value = m_triggeredByAuraSpell->Effects[EFFECT_0].CalcValue();
 
                     if (AuraEffect * aurEff = unitTarget->GetAuraEffect(spellId, EFFECT_2, m_caster->GetGUID()))
                         aurEff->SetAmount(value);
@@ -1766,22 +1752,6 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
                         passenger->GetMotionMaster()->MoveJump(x, y, z, m_targets.GetSpeedXY(), m_targets.GetSpeedZ());
                     }                    
                 return;    
-            case 66629:
-            case 66638:
-            {
-                if(!(m_caster->GetTypeId()==TYPEID_PLAYER))
-                    return;
-                Player *plr = m_caster->ToPlayer();
-                if (Battleground *bg = plr->GetBattleground())
-                    {
-                        if (bg->GetTypeID(true) == BATTLEGROUND_IC)
-                            bg->EventPlayerCapturedFlag(plr);
-                        return;
-                    }
-                
-                return;
-            }
-
             case 52588: // Skeletal Gryphon Escape
             case 48598: // Ride Flamebringer Cue
                 unitTarget->RemoveAura(damage);
