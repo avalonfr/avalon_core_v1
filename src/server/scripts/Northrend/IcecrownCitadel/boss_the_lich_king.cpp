@@ -23,6 +23,7 @@
 #include "icecrown_citadel.h"
 #include "Group.h"
 #include "MapManager.h"
+#include "Vehicle.h"
 
 #define GOSSIP_MENU 10700
 #define GOSSIP_START_EVENT "We are prepared, Highlord. Let us battle for the fate of Azeroth! For the light of dawn!"
@@ -382,58 +383,58 @@ class boss_the_lich_king : public CreatureScript
                 if(me->GetMotionMaster()->GetCurrentMovementGeneratorType() == POINT_MOTION_TYPE)
                     me->GetMotionMaster()->MovementExpired();
 
-                if (SpellEntry* spellDefile = GET_SPELL(SPELL_SUMMON_DEFILE))
+                if (SpellEntry* spellDefile = (SpellEntry*)sSpellStore.LookupEntry(SPELL_SUMMON_DEFILE))
                     spellDefile->DurationIndex = 3;
 
-                if (SpellEntry* lock = GET_SPELL(SPELL_ICEBLOCK_TRIGGER))
+                if (SpellEntry* lock = (SpellEntry*)sSpellStore.LookupEntry(SPELL_ICEBLOCK_TRIGGER))
                     lock->Targets = 6; //target chain damage
 
-                if (SpellEntry* reaper = GET_SPELL(SPELL_SOUL_REAPER_HASTE_AURA))
+                if (SpellEntry* reaper = (SpellEntry*)sSpellStore.LookupEntry(SPELL_SOUL_REAPER_HASTE_AURA))
                     reaper->Targets = 1;
 
-                if (SpellEntry* plague = GET_SPELL(SPELL_PLAGUE_SIPHON)) //hack
+                if (SpellEntry* plague = (SpellEntry*)sSpellStore.LookupEntry(SPELL_PLAGUE_SIPHON)) //hack
                     plague->Targets = 18;
 
-                if (SpellEntry *shadowEffect = GET_SPELL(SPELL_SHADOW_TRAP_EFFECT))
+                if (SpellEntry *shadowEffect = (SpellEntry*)sSpellStore.LookupEntry(SPELL_SHADOW_TRAP_EFFECT))
                     shadowEffect->EffectRadiusIndex[1] = 13;
 
-                if (SpellEntry* raging = GET_SPELL(SPELL_SUMMON_RAGING_SPIRIT))
+                if (SpellEntry* raging = (SpellEntry*)sSpellStore.LookupEntry(SPELL_SUMMON_RAGING_SPIRIT))
                 {
                     raging->DurationIndex = 28;
                     raging->Effect[0] = 6;
                 }
 
-                if (SpellEntry* furyOfFrostmourne = GET_SPELL(SPELL_FURY_OF_FROSTMOURNE))
+                if (SpellEntry* furyOfFrostmourne = (SpellEntry*)sSpellStore.LookupEntry(SPELL_FURY_OF_FROSTMOURNE))
                 {
                     furyOfFrostmourne->Effect[0] = SPELL_EFFECT_APPLY_AURA;
                     furyOfFrostmourne->Effect[1] = SPELL_EFFECT_INSTAKILL;
                     furyOfFrostmourne->EffectRadiusIndex[0] = 22;
                     furyOfFrostmourne->EffectRadiusIndex[1] = 22;
                     furyOfFrostmourne->EffectImplicitTargetA[0] = TARGET_SRC_CASTER;
-                    furyOfFrostmourne->EffectImplicitTargetB[0] = TARGET_UNIT_AREA_ENEMY_SRC;
+                    furyOfFrostmourne->EffectImplicitTargetB[0] = TARGET_UNIT_SRC_AREA_ENEMY;
                     furyOfFrostmourne->EffectAmplitude[0] = 50000;
                 }
-                if (SpellEntry *furyOfFrostmournenores = GET_SPELL(SPELL_FURY_OF_FROSTMOURNE_NORES))
+                if (SpellEntry *furyOfFrostmournenores = (SpellEntry*)sSpellStore.LookupEntry(SPELL_FURY_OF_FROSTMOURNE_NORES))
                 {
                     furyOfFrostmournenores->EffectRadiusIndex[0] = 22;
                 }
-                if(SpellEntry* spellRaiseDead = GET_SPELL(SPELL_RAISE_DEAD_EFFECT))
+                if(SpellEntry* spellRaiseDead = (SpellEntry*)sSpellStore.LookupEntry(SPELL_RAISE_DEAD_EFFECT))
                 {
                     spellRaiseDead->EffectRadiusIndex[0] = 22;
                 }
-                if (SpellEntry* massResurrection = GET_SPELL(SPELL_REVIVE))
+                if (SpellEntry* massResurrection = (SpellEntry*)sSpellStore.LookupEntry(SPELL_REVIVE))
                 {
                     massResurrection->EffectRadiusIndex[0] = 4;
-                    massResurrection->AttributesEx3 |= SPELL_ATTR3_REQUIRE_DEAD_TARGET;
+                    massResurrection->AttributesEx3 |= SPELL_ATTR3_ONLY_TARGET_GHOSTS;
                 }
 
-                if (SpellEntry* defileDamage = GET_SPELL(SPELL_DEFILE_DAMAGE))
+                if (SpellEntry* defileDamage = (SpellEntry*)sSpellStore.LookupEntry(SPELL_DEFILE_DAMAGE))
                 {
                     defileDamage->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
                     defileDamage->EffectImplicitTargetB[1] = TARGET_UNIT_TARGET_ENEMY;
                 }
 
-                if (SpellEntry* remorselessWinter = GET_SPELL(SPELL_REMORSELESS_WINTER_10N || SPELL_REMORSELESS_WINTER_10H || SPELL_REMORSELESS_WINTER_25N || SPELL_REMORSELESS_WINTER_25H))
+                if (SpellEntry* remorselessWinter = (SpellEntry*)sSpellStore.LookupEntry(SPELL_REMORSELESS_WINTER_10N || SPELL_REMORSELESS_WINTER_10H || SPELL_REMORSELESS_WINTER_25N || SPELL_REMORSELESS_WINTER_25H))
                     remorselessWinter->Effect[2] = 0;
 
                 if (instance)
@@ -1663,9 +1664,9 @@ class npc_valkyr_shadowguard : public CreatureScript
 
         struct npc_valkyr_shadowguardAI : public ScriptedAI
         {
-            npc_valkyr_shadowguardAI(Creature* creature) : ScriptedAI(creature), vehicle(creature->GetVehicleKit()), m_victimGuid(0)
+            npc_valkyr_shadowguardAI(Creature* creature) : ScriptedAI(creature), _vehicle(creature->GetVehicleKit()), m_victimGuid(0)
             {
-                ASSERT(vehicle);
+                ASSERT(_vehicle);
             }
 
             void Reset()
@@ -1695,7 +1696,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             {
                 if (!HealthAbovePct(50) && IsHeroic() && !bCanCast)
                 {
-                    vehicle->RemoveAllPassengers();
+                    _vehicle->RemoveAllPassengers();
                     me->RemoveAllAuras();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     me->GetMotionMaster()->MovePoint(POINT_VALKYR_ZET, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ() + 10);
@@ -1721,19 +1722,19 @@ class npc_valkyr_shadowguard : public CreatureScript
                 }
             }
 
-            void SpellHitTarget(Unit* victim, SpellEntry const* spellEntry)
+            void SpellHitTarget(Unit* victim, SpellInfo const* spellInfo)
             {
-                if (spellEntry->Id == SPELL_VALKYR_CHARGE)
+                if (spellInfo->Id == SPELL_VALKYR_CHARGE)
                     if (Player *player = ObjectAccessor::GetPlayer(*me, m_victimGuid))
                         DoCast(player, SPELL_VALKYR_CARRY_CAN_CAST, true);
 
-                ScriptedAI::SpellHitTarget(victim, spellEntry);
+                ScriptedAI::SpellHitTarget(victim, spellInfo);
             }
 
-            void SpellHit(Unit* attacker, const SpellEntry* spellEntry)
+            void SpellHit(Unit* attacker, const SpellInfo* spellInfo)
             {
-                if (spellEntry)
-                    switch (spellEntry->Id)
+                if (spellInfo)
+                    switch (spellInfo->Id)
                     {
                         case SPELL_VALKYR_GRAB_PLAYER:
                         {
@@ -1798,7 +1799,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                             //me->GetMotionMaster()->MovePoint(POINT_PLATFORM_END, MovePos[4]);
                         }
                     }
-                ScriptedAI::SpellHit(attacker, spellEntry);
+                ScriptedAI::SpellHit(attacker, spellInfo);
             }
 
             void MovementInform(uint32 type, uint32 id)
@@ -1905,7 +1906,7 @@ class npc_valkyr_shadowguard : public CreatureScript
             Position m_pos;
             float m_angle;
             uint32 m_moveUpdatePeriod;
-            Vehicle* vehicle;
+            Vehicle* _vehicle;
             uint64 m_victimGuid;
         };
 
@@ -2419,7 +2420,8 @@ class npc_defile : public CreatureScript
             {
                 if (!alreadyReset)
                 {
-                    if (SpellEntry const* defileAuraSpellEntry = sSpellMgr->GetSpellForDifficultyFromSpell(sSpellStore.LookupEntry(SPELL_DEFILE), me))
+					SpellInfo const* spell = sSpellMgr->GetSpellInfo(SPELL_DEFILE);
+                    if (SpellInfo const* defileAuraSpellEntry = sSpellMgr->GetSpellForDifficultyFromSpell(spell, me))
                         DoCast(me, defileAuraSpellEntry->Id, true);
                     //UpdateDefileAura();
                     me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
@@ -2838,8 +2840,8 @@ class spell_lich_king_pain_and_suffering_effect : public SpellScriptLoader
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_lich_king_pain_and_suffering_effect_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_TARGET_ENEMY);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_lich_king_pain_and_suffering_effect_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_AREA_PATH);
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_lich_king_pain_and_suffering_effect_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_AREA_PATH);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_lich_king_pain_and_suffering_effect_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_CONE_ENEMY_104);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_lich_king_pain_and_suffering_effect_SpellScript::FilterTargets, EFFECT_2, TARGET_UNIT_CONE_ENEMY_104);
                 //OnEffect += SpellEffectFn(spell_lich_king_pain_and_suffering_effect_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCHOOL_DAMAGE);
             }
         };
@@ -2952,7 +2954,7 @@ class spell_lich_king_necrotic_plague : public SpellScriptLoader
                 if (stacksTransferred < 1)
                     stacksTransferred = 1;
 
-                uint32 spellId = aurEff->GetSpellProto()->Id;
+                uint32 spellId = aurEff->GetSpellInfo()->Id;
                 InstanceScript* instance = target->GetInstanceScript();
 
                 if (instance)
@@ -3049,11 +3051,11 @@ class spell_lich_king_defile : public SpellScriptLoader
 
                 uint32 triggeredSpellId = SPELL_DEFILE_DAMAGE;
                 int32 triggeredSpellBaseDamage = 3000;
-
-                if (SpellEntry const* defileDamage = sSpellMgr->GetSpellForDifficultyFromSpell(sSpellStore.LookupEntry(SPELL_DEFILE_DAMAGE), caster))
+				SpellInfo const* spelldamage = sSpellMgr->GetSpellInfo(SPELL_DEFILE_DAMAGE);
+                if (SpellInfo const* defileDamage = sSpellMgr->GetSpellForDifficultyFromSpell(spelldamage, caster))
                 {
                     triggeredSpellId = defileDamage->Id;
-                    triggeredSpellBaseDamage = (int32)(defileDamage->EffectBasePoints[EFFECT_0] * (1.0f + (map->IsHeroic() ? 0.1f : 0.05f) * m_hitCount));
+                    triggeredSpellBaseDamage = (int32)(defileDamage->Effects[EFFECT_0].BasePoints * (1.0f + (map->IsHeroic() ? 0.1f : 0.05f) * m_hitCount));
                 }
 
                 values.AddSpellMod(SPELLVALUE_BASE_POINT0, ((int32)(triggeredSpellBaseDamage)));
@@ -3082,8 +3084,8 @@ class spell_lich_king_defile : public SpellScriptLoader
 
                 if (!increaseRadius)
                     return;
-
-                if (SpellEntry const* defileIncrease = sSpellMgr->GetSpellForDifficultyFromSpell(sSpellStore.LookupEntry(SPELL_DEFILE_INCREASE), caster))
+				SpellInfo const* spellincrease = sSpellMgr->GetSpellInfo(SPELL_DEFILE_INCREASE);
+                if (SpellInfo const* defileIncrease = sSpellMgr->GetSpellForDifficultyFromSpell(spellincrease, caster))
                 {
                     caster->CastSpell(caster, defileIncrease->Id, true);
 
@@ -3130,7 +3132,7 @@ class spell_lich_king_infection : public SpellScriptLoader
                     //if (it != apmap.end())
                     //    apmap.erase(it);
                     PreventDefaultAction();
-                    GetTarget()->RemoveAurasDueToSpell(aurEff->GetSpellProto()->Id);
+                    GetTarget()->RemoveAurasDueToSpell(aurEff->GetSpellInfo()->Id);
                 }
             }
 
@@ -3178,9 +3180,9 @@ class spell_lich_king_valkyr_summon : public SpellScriptLoader
                 {
                     Position randomPos;
                     caster->GetRandomNearPosition(randomPos, 10.0f);
-                    uint32 triggerSpellId = GetSpellProto()->EffectTriggerSpell[aurEff->GetEffIndex()];
+                    uint32 triggerSpellId = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
                     randomPos.m_positionZ = caster->GetPositionZ() + 6.0f;
-                    caster->CastSpell(randomPos.GetPositionX(), randomPos.GetPositionY(), randomPos.GetPositionZ(), triggerSpellId, true, NULL, NULL, GetCasterGUID(), caster);
+                    caster->CastSpell(randomPos.GetPositionX(), randomPos.GetPositionY(), randomPos.GetPositionZ(), triggerSpellId, true, NULL, NULL, GetCasterGUID());
                 }
             }
 
@@ -3231,7 +3233,7 @@ class spell_lich_king_vile_spirit_summon : public SpellScriptLoader
                 Position pos;
                 caster->GetRandomNearPosition(pos, 13.0f);
                 pos.m_positionZ = npc_vile_spirit::Z_VILE_SPIRIT;
-                uint32 triggeredSpell = aurEff->GetSpellProto()->EffectTriggerSpell[aurEff->GetEffIndex()];
+                uint32 triggeredSpell = aurEff->GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
                 caster->CastSpell(pos.m_positionX, pos.m_positionY, pos.m_positionZ, triggeredSpell, true);
             }
 
@@ -3268,7 +3270,7 @@ class spell_lich_king_vile_spirit_summon_visual : public SpellScriptLoader
                 Position pos;
                 caster->GetRandomNearPosition(pos, 13.0f);
                 pos.m_positionZ = npc_vile_spirit::Z_VILE_SPIRIT;
-                uint32 triggeredSpell = aurEff->GetSpellProto()->EffectTriggerSpell[aurEff->GetEffIndex()];
+                uint32 triggeredSpell = aurEff->GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
                 caster->CastSpell(pos.m_positionX, pos.m_positionY, pos.m_positionZ, triggeredSpell, true);
             }
 
@@ -3567,7 +3569,7 @@ class spell_valkyr_target_search : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_valkyr_target_search_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_AREA_ENEMY_SRC);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_valkyr_target_search_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
                 OnEffect += SpellEffectFn(spell_valkyr_target_search_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
@@ -3593,8 +3595,8 @@ class spell_valkyr_eject_passenger : public SpellScriptLoader
                 if (!(GetCaster() && GetCaster()->IsVehicle()))
                     return;
 
-                if (Vehicle* vehicle = GetCaster()->GetVehicleKit())
-                    vehicle->RemoveAllPassengers();
+                if (Vehicle* _vehicle = GetCaster()->GetVehicleKit())
+                    _vehicle->RemoveAllPassengers();
             }
 
             void Register()

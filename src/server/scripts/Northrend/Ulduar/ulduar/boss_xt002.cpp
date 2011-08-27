@@ -17,6 +17,7 @@
 
 #include "ScriptPCH.h"
 #include "ulduar.h"
+#include "Vehicle.h"
 
 enum Spells
 {
@@ -147,13 +148,13 @@ public:
 
     struct boss_xt002_AI : public BossAI
     {
-        boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, BOSS_XT002), vehicle(me->GetVehicleKit())
+        boss_xt002_AI(Creature *pCreature) : BossAI(pCreature, BOSS_XT002), _vehicle(me->GetVehicleKit())
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         }
 
-        Vehicle *vehicle;
+        Vehicle *_vehicle;
     
         uint32 uiSearingLightTimer;
         uint32 uiSpawnLifeSparkTimer;
@@ -205,7 +206,7 @@ public:
             phase = 1;
             heart_exposed = 0;
 
-            vehicle->Reset();
+            _vehicle->Reset();
 
             if (instance)
                 instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT, ACHIEV_TIMED_START_EVENT);
@@ -447,7 +448,7 @@ public:
             me->AttackStop();
 
             // Expose the heart npc
-            if (Unit *Heart = vehicle->GetPassenger(0))
+            if (Unit *Heart = _vehicle->GetPassenger(0))
                 Heart->ToCreature()->AI()->DoAction(0);
              
             // Start "end of phase 2 timer"
@@ -853,7 +854,7 @@ class spell_xt002_gravity_bomb : public SpellScriptLoader
 
             void Register()
             {
-                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_gravity_bomb_SpellScript::FilterTargets, EFFECT_0, TARGET_DST_CASTER);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_xt002_gravity_bomb_SpellScript::FilterTargets, EFFECT_0, TARGET_DEST_CASTER);
             }
         };
 

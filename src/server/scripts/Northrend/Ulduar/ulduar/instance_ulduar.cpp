@@ -496,7 +496,7 @@ public:
                     if (GameObject* HodirRareChest = instance->GetGameObject(HodirRareChestGUID))
                     {
                         if (value == GO_STATE_READY)
-                            HodirRareChest->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_UNK1);
+                            HodirRareChest->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_NOT_SELECTABLE);
                     }
                     break;
                case BOSS_ALGALON:
@@ -537,7 +537,7 @@ public:
                     if (GameObject* pThorimLever = instance->GetGameObject(ThorimLeverGUID))
                     {
                         if (state == IN_PROGRESS)
-                            pThorimLever->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_UNK1);
+                            pThorimLever->RemoveFlag(GAMEOBJECT_FLAGS,GO_FLAG_NOT_SELECTABLE);
                     }
 					/*activation image gardien gossip*/
 					if (Creature* pThorimGossip = instance->GetCreature(uiThorimYS))

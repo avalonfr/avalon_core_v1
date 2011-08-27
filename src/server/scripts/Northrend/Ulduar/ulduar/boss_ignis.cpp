@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "ulduar.h"
+#include "Vehicle.h"
 
 enum Yells
 {
@@ -127,13 +128,13 @@ public:
 
     struct boss_ignis_AI : public BossAI
     {
-        boss_ignis_AI(Creature *pCreature) : BossAI(pCreature, BOSS_IGNIS), vehicle(me->GetVehicleKit())
+        boss_ignis_AI(Creature *pCreature) : BossAI(pCreature, BOSS_IGNIS), _vehicle(me->GetVehicleKit())
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         }
 
-        Vehicle* vehicle;
+        Vehicle* _vehicle;
         std::vector<Creature *> construct_list;
     
         uint32 SlagPotGUID;
@@ -149,8 +150,8 @@ public:
         
             construct_list.clear();
         
-            if (vehicle)
-                vehicle->RemoveAllPassengers();
+            if (_vehicle)
+                _vehicle->RemoveAllPassengers();
             
             for (uint8 n = 0; n < 20; n++)
             {
@@ -225,7 +226,7 @@ public:
                     case EVENT_GRAB_POT:
                         if (Unit* SlagPotTarget = Unit::GetUnit(*me, SlagPotGUID))
                         {
-                            SlagPotTarget->_EnterVehicle(vehicle, 0);
+                            SlagPotTarget->_EnterVehicle(_vehicle, 0);
                             events.ScheduleEvent(EVENT_CHANGE_POT, 1000);
                         }
                         break;

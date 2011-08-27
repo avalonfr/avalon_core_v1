@@ -43,7 +43,7 @@ class HomeMovementGenerator<Creature>
         void Reset(Creature &);
 
         bool Update(Creature &, const uint32);
-        void modifyTravelTime(uint32 travel_time) { i_travel_timer = travel_time; }
+        void modifyTravelTime(uint32 travel_time) { i_travel_time = travel_time; }
 
         MovementGeneratorType GetMovementGeneratorType() { return HOME_MOTION_TYPE; }
 

@@ -24,6 +24,7 @@ EndScriptData */
 
 #include "ScriptPCH.h"
 #include "ulduar.h"
+#include "Vehicle.h"
 
 enum Yells
 {
@@ -665,14 +666,14 @@ public:
 
     struct boss_leviathan_mkAI : public BossAI
     {
-        boss_leviathan_mkAI(Creature *pCreature) : BossAI(pCreature, BOSS_MIMIRON), vehicle(me->GetVehicleKit()), phase(PHASE_NULL)
+        boss_leviathan_mkAI(Creature *pCreature) : BossAI(pCreature, BOSS_MIMIRON), _vehicle(me->GetVehicleKit()), phase(PHASE_NULL)
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
         }
         
-        Vehicle* vehicle;
+        Vehicle* _vehicle;
         Phases phase;
         EventMap events;
         
@@ -685,8 +686,8 @@ public:
             me->RemoveAllAuras();
             phase = PHASE_NULL;
             events.SetPhase(PHASE_NULL);
-            if (vehicle->HasEmptySeat(3))
-                vehicle->Reset();
+            if (_vehicle->HasEmptySeat(3))
+                _vehicle->Reset();
         }
 
         void KilledUnit(Unit *who)
@@ -717,7 +718,7 @@ public:
                     phase = PHASE_NULL;
                     if (Creature *pMimiron = me->GetCreature(*me, instance->GetData64(DATA_MIMIRON)))
                         pMimiron->AI()->DoAction(DO_ACTIVATE_VX001);
-                    if (Creature *turret = CAST_CRE(vehicle->GetPassenger(3)))
+                    if (Creature *turret = CAST_CRE(_vehicle->GetPassenger(3)))
                         turret->Kill(turret, false);
                     me->SetSpeed(MOVE_RUN, 1.5f, true);
                     me->GetMotionMaster()->MovePoint(0, 2790.11f, 2595.83f, 364.32f);
@@ -748,7 +749,7 @@ public:
                 events.ScheduleEvent(EVENT_FLAME_SUPPRESSANT, 60000, 0, PHASE_LEVIATHAN_SOLO);
             }
             
-            if (Creature *turret = CAST_CRE(vehicle->GetPassenger(3)))
+            if (Creature *turret = CAST_CRE(_vehicle->GetPassenger(3)))
             {
                 turret->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 turret->SetReactState(REACT_AGGRESSIVE);
@@ -953,14 +954,14 @@ public:
 
     struct boss_vx_001AI : public BossAI
     {
-        boss_vx_001AI(Creature *pCreature) : BossAI(pCreature, BOSS_MIMIRON), vehicle(me->GetVehicleKit()), phase(PHASE_NULL)
+        boss_vx_001AI(Creature *pCreature) : BossAI(pCreature, BOSS_MIMIRON), _vehicle(me->GetVehicleKit()), phase(PHASE_NULL)
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
         }
         
-        Vehicle* vehicle;
+        Vehicle* _vehicle;
         Phases phase;
         EventMap events;
         
@@ -1177,14 +1178,14 @@ public:
 
     struct boss_aerial_unitAI : public BossAI
     {
-        boss_aerial_unitAI(Creature *pCreature) : BossAI(pCreature, BOSS_MIMIRON), vehicle(me->GetVehicleKit()), phase(PHASE_NULL)
+        boss_aerial_unitAI(Creature *pCreature) : BossAI(pCreature, BOSS_MIMIRON), _vehicle(me->GetVehicleKit()), phase(PHASE_NULL)
         {
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             me->ApplySpellImmune(0, IMMUNITY_ID, SPELL_ROCKET_STRIKE_DMG, true);
         }
         
-        Vehicle* vehicle;
+        Vehicle* _vehicle;
         Phases phase;
         EventMap events;
         uint8 spawnedAdds;
