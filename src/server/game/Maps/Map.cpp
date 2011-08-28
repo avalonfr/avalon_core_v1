@@ -40,7 +40,7 @@ union u_map_magic
 };
 
 u_map_magic MapMagic        = { {'M','A','P','S'} };
-u_map_magic MapVersionMagic = { {'v','1','.','1'} };
+u_map_magic MapVersionMagic = { {'v','2','.','1'} };
 u_map_magic MapAreaMagic    = { {'A','R','E','A'} };
 u_map_magic MapHeightMagic  = { {'M','H','G','T'} };
 u_map_magic MapLiquidMagic  = { {'M','L','I','Q'} };
