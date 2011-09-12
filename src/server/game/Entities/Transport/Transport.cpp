@@ -91,8 +91,8 @@ void MapManager::LoadTransports()
             delete t;
             continue;
         }
-
-        m_Transports.insert(t);
+		
+		m_Transports.insert(t);
 
         for (std::set<uint32>::const_iterator i = mapsUsed.begin(); i != mapsUsed.end(); ++i)
             m_TransportsByMap[*i].insert(t);
@@ -672,10 +672,8 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
         delete pCreature;
         return 0;
     }
-
     map->Add(pCreature);
     m_NPCPassengerSet.insert(pCreature);
-
     if (tguid == 0)
     {
         ++currenttguid;
@@ -683,7 +681,6 @@ uint32 Transport::AddNPCPassenger(uint32 tguid, uint32 entry, float x, float y, 
     }
     else
         currenttguid = std::max(tguid, currenttguid);
-
     pCreature->SetGUIDTransport(tguid);
     sScriptMgr->OnAddCreaturePassenger(this, pCreature);
     return tguid;
