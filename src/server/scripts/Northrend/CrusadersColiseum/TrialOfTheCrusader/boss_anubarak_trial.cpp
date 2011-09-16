@@ -68,8 +68,8 @@ enum BossSpells
     SPELL_SUBMERGE_ANUBARAK = 65981,
     SPELL_CLEAR_ALL_DEBUFFS = 34098,
     SPELL_EMERGE_ANUBARAK   = 65982,
-    SPELL_SUMMON_BEATLES    = 66339,
-    SPELL_SUMMON_BURROWER   = 66332,
+    SPELL_SUMMON_BEATLES    = 66340,
+    SPELL_SUMMON_BURROWER   = 66333,
 
     // Burrow
     SPELL_CHURNING_GROUND   = 66969,
@@ -154,6 +154,7 @@ public:
         uint32 m_uiSummonScarabTimer;
         uint32 m_uiSummonFrostSphereTimer;
         uint32 m_uiBerserkTimer;
+		uint32 m_uitargetflag;
 
         uint8  m_uiStage;
         bool   m_bIntro;
@@ -173,7 +174,7 @@ public:
             m_uiSummonScarabTimer = 2*IN_MILLISECONDS;
 
             m_uiSummonFrostSphereTimer = 20*IN_MILLISECONDS;
-
+			m_uitargetflag = 3600 * 24 * IN_MILLISECONDS;
             m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
             m_uiStage = 0;
             m_uiScarabSummoned = 0;
@@ -390,11 +391,20 @@ public:
 
             if (HealthBelowPct(30) && m_uiStage == 0 && !m_bReachedPhase3)
             {
+				me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                 m_bReachedPhase3 = true;
                 DoCastAOE(SPELL_LEECHING_SWARM);
                 DoScriptText(EMOTE_LEECHING_SWARM, me);
                 DoScriptText(SAY_LEECHING_SWARM, me);
+				m_uitargetflag = 4000;
             }
+
+			if (m_uitargetflag <= uiDiff)
+			{
+				me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+				m_uitargetflag = 3600 * 1000 *24;
+			} else m_uitargetflag -= uiDiff;
+
 
             if (m_uiBerserkTimer <= uiDiff && !me->HasAura(SPELL_BERSERK))
             {
