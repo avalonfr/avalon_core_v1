@@ -1398,7 +1398,7 @@ void GameObject::Use(Unit* user)
                 // and its required target number is 1 (outter for loop will run once)
                 if (info->summoningRitual.casterTargetSpell && info->summoningRitual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
                 {
-                    for (int i = 0; i < info->summoningRitual.casterTargetSpellTargets; i++)
+                    for (uint32 i = 0; i < info->summoningRitual.casterTargetSpellTargets; i++)
                     {
                         if (Unit* target = Unit::GetUnit(*this, (uint64)SelectRandomContainerElement(m_unique_users)))
                             spellCaster->CastSpell(target, info->summoningRitual.casterTargetSpell, true);

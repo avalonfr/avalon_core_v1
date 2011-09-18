@@ -74,6 +74,7 @@ namespace VMAP
         protected:
             G3D::Matrix3 iInvRot;
             float iInvScale;
+			WorldModel* iModel;
     };
 } // namespace VMAP
 
