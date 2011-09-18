@@ -265,7 +265,7 @@ public:
             me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
         }
 
-        void SpellHit(Unit* /*caster*/, const SpellInfo *spell)
+        void SpellHit(Unit* /*caster*/, const SpellInfo* spell)
         {
             if (spell->Id == SPELL_FLARE || spell->Id == SPELL_FOLLY)
             {
@@ -490,7 +490,7 @@ public:
 
                     if (Wave_Timer <= diff)
                     {
-                        if (AffrayChallenger[Wave] && Wave < 6 && !EventBigWill)
+                        if (Wave < 6 && AffrayChallenger[Wave] && !EventBigWill)
                         {
                             DoScriptText(SAY_TWIGGY_FLATHEAD_FRAY, me);
                             Creature* creature = Unit::GetCreature((*me), AffrayChallenger[Wave]);

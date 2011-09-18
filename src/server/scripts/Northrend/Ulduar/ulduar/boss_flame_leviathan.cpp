@@ -861,8 +861,8 @@ public:
         }
     };
 
-};
 
+};
 
 class spell_pool_of_tar : public CreatureScript
 {

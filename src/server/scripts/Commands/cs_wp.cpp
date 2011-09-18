@@ -115,7 +115,7 @@ public:
             point = (*result)[0].GetUInt32();
 
         Player* player = handler->GetSession()->GetPlayer();
-        //Map *map = player->GetMap();
+        //Map* map = player->GetMap();
 
         WorldDatabase.PExecute("INSERT INTO waypoint_data (id, point, position_x, position_y, position_z) VALUES ('%u', '%u', '%f', '%f', '%f')",
             pathid, point+1, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
@@ -199,7 +199,7 @@ public:
     }
     static bool HandleWpUnLoadCommand(ChatHandler* handler, const char* /*args*/)
     {
-        uint32 guidlow = 0;
+
         Creature* target = handler->getSelectedCreature();
 
         if (!target)
@@ -208,11 +208,13 @@ public:
             return true;
         }
 
+        uint32 guidlow = target->GetDBTableGUIDLow();
+
         if (target->GetCreatureAddon())
         {
             if (target->GetCreatureAddon()->path_id != 0)
             {
-                WorldDatabase.PExecute("DELETE FROM creature_addon WHERE guid = %u", target->GetGUIDLow());
+                WorldDatabase.PExecute("DELETE FROM creature_addon WHERE guid = %u", guidlow);
                 target->UpdateWaypointID(0);
                 WorldDatabase.PExecute("UPDATE creature SET MovementType = '%u' WHERE guid = '%u'", IDLE_MOTION_TYPE, guidlow);
                 target->LoadPath(0);
@@ -291,7 +293,7 @@ public:
                 return true;
             }
 
-            Field *fields;
+            Field* fields;
 
             do
             {
@@ -373,8 +375,6 @@ public:
                 return true;
             }
 
-            float coord;
-
             if (arg_str_2 == "setid")
             {
                 uint32 newid = atoi(arg_3);
@@ -394,33 +394,29 @@ public:
 
                 if (arg_str_2 == "posx")
                 {
-                    coord = (float)(atof(arg_3));
                     WorldDatabase.PExecute("UPDATE waypoint_scripts SET x='%f' WHERE guid='%u'",
-                        coord, id);
+                        (float)(atof(arg_3)), id);
                     handler->PSendSysMessage("|cff00ff00Waypoint script:|r|cff00ffff %u|r|cff00ff00 position_x updated.|r", id);
                     return true;
                 }
                 else if (arg_str_2 == "posy")
                 {
-                    coord = (float)(atof(arg_3));
                     WorldDatabase.PExecute("UPDATE waypoint_scripts SET y='%f' WHERE guid='%u'",
-                        coord, id);
+                        (float)(atof(arg_3)), id);
                     handler->PSendSysMessage("|cff00ff00Waypoint script: %u position_y updated.|r", id);
                     return true;
                 }
                 else if (arg_str_2 == "posz")
                 {
-                    coord = (float)(atof(arg_3));
                     WorldDatabase.PExecute("UPDATE waypoint_scripts SET z='%f' WHERE guid='%u'",
-                        coord, id);
+                        (float)(atof(arg_3)), id);
                     handler->PSendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff%u|r|cff00ff00 position_z updated.|r", id);
                     return true;
                 }
                 else if (arg_str_2 == "orientation")
                 {
-                    coord = (float)(atof(arg_3));
                     WorldDatabase.PExecute("UPDATE waypoint_scripts SET o='%f' WHERE guid='%u'",
-                        coord, id);
+                        (float)(atof(arg_3)), id);
                     handler->PSendSysMessage("|cff00ff00Waypoint script: |r|cff00ffff%u|r|cff00ff00 orientation updated.|r", id);
                     return true;
                 }
@@ -523,7 +519,7 @@ public:
 
             do
             {
-                Field *fields = result->Fetch();
+                Field* fields = result->Fetch();
                 pathid = fields[0].GetUInt32();
                 point  = fields[1].GetUInt32();
             }
@@ -570,7 +566,7 @@ public:
             handler->PSendSysMessage("|cff00ff00DEBUG: wp move, PathID: |r|cff00ffff%u|r", pathid);
 
             Player* chr = handler->GetSession()->GetPlayer();
-            Map *map = chr->GetMap();
+            Map* map = chr->GetMap();
             {
                 // wpCreature
                 Creature* wpCreature = NULL;
@@ -698,7 +694,7 @@ public:
             handler->SendSysMessage("|cff00ffffDEBUG: wp show info:|r");
             do
             {
-                Field *fields = result->Fetch();
+                Field* fields = result->Fetch();
                 pathid                  = fields[0].GetUInt32();
                 uint32 point            = fields[1].GetUInt32();
                 uint32 delay            = fields[2].GetUInt32();
@@ -738,7 +734,7 @@ public:
                 bool hasError = false;
                 do
                 {
-                    Field *fields = result2->Fetch();
+                    Field* fields = result2->Fetch();
                     uint32 wpguid = fields[0].GetUInt32();
                     Creature* creature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(MAKE_NEW_GUID(wpguid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
 
@@ -768,7 +764,7 @@ public:
 
             do
             {
-                Field *fields = result->Fetch();
+                Field* fields = result->Fetch();
                 uint32 point    = fields[0].GetUInt32();
                 float x         = fields[1].GetFloat();
                 float y         = fields[2].GetFloat();
@@ -777,7 +773,7 @@ public:
                 uint32 id = VISUAL_WAYPOINT;
 
                 Player* chr = handler->GetSession()->GetPlayer();
-                Map *map = chr->GetMap();
+                Map* map = chr->GetMap();
                 float o = chr->GetOrientation();
 
                 Creature* wpCreature = new Creature;
@@ -821,7 +817,7 @@ public:
                 return false;
             }
 
-            Field *fields = result->Fetch();
+            Field* fields = result->Fetch();
             float x         = fields[0].GetFloat();
             float y         = fields[1].GetFloat();
             float z         = fields[2].GetFloat();
@@ -829,7 +825,7 @@ public:
 
             Player* chr = handler->GetSession()->GetPlayer();
             float o = chr->GetOrientation();
-            Map *map = chr->GetMap();
+            Map* map = chr->GetMap();
 
             Creature* creature = new Creature;
             if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
@@ -869,7 +865,7 @@ public:
                 handler->SetSentErrorMessage(true);
                 return false;
             }
-            Field *fields = result->Fetch();
+            Field* fields = result->Fetch();
             float x         = fields[0].GetFloat();
             float y         = fields[1].GetFloat();
             float z         = fields[2].GetFloat();
@@ -877,7 +873,7 @@ public:
 
             Player* chr = handler->GetSession()->GetPlayer();
             float o = chr->GetOrientation();
-            Map *map = chr->GetMap();
+            Map* map = chr->GetMap();
 
             Creature* creature = new Creature;
             if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, chr->GetPhaseMaskForSpawn(), id, 0, 0, x, y, z, o))
@@ -912,7 +908,7 @@ public:
             bool hasError = false;
             do
             {
-                Field *fields = result->Fetch();
+                Field* fields = result->Fetch();
                 uint32 guid = fields[0].GetUInt32();
                 Creature* creature = handler->GetSession()->GetPlayer()->GetMap()->GetCreature(MAKE_NEW_GUID(guid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
                 if (!creature)

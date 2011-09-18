@@ -422,7 +422,7 @@ void BattlegroundAV::StartingEventOpenDoors()
     DoorOpen(BG_AV_OBJECT_DOOR_A);
 }
 
-void BattlegroundAV::AddPlayer(Player *plr)
+void BattlegroundAV::AddPlayer(Player* plr)
 {
     Battleground::AddPlayer(plr);
     //create score and add it to map, default values are set in constructor
@@ -486,7 +486,7 @@ void BattlegroundAV::RemovePlayer(Player* plr, uint64 /*guid*/, uint32 /*team*/)
     plr->RemoveAurasDueToSpell(AV_BUFF_H_CAPTAIN);
 }
 
-void BattlegroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattlegroundAV::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if (GetStatus() != STATUS_IN_PROGRESS)
@@ -853,7 +853,7 @@ uint32 BattlegroundAV::GetObjectThroughNode(BG_AV_Nodes node)
 
 //called when using banner
 
-void BattlegroundAV::EventPlayerClickedOnFlag(Player *source, GameObject* target_obj)
+void BattlegroundAV::EventPlayerClickedOnFlag(Player* source, GameObject* target_obj)
 {
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -1029,8 +1029,8 @@ void BattlegroundAV::EventPlayerAssaultsPoint(Player* player, uint32 object)
             std::vector<uint64> ghost_list = m_ReviveQueue[m_BgCreatures[node]];
             if (!ghost_list.empty())
             {
-                Player *plr;
-                WorldSafeLocsEntry const *ClosestGrave = NULL;
+                Player* plr;
+                WorldSafeLocsEntry const* ClosestGrave = NULL;
                 for (std::vector<uint64>::iterator itr = ghost_list.begin(); itr != ghost_list.end(); ++itr)
                 {
                     plr = ObjectAccessor::FindPlayer(*ghost_list.begin());
@@ -1490,4 +1490,63 @@ void BattlegroundAV::ResetBGSubclass()
         if (m_BgCreatures[i])
             DelCreature(i);
 
+}
+
+bool BattlegroundAV::IsBothMinesControlledByTeam(uint32 team) const
+{
+    for (uint8 mine = 0; mine < 2; mine++)
+        if (m_Mine_Owner[mine] != team)
+            return false;
+
+    return true;
+}
+
+bool BattlegroundAV::IsAllTowersControlledAndCaptainAlive(uint32 team) const
+{
+    if (team == ALLIANCE)
+    {
+        for (BG_AV_Nodes i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_STONEHEART_BUNKER; ++i) // alliance towers controlled
+        {
+            if (m_Nodes[i].State == POINT_CONTROLED)
+            {
+                if (m_Nodes[i].Owner != ALLIANCE)
+                    return false;
+            }
+            else
+                return false;
+        }
+
+        for (BG_AV_Nodes i = BG_AV_NODES_ICEBLOOD_TOWER; i <= BG_AV_NODES_FROSTWOLF_WTOWER; ++i) // horde towers destroyed
+            if (m_Nodes[i].State != POINT_DESTROYED)
+                return false;
+
+        if (!m_CaptainAlive[0])
+            return false;
+
+        return true;
+    }
+    else if (team == HORDE)
+    {
+        for (BG_AV_Nodes i = BG_AV_NODES_ICEBLOOD_TOWER; i <= BG_AV_NODES_FROSTWOLF_WTOWER; ++i) // horde towers controlled
+        {
+            if (m_Nodes[i].State == POINT_CONTROLED)
+            {
+                if (m_Nodes[i].Owner != HORDE)
+                    return false;
+            }
+            else
+                return false;
+        }
+
+        for (BG_AV_Nodes i = BG_AV_NODES_DUNBALDAR_SOUTH; i <= BG_AV_NODES_STONEHEART_BUNKER; ++i) // alliance towers destroyed
+            if (m_Nodes[i].State != POINT_DESTROYED)
+                return false;
+
+        if (!m_CaptainAlive[1])
+            return false;
+
+        return true;
+    }
+
+    return false;
 }

@@ -266,7 +266,7 @@ World::AddSession_(WorldSession* s)
     if (decrease_session)
         --Sessions;
 
-    if (pLimit > 0 && Sessions >= pLimit && s->GetSecurity() == SEC_PLAYER && !HasRecentlyDisconnected(s))
+    if (pLimit > 0 && Sessions >= pLimit && AccountMgr::IsPlayerAccount(s->GetSecurity()) && !HasRecentlyDisconnected(s))
     {
         AddQueuedPlayer (s);
         UpdateMaxSessionCounters();
@@ -404,6 +404,8 @@ void World::LoadConfigSettings(bool reload)
             sLog->outError("World settings reload fail: can't read settings from %s.", sConfig->GetFilename().c_str());
             return;
         }
+
+        sLog->ReloadConfig(); // Reload log levels and filters
     }
 
     ///- Read the player limit and the Message of the day from the config file
@@ -1376,7 +1378,7 @@ void World::SetInitialWorldSettings()
     LoadRandomEnchantmentsTable();
 
     sLog->outString("Loading Disables");
-    sDisableMgr->LoadDisables();                                 // must be before loading quests and items
+    DisableMgr::LoadDisables();                                  // must be before loading quests and items
 
     sLog->outString("Loading Items...");                         // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr->LoadItemTemplates();
@@ -1442,7 +1444,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr->LoadQuests();                                    // must be loaded after DBCs, creature_template, item_template, gameobject tables
 
     sLog->outString("Checking Quest Disables");
-    sDisableMgr->CheckQuestDisables();                           // must be after loading quests
+    DisableMgr::CheckQuestDisables();                           // must be after loading quests
 
     sLog->outString("Loading Quest POI");
     sObjectMgr->LoadQuestPOI();
@@ -1625,7 +1627,7 @@ void World::SetInitialWorldSettings()
     sTicketMgr->LoadSurveys();
 
     sLog->outString("Loading client addons...");
-    sAddonMgr->LoadFromDB();
+    AddonMgr::LoadFromDB();
 
     ///- Handle outdated emails (delete/return)
     sLog->outString("Returning old mails...");
@@ -1793,7 +1795,7 @@ void World::DetectDBCLang()
     uint8 default_locale = TOTAL_LOCALES;
     for (uint8 i = default_locale-1; i < TOTAL_LOCALES; --i)  // -1 will be 255 due to uint8
     {
-        if (strlen(race->name[i]) > 0)                     // check by race names
+        if (race->name[i][0] != '\0')                     // check by race names
         {
             default_locale = i;
             m_availableDbcLocaleMask |= (1 << i);
@@ -1866,7 +1868,7 @@ void World::LoadAutobroadcasts()
     do
     {
 
-        Field *fields = result->Fetch();
+        Field* fields = result->Fetch();
         std::string message = fields[0].GetString();
 
         m_Autobroadcasts.push_back(message);
@@ -2076,7 +2078,7 @@ void World::SendGlobalGMMessage(WorldPacket* packet, WorldSession* self, uint32 
             itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld() &&
             itr->second != self &&
-            itr->second->GetSecurity() > SEC_PLAYER+1 &&
+            !AccountMgr::IsPlayerAccount(itr->second->GetSecurity()) &&
             (team == 0 || itr->second->GetPlayer()->GetTeam() == team))
         {
             itr->second->SendPacket(packet);
@@ -2173,7 +2175,7 @@ void World::SendGMText(int32 string_id, ...)
         if (!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld())
             continue;
 
-        if (itr->second->GetSecurity() < SEC_MODERATOR)
+        if (AccountMgr::IsPlayerAccount(itr->second->GetSecurity()))
             continue;
 
         wt_do(itr->second->GetPlayer());
@@ -2337,7 +2339,7 @@ bool World::RemoveBanAccount(BanMode mode, std::string nameOrIP)
     {
         uint32 account = 0;
         if (mode == BAN_ACCOUNT)
-            account = sAccountMgr->GetId(nameOrIP);
+            account = AccountMgr::GetId(nameOrIP);
         else if (mode == BAN_CHARACTER)
             account = sObjectMgr->GetPlayerAccountIdByPlayerName(nameOrIP);
 
@@ -2552,7 +2554,7 @@ void World::UpdateSessions(uint32 diff)
         ++next;
 
         ///- and remove not active sessions from the list
-        WorldSession * pSession = itr->second;
+        WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
         if (!pSession->Update(diff, updater))    // As interval = 0
@@ -2593,9 +2595,7 @@ void World::SendAutoBroadcast()
 
     std::string msg;
 
-    std::list<std::string>::const_iterator itr = m_Autobroadcasts.begin();
-    std::advance(itr, rand() % m_Autobroadcasts.size());
-    msg = *itr;
+    msg = SelectRandomContainerElement(m_Autobroadcasts);
 
     uint32 abcenter = sWorld->getIntConfig(CONFIG_AUTOBROADCAST_CENTER);
 
@@ -2633,7 +2633,7 @@ void World::_UpdateRealmCharCount(PreparedQueryResult resultCharCount)
 {
     if (resultCharCount)
     {
-        Field *fields = resultCharCount->Fetch();
+        Field* fields = resultCharCount->Fetch();
         uint32 accountId = fields[0].GetUInt32();
         uint32 charCount = fields[1].GetUInt32();
 
@@ -2664,7 +2664,7 @@ void World::InitDailyQuestResetTime()
     QueryResult result = CharacterDatabase.Query("SELECT MAX(time) FROM character_queststatus_daily");
     if (result)
     {
-        Field *fields = result->Fetch();
+        Field* fields = result->Fetch();
         mostRecentQuestTime = time_t(fields[0].GetUInt32());
     }
     else
@@ -2838,7 +2838,7 @@ void World::LoadWorldStates()
 
     do
     {
-        Field *fields = result->Fetch();
+        Field* fields = result->Fetch();
         m_worldstates[fields[0].GetUInt32()] = fields[1].GetUInt32();
         ++count;
     }

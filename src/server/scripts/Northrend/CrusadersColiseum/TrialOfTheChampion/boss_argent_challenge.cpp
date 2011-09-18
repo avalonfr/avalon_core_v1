@@ -104,6 +104,45 @@ enum eEnums
     SAY_START_6                             = -1999951
 };
 
+class OrientationCheck : public std::unary_function<Unit*, bool>
+{
+    public:
+        explicit OrientationCheck(Unit* _caster) : caster(_caster) { }
+        bool operator() (Unit* unit)
+        {
+            return !unit->isInFront(caster, 40.0f, 2.5f);
+        }
+
+    private:
+        Unit* caster;
+};
+
+class spell_eadric_radiance : public SpellScriptLoader
+{
+    public:
+        spell_eadric_radiance() : SpellScriptLoader("spell_eadric_radiance") { }
+        class spell_eadric_radiance_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_eadric_radiance_SpellScript);
+            void FilterTargets(std::list<Unit*>& unitList)
+            {
+                unitList.remove_if(OrientationCheck(GetCaster()));
+            }
+
+            void Register()
+            {
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_eadric_radiance_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+                OnUnitTargetSelect += SpellUnitTargetFn(spell_eadric_radiance_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_eadric_radiance_SpellScript();
+        }
+};
+
+
 class boss_eadric : public CreatureScript
 {
 public:
@@ -806,4 +845,5 @@ void AddSC_boss_argent_challenge()
     new npc_memory();
     new npc_argent_soldier();
     new spell_gen_reflective_shield();
+	new spell_eadric_radiance();
 }

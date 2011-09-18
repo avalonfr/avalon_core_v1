@@ -26,7 +26,6 @@ EndScriptData */
 /* ContentData
 mob_shattered_rumbler
 mob_lump
-mob_sunspring_villager
 npc_altruis_the_sufferer
 npc_greatmother_geyah
 npc_lantresor_of_the_blade
@@ -65,7 +64,7 @@ public:
 
         void EnterCombat(Unit* /*who*/) {}
 
-        void SpellHit(Unit* Hitter, const SpellInfo *Spellkind)
+        void SpellHit(Unit* Hitter, const SpellInfo* Spellkind)
         {
             if (Spellkind->Id == 32001 && !Spawn)
             {
@@ -238,44 +237,6 @@ public:
             } else Spear_Throw_Timer -= diff;
 
             DoMeleeAttackIfReady();
-        }
-    };
-
-};
-
-/*####
-# mob_sunspring_villager - should be done with ACID
-####*/
-
-class mob_sunspring_villager : public CreatureScript
-{
-public:
-    mob_sunspring_villager() : CreatureScript("mob_sunspring_villager") { }
-
-    CreatureAI* GetAI(Creature* creature) const
-    {
-        return new mob_sunspring_villagerAI (creature);
-    }
-
-    struct mob_sunspring_villagerAI : public ScriptedAI
-    {
-        mob_sunspring_villagerAI(Creature* c) : ScriptedAI(c) {}
-
-        void Reset()
-        {
-            me->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
-            me->SetStandState(UNIT_STAND_STATE_DEAD);
-        }
-
-        void EnterCombat(Unit* /*who*/) {}
-
-        void SpellHit(Unit* /*caster*/, const SpellInfo *spell)
-        {
-            if (spell->Id == 32146)
-            {
-                me->DealDamage(me, me->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-                me->RemoveCorpse();
-            }
         }
     };
 
@@ -877,7 +838,7 @@ public:
             ScriptedAI::UpdateAI(diff);
         }
 
-        void SpellHit(Unit* caster, const SpellInfo *spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
             if (caster->GetTypeId() == TYPEID_PLAYER)
             {
@@ -964,7 +925,7 @@ class npc_corki : public CreatureScript
 public:
   npc_corki() : CreatureScript("npc_corki") { }
 
-  CreatureAI *GetAI(Creature* creature) const
+  CreatureAI* GetAI(Creature* creature) const
   {
       return new npc_corkiAI(creature);
   }
@@ -1013,7 +974,6 @@ void AddSC_nagrand()
 {
     new mob_shattered_rumbler();
     new mob_lump();
-    new mob_sunspring_villager();
     new npc_altruis_the_sufferer();
     new npc_greatmother_geyah();
     new npc_lantresor_of_the_blade();

@@ -261,15 +261,58 @@ public:
         if (ifs.bad())
             return false;
 
+        // remove comments from file
+        std::stringstream parsedStream;
+        while (!ifs.eof())
+        {
+            char commentToken[2];
+            ifs.get(commentToken[0]);
+            if (commentToken[0] == '/' && !ifs.eof())
+            {
+                ifs.get(commentToken[1]);
+                // /* comment
+                if (commentToken[1] == '*')
+                {
+                    while (!ifs.eof())
+                    {
+                        ifs.get(commentToken[0]);
+                        if (commentToken[0] == '*' && !ifs.eof())
+                        {
+                            ifs.get(commentToken[1]);
+                            if (commentToken[1] == '/')
+                                break;
+                            else
+                                ifs.putback(commentToken[1]);
+                        }
+                    }
+                    continue;
+                }
+                // line comment
+                else if (commentToken[1] == '/')
+                {
+                    std::string str;
+                    getline(ifs,str);
+                    continue;
+                }
+                // regular data
+                else
+                {
+                    ifs.putback(commentToken[1]);
+                }
+            }
+            parsedStream.put(commentToken[0]);
+        }
+        ifs.close();
+
         uint32 opcode;
-        ifs >> opcode;
+        parsedStream >> opcode;
 
         WorldPacket data(opcode, 0);
 
-        while (!ifs.eof())
+        while (!parsedStream.eof())
         {
             std::string type;
-            ifs >> type;
+            parsedStream >> type;
 
             if (type == "")
                 break;
@@ -277,37 +320,37 @@ public:
             if (type == "uint8")
             {
                 uint16 val1;
-                ifs >> val1;
+                parsedStream >> val1;
                 data << uint8(val1);
             }
             else if (type == "uint16")
             {
                 uint16 val2;
-                ifs >> val2;
+                parsedStream >> val2;
                 data << val2;
             }
             else if (type == "uint32")
             {
                 uint32 val3;
-                ifs >> val3;
+                parsedStream >> val3;
                 data << val3;
             }
             else if (type == "uint64")
             {
                 uint64 val4;
-                ifs >> val4;
+                parsedStream >> val4;
                 data << val4;
             }
             else if (type == "float")
             {
                 float val5;
-                ifs >> val5;
+                parsedStream >> val5;
                 data << val5;
             }
             else if (type == "string")
             {
                 std::string val6;
-                ifs >> val6;
+                parsedStream >> val6;
                 data << val6;
             }
             else if (type == "appitsguid")
@@ -350,7 +393,7 @@ public:
             {
                 data << uint64(unit->GetGUID());
             }
-            else if (type == "pos")
+            else if (type == "itspos")
             {
                 data << unit->GetPositionX();
                 data << unit->GetPositionY();
@@ -368,7 +411,6 @@ public:
                 break;
             }
         }
-        ifs.close();
         sLog->outDebug(LOG_FILTER_NETWORKIO, "Sending opcode %u", data.GetOpcode());
         data.hexlike();
         player->GetSession()->SendPacket(&data);
@@ -506,13 +548,13 @@ public:
 
         if (list_queue)
         {
-            std::vector<Item *> &updateQueue = player->GetItemUpdateQueue();
+            std::vector<Item*> &updateQueue = player->GetItemUpdateQueue();
             for (size_t i = 0; i < updateQueue.size(); ++i)
             {
                 Item* item = updateQueue[i];
                 if (!item) continue;
 
-                Bag *container = item->GetContainer();
+                Bag* container = item->GetContainer();
                 uint8 bag_slot = container ? container->GetSlot() : uint8(INVENTORY_SLOT_BAG_0);
 
                 std::string st;
@@ -533,7 +575,7 @@ public:
         if (check_all)
         {
             bool error = false;
-            std::vector<Item *> &updateQueue = player->GetItemUpdateQueue();
+            std::vector<Item*> &updateQueue = player->GetItemUpdateQueue();
             for (uint8 i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)
             {
                 if (i >= BUYBACK_SLOT_START && i < BUYBACK_SLOT_END)
@@ -554,7 +596,7 @@ public:
                     error = true; continue;
                 }
 
-                if (Bag *container = item->GetContainer())
+                if (Bag* container = item->GetContainer())
                 {
                     handler->PSendSysMessage("The item with slot %d and guid %d has a container (slot: %d, guid: %d) but shouldn't!", item->GetSlot(), item->GetGUIDLow(), container->GetSlot(), container->GetGUIDLow());
                     error = true; continue;
@@ -606,7 +648,7 @@ public:
                             error = true; continue;
                         }
 
-                        Bag *container = item2->GetContainer();
+                        Bag* container = item2->GetContainer();
                         if (!container)
                         {
                             handler->PSendSysMessage("The item in bag %d at slot %d with guid %d has no container!", bag->GetSlot(), item2->GetSlot(), item2->GetGUIDLow());
@@ -818,19 +860,19 @@ public:
 
         uint32 id = (uint32)atoi(i);
 
-        CreatureTemplate const *ci = sObjectMgr->GetCreatureTemplate(entry);
+        CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(entry);
 
         if (!ci)
             return false;
 
-        VehicleEntry const *ve = sVehicleStore.LookupEntry(id);
+        VehicleEntry const* ve = sVehicleStore.LookupEntry(id);
 
         if (!ve)
             return false;
 
         Creature* v = new Creature;
 
-        Map *map = handler->GetSession()->GetPlayer()->GetMap();
+        Map* map = handler->GetSession()->GetPlayer()->GetMap();
 
         if (!v->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_VEHICLE), map, handler->GetSession()->GetPlayer()->GetPhaseMask(), entry, id, handler->GetSession()->GetPlayer()->GetTeam(), x, y, z, o))
         {
@@ -1012,20 +1054,19 @@ public:
             handler->PSendSysMessage(LANG_TOO_BIG_INDEX, Opcode, GUID_LOPART(guid), target->GetValuesCount());
             return false;
         }
-        uint32 iValue;
-        float fValue;
+
         bool isint32 = true;
         if (pz)
             isint32 = (bool)atoi(pz);
         if (isint32)
         {
-            iValue = (uint32)atoi(py);
+            uint32 iValue = (uint32)atoi(py);
             target->SetUInt32Value(Opcode , iValue);
             handler->PSendSysMessage(LANG_SET_UINT_FIELD, GUID_LOPART(guid), Opcode, iValue);
         }
         else
         {
-            fValue = (float)atof(py);
+            float fValue = (float)atof(py);
             target->SetFloatValue(Opcode , fValue);
             handler->PSendSysMessage(LANG_SET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
         }
@@ -1060,20 +1101,19 @@ public:
             handler->PSendSysMessage(LANG_TOO_BIG_INDEX, Opcode, GUID_LOPART(guid), target->GetValuesCount());
             return false;
         }
-        uint32 iValue;
-        float fValue;
+
         bool isint32 = true;
         if (pz)
             isint32 = (bool)atoi(pz);
 
         if (isint32)
         {
-            iValue = target->GetUInt32Value(Opcode);
+            uint32 iValue = target->GetUInt32Value(Opcode);
             handler->PSendSysMessage(LANG_GET_UINT_FIELD, GUID_LOPART(guid), Opcode,    iValue);
         }
         else
         {
-            fValue = target->GetFloatValue(Opcode);
+            float fValue = target->GetFloatValue(Opcode);
             handler->PSendSysMessage(LANG_GET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
         }
 

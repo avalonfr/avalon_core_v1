@@ -174,7 +174,9 @@ public:
             m_uiSummonScarabTimer = 2*IN_MILLISECONDS;
 
             m_uiSummonFrostSphereTimer = 20*IN_MILLISECONDS;
+
 			m_uitargetflag = 3600 * 24 * IN_MILLISECONDS;
+
             m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
             m_uiStage = 0;
             m_uiScarabSummoned = 0;
