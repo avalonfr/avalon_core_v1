@@ -870,6 +870,12 @@ struct FactionEntry
                                                             // 39 string flags
     //char*     description[16];                            // 40-55    m_description_lang
                                                             // 56 string flags
+
+    // helpers
+    bool CanHaveReputation() const
+    {
+        return reputationListID >=0;
+    }
 };
 
 #define MAX_FACTION_RELATIONS 4
@@ -889,8 +895,6 @@ struct FactionTemplateEntry
     // helpers
     bool IsFriendlyTo(FactionTemplateEntry const& entry) const
     {
-        if (ID == entry.ID)
-            return true;
         if (entry.faction)
         {
             for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
@@ -904,8 +908,6 @@ struct FactionTemplateEntry
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
-        if (ID == entry.ID)
-            return false;
         if (entry.faction)
         {
             for (int i = 0; i < MAX_FACTION_RELATIONS; ++i)
@@ -1172,12 +1174,12 @@ struct LFGDungeonEntry
     uint32  reclevel;                                       // 20
     uint32  recminlevel;                                    // 21
     uint32  recmaxlevel;                                    // 22
-    int32  map;                                             // 23
+    int32   map;                                            // 23
     uint32  difficulty;                                     // 24
-    //uint32  unk;                                          // 25
+    //uint32  flags;                                        // 25
     uint32  type;                                           // 26
-    //uint32  unk2;                                         // 27
-    //char*   unk3;                                         // 28
+    //uint32  unk;                                          // 27
+    //char*   iconname;                                     // 28
     uint32  expansion;                                      // 29
     //uint32  unk4;                                         // 30
     uint32  grouptype;                                      // 31
@@ -1185,6 +1187,28 @@ struct LFGDungeonEntry
     // Helpers
     uint32 Entry() const { return ID + (type << 24); }
 };
+
+/*
+struct LiquidTypeEntry
+{
+    uint32      ID;                                         // 0
+    char*       name;                                       // 1
+    uint32      flags;                                      // 2        Water: 1|2|4|8, Magma: 8|16|32|64, Slime: 2|64|256, WMO Ocean: 1|2|4|8|512
+    uint32      type;                                       // 3        0: Water, 1: Ocean, 2: Magma, 3: Slime
+    uint32      soundid;                                    // 4        Reference to SoundEntries.dbc
+    uint32      spellID;                                    // 5        Reference to Spell.dbc
+    float       unk0[4];                                    // 6-9
+    uint32      unk1;                                       // 10       Light?
+    float       particleScale                               // 11       0: Slime, 1: Water/Ocean, 4: Magma
+    uint32      particleMovement;                           // 12
+    uint32      unk2                                        // 13
+    uint32      LiquidMaterialID                            // 14       Reference to LiquidMaterial.dbc
+    char*       texture[6];                                 // 15-20
+    uint32      unk3[2]                                     // 21-22
+    float       unk4[18];                                   // 23-40
+    uint32      unk5[4]                                     // 41-44
+};
+*/
 
 #define MAX_LOCK_CASE 8
 
@@ -1538,7 +1562,7 @@ struct SpellEntry
     uint32    Effect[MAX_SPELL_EFFECTS];                    // 71-73    m_effect
     int32     EffectDieSides[MAX_SPELL_EFFECTS];            // 74-76    m_effectDieSides
     float     EffectRealPointsPerLevel[MAX_SPELL_EFFECTS];  // 77-79    m_effectRealPointsPerLevel
-    int32     EffectBasePoints[MAX_SPELL_EFFECTS];          // 80-82    m_effectBasePoints (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
+    int32     EffectBasePoints[MAX_SPELL_EFFECTS];          // 80-82    m_effectBasePoints (must not be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
     uint32    EffectMechanic[MAX_SPELL_EFFECTS];            // 83-85    m_effectMechanic
     uint32    EffectImplicitTargetA[MAX_SPELL_EFFECTS];     // 86-88    m_implicitTargetA
     uint32    EffectImplicitTargetB[MAX_SPELL_EFFECTS];     // 89-91    m_implicitTargetB

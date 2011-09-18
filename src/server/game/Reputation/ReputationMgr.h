@@ -86,7 +86,7 @@ class ReputationMgr
 
         FactionState const* GetState(FactionEntry const* factionEntry) const
         {
-            return factionEntry->reputationListID >= 0 ? GetState(factionEntry->reputationListID) : NULL;
+            return factionEntry->CanHaveReputation() ? GetState(factionEntry->reputationListID) : NULL;
         }
 
         FactionState const* GetState(RepListID id) const
@@ -95,13 +95,16 @@ class ReputationMgr
             return repItr != m_factions.end() ? &repItr->second : NULL;
         }
 
+        bool IsAtWar(uint32 faction_id) const;
+        bool IsAtWar(FactionEntry const* factionEntry) const;
+
         int32 GetReputation(uint32 faction_id) const;
         int32 GetReputation(FactionEntry const* factionEntry) const;
         int32 GetBaseReputation(FactionEntry const* factionEntry) const;
 
         ReputationRank GetRank(FactionEntry const* factionEntry) const;
         ReputationRank GetBaseRank(FactionEntry const* factionEntry) const;
-        uint32 GetReputationRankStrIndex(FactionEntry const* factionEntry)
+        uint32 GetReputationRankStrIndex(FactionEntry const* factionEntry) const
         {
             return ReputationRankStrIndex[GetRank(factionEntry)];
         };

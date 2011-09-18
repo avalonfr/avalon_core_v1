@@ -96,7 +96,7 @@ class SmartAI : public CreatureAI
         // Tell creature to attack and follow the victim
         void AttackStart(Unit* who);
 
-        // Called if IsVisible(Unit *who) is true at each *who move, reaction at visibility zone enter
+        // Called if IsVisible(Unit* who) is true at each *who move, reaction at visibility zone enter
         void MoveInLineOfSight(Unit* who);
 
         // Called when hit by a spell
@@ -157,7 +157,7 @@ class SmartAI : public CreatureAI
         void SetData(uint32 id, uint32 value);
 
         // Used in scripts to share variables
-        void SetGUID(const uint64 guid, int32 id = 0);
+        void SetGUID(uint64 guid, int32 id = 0);
 
         // Used in scripts to share variables
         uint64 GetGUID(int32 id = 0);

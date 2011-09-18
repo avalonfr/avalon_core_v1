@@ -971,7 +971,7 @@ class npc_crok_scourgebane : public CreatureScript
                 }
             }
 
-            void SetGUID(uint64 const guid, int32 type/* = 0*/)
+            void SetGUID(uint64 guid, int32 type/* = 0*/)
             {
                 if (type == ACTION_VRYKUL_DEATH)
                 {
@@ -1361,9 +1361,7 @@ class npc_captain_arnath : public CreatureScript
                         case EVENT_ARNATH_PW_SHIELD:
                         {
                             std::list<Creature*> targets = DoFindFriendlyMissingBuff(40.0f, SPELL_POWER_WORD_SHIELD);
-                            std::list<Creature*>::iterator itr = targets.begin();
-                            std::advance(itr, urand(0, targets.size() - 1));
-                            DoCast(*itr, SPELL_POWER_WORD_SHIELD);
+                            DoCast(SelectRandomContainerElement(targets), SPELL_POWER_WORD_SHIELD);
                             Events.ScheduleEvent(EVENT_ARNATH_PW_SHIELD, urand(15000, 20000));
                             break;
                         }
@@ -1505,8 +1503,7 @@ class npc_captain_grondel : public CreatureScript
                     switch (eventId)
                     {
                         case EVENT_GRONDEL_CHARGE_CHECK:
-                            if (CanCast(me->getVictim(), sSpellMgr->GetSpellInfo(SPELL_CHARGE)))
-                                DoCastVictim(SPELL_CHARGE);
+                            DoCastVictim(SPELL_CHARGE);
                             Events.ScheduleEvent(EVENT_GRONDEL_CHARGE_CHECK, 500);
                             break;
                         case EVENT_GRONDEL_MORTAL_STRIKE:
@@ -1818,9 +1815,7 @@ class spell_frost_giant_death_plague : public SpellScriptLoader
                 unitList.remove_if(DeathPlagueTargetSelector(GetCaster()));
                 if (!unitList.empty())
                 {
-                    std::list<Unit*>::iterator itr = unitList.begin();
-                    std::advance(itr, urand(0, unitList.size()-1));
-                    Unit* target = *itr;
+                    Unit* target = SelectRandomContainerElement(unitList);
                     unitList.clear();
                     unitList.push_back(target);
                 }

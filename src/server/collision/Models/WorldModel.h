@@ -56,8 +56,8 @@ namespace VMAP
             float *GetHeightStorage() { return iHeight; }
             uint8 *GetFlagsStorage() { return iFlags; }
             uint32 GetFileSize();
-            bool writeToFile(FILE *wf);
-            static bool readFromFile(FILE *rf, WmoLiquid *&liquid);
+            bool writeToFile(FILE* wf);
+            static bool readFromFile(FILE* rf, WmoLiquid* &liquid);
         private:
             WmoLiquid(): iHeight(0), iFlags(0) {};
             uint32 iTilesX;  //!< number of tiles in x direction, each
@@ -83,16 +83,17 @@ namespace VMAP
 
             //! pass mesh data to object and create BIH. Passed vectors get get swapped with old geometry!
             void setMeshData(std::vector<Vector3> &vert, std::vector<MeshTriangle> &tri);
-            void setLiquidData(WmoLiquid *liquid) { iLiquid = liquid; }
+            void setLiquidData(WmoLiquid* liquid) { iLiquid = liquid; }
             bool IntersectRay(const G3D::Ray &ray, float &distance, bool stopAtFirstHit) const;
             bool IsInsideObject(const Vector3 &pos, const Vector3 &down, float &z_dist) const;
             bool GetLiquidLevel(const Vector3 &pos, float &liqHeight) const;
             uint32 GetLiquidType() const;
-            bool writeToFile(FILE *wf);
-            bool readFromFile(FILE *rf);
+            bool writeToFile(FILE* wf);
+            bool readFromFile(FILE* rf);
             const G3D::AABox& GetBound() const { return iBound; }
             uint32 GetMogpFlags() const { return iMogpFlags; }
             uint32 GetWmoID() const { return iGroupWMOID; }
+			void getMeshData(std::vector<Vector3> &vertices, std::vector<MeshTriangle> &triangles, WmoLiquid* &liquid);
         protected:
             G3D::AABox iBound;
             uint32 iMogpFlags;// 0x8 outdor; 0x2000 indoor
@@ -101,10 +102,6 @@ namespace VMAP
             std::vector<MeshTriangle> triangles;
             BIH meshTree;
             WmoLiquid *iLiquid;
-			
-			
-		public:
-			void getMeshData(std::vector<Vector3> &vertices, std::vector<MeshTriangle> &triangles, WmoLiquid* &liquid);
     };
     /*! Holds a model (converted M2 or WMO) in its original coordinate space */
     class WorldModel

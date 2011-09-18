@@ -212,15 +212,6 @@ class AuraRemoveEvent : public BasicEvent
         uint32 _spellId;
 };
 
-class SummonTargetSelector
-{
-    public:
-        bool operator()(Unit* unit) const
-        {
-            return unit->HasAura(SPELL_RECENTLY_SPAWNED);
-        }
-};
-
 class ValithriaDespawner : public BasicEvent
 {
     public:
@@ -249,6 +240,7 @@ class ValithriaDespawner : public BasicEvent
                 case NPC_GLUTTONOUS_ABOMINATION:
                 case NPC_MANA_VOID:
                 case NPC_COLUMN_OF_FROST:
+                case NPC_ROT_WORM:
                     creature->DespawnOrUnsummon();
                     return;
                 case NPC_RISEN_ARCHMAGE:
@@ -310,6 +302,8 @@ class boss_valithria_dreamwalker : public CreatureScript
                 // immune to percent heals
                 me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_OBS_MOD_HEALTH, true);
                 me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_HEAL_PCT, true);
+                // Glyph of Dispel Magic - not a percent heal by effect, its cast with custom basepoints
+                me->ApplySpellImmune(0, IMMUNITY_ID, 56131, true);
                 _instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
                 _missedPortals = 0;
                 _under25PercentTalkDone = false;
@@ -513,8 +507,15 @@ class npc_green_dragon_combat_trigger : public CreatureScript
                 me->SetReactState(REACT_PASSIVE);
             }
 
-            void EnterCombat(Unit* /*target*/)
+            void EnterCombat(Unit* target)
             {
+                if (!instance->CheckRequiredBosses(DATA_VALITHRIA_DREAMWALKER, target->ToPlayer()))
+                {
+                    EnterEvadeMode();
+                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                    return;
+                }
+
                 me->setActive(true);
                 DoZoneInCombat();
                 instance->SetBossState(DATA_VALITHRIA_DREAMWALKER, IN_PROGRESS);
@@ -1186,13 +1187,11 @@ class spell_dreamwalker_summoner : public SpellScriptLoader
 
             void FilterTargets(std::list<Unit*>& targets)
             {
-                targets.remove_if(SummonTargetSelector());
+                targets.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 if (targets.empty())
                     return;
 
-                std::list<Unit*>::iterator itr = targets.begin();
-                std::advance(itr, urand(0, targets.size() - 1));
-                Unit* target = *itr;
+                Unit* target = SelectRandomContainerElement(targets);
                 targets.clear();
                 targets.push_back(target);
             }
@@ -1227,7 +1226,7 @@ class spell_dreamwalker_summon_suppresser : public SpellScriptLoader
 
                 std::list<Creature*> summoners;
                 GetCreatureListWithEntryInGrid(summoners, caster, 22515, 100.0f);
-                summoners.remove_if(SummonTargetSelector());
+                summoners.remove_if(Trinity::UnitAuraCheck(true, SPELL_RECENTLY_SPAWNED));
                 Trinity::RandomResizeList(summoners, 2);
                 if (summoners.empty())
                     return;
@@ -1349,6 +1348,38 @@ class spell_dreamwalker_nightmare_cloud : public SpellScriptLoader
         }
 };
 
+class spell_dreamwalker_twisted_nightmares : public SpellScriptLoader
+{
+    public:
+        spell_dreamwalker_twisted_nightmares() : SpellScriptLoader("spell_dreamwalker_twisted_nightmares") { }
+
+        class spell_dreamwalker_twisted_nightmares_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_dreamwalker_twisted_nightmares_SpellScript);
+
+            void HandleScript(SpellEffIndex effIndex)
+            {
+                PreventHitDefaultEffect(effIndex);
+                // impossible with TARGET_UNIT_CASTER
+                //if (!GetHitUnit())
+                //    return;
+
+                if (InstanceScript* instance = GetHitUnit()->GetInstanceScript())
+                    GetHitUnit()->CastSpell((Unit*)NULL, GetSpellInfo()->Effects[effIndex].TriggerSpell, true, NULL, NULL, instance->GetData64(DATA_VALITHRIA_DREAMWALKER));
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_dreamwalker_twisted_nightmares_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_FORCE_CAST);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_dreamwalker_twisted_nightmares_SpellScript();
+        }
+};
+
 class achievement_portal_jockey : public AchievementCriteriaScript
 {
     public:
@@ -1379,5 +1410,6 @@ void AddSC_boss_valithria_dreamwalker()
     new spell_dreamwalker_summon_dream_portal();
     new spell_dreamwalker_summon_nightmare_portal();
     new spell_dreamwalker_nightmare_cloud();
+    new spell_dreamwalker_twisted_nightmares();
     new achievement_portal_jockey();
 }

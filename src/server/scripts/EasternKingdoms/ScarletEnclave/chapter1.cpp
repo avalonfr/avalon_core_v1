@@ -106,7 +106,7 @@ public:
         {
             me->SetReactState(REACT_PASSIVE);
             if (!me->GetEquipmentId())
-                if (const CreatureTemplate *info = sObjectMgr->GetCreatureTemplate(28406))
+                if (const CreatureTemplate* info = sObjectMgr->GetCreatureTemplate(28406))
                     if (info->equipmentId)
                         const_cast<CreatureTemplate*>(me->GetCreatureInfo())->equipmentId = info->equipmentId;
         }
@@ -297,7 +297,7 @@ public:
 
         uint64 prisonerGUID;
 
-        void SetGUID(const uint64 guid, int32 /*id*/)
+        void SetGUID(uint64 guid, int32 /*id*/)
         {
             if (!prisonerGUID)
                 prisonerGUID = guid;
@@ -625,7 +625,7 @@ public:
     {
         npc_salanar_the_horsemanAI(Creature* c) : ScriptedAI(c) {}
 
-        void SpellHit(Unit* caster, const SpellInfo *spell)
+        void SpellHit(Unit* caster, const SpellInfo* spell)
         {
             if (spell->Id == DELIVER_STOLEN_HORSE)
             {
@@ -883,7 +883,7 @@ public:
 
         uint64 minerGUID;
 
-        void SetGUID(const uint64 guid, int32 /*id*/)
+        void SetGUID(uint64 guid, int32 /*id*/)
         {
             minerGUID = guid;
         }

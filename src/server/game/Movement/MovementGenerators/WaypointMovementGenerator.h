@@ -81,10 +81,9 @@ class WaypointMovementGenerator
         bool Update(T &, const uint32);
         bool GetDestination(float &x, float &y, float &z) const;
         MovementGeneratorType GetMovementGeneratorType() { return WAYPOINT_MOTION_TYPE; }
-
-    private:
 		void MoveToNextNode(CreatureTraveller &traveller);
-        WaypointData *node;
+    private:
+        WaypointData* node;
         uint32 path_id;
         TimeTrackerSmall i_nextMoveTime;
         WaypointPath const* waypoints;

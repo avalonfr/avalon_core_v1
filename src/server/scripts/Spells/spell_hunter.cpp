@@ -39,6 +39,58 @@ enum HunterSpells
     HUNTER_SPELL_CHIMERA_SHOT_SERPENT            = 53353,
     HUNTER_SPELL_CHIMERA_SHOT_VIPER              = 53358,
     HUNTER_SPELL_CHIMERA_SHOT_SCORPID            = 53359,
+    HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET         = 61669,
+};
+
+// 13161 Aspect of the Beast
+class spell_hun_aspect_of_the_beast : public SpellScriptLoader
+{
+public:
+    spell_hun_aspect_of_the_beast() : SpellScriptLoader("spell_hun_aspect_of_the_beast") { }
+
+    class spell_hun_aspect_of_the_beast_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_hun_aspect_of_the_beast_AuraScript)
+        bool Validate(SpellInfo const* /*entry*/)
+        {
+            if (!sSpellMgr->GetSpellInfo(HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET))
+                return false;
+            return true;
+        }
+
+        void OnRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (!GetCaster())
+                return;
+
+            Unit* caster = GetCaster();
+            if (caster->ToPlayer())
+                if (Pet* pet = caster->ToPlayer()->GetPet())
+                    pet->RemoveAurasDueToSpell(HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET);
+        }
+
+        void OnApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            if (!GetCaster())
+                return;
+
+            Unit* caster = GetCaster();
+            if (caster->ToPlayer())
+                if (caster->ToPlayer()->GetPet())
+                    caster->CastSpell(caster, HUNTER_SPELL_ASPECT_OF_THE_BEAST_PET, true);
+        }
+
+        void Register()
+        {
+            AfterEffectApply += AuraEffectApplyFn(spell_hun_aspect_of_the_beast_AuraScript::OnApply, EFFECT_0, SPELL_AURA_UNTRACKABLE, AURA_EFFECT_HANDLE_REAL);
+            AfterEffectRemove += AuraEffectRemoveFn(spell_hun_aspect_of_the_beast_AuraScript::OnRemove, EFFECT_0, SPELL_AURA_UNTRACKABLE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const
+    {
+        return new spell_hun_aspect_of_the_beast_AuraScript();
+    }
 };
 
 // 53209 Chimera Shot
@@ -276,7 +328,7 @@ public:
             const SpellCooldowns& cm = caster->ToPlayer()->GetSpellCooldownMap();
             for (SpellCooldowns::const_iterator itr = cm.begin(); itr != cm.end();)
             {
-                SpellInfo const *spellInfo = sSpellMgr->GetSpellInfo(itr->first);
+                SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(itr->first);
 
                 ///! If spellId in cooldown map isn't valid, the above will return a null pointer.
                 if (spellInfo &&
@@ -376,12 +428,12 @@ public:
             if (!target->HasAura(spellId))
             {
                 SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(spellId);
-                Unit* triggerCaster = triggeredSpellInfo->IsRequiringSelectedTarget() ? caster : target;
+                Unit* triggerCaster = triggeredSpellInfo->NeedsToBeTriggeredByCaster() ? caster : target;
                 triggerCaster->CastSpell(target, triggeredSpellInfo, true, 0, aurEff);
             }
         }
 
-        void HandleUpdatePeriodic(AuraEffect * aurEff)
+        void HandleUpdatePeriodic(AuraEffect* aurEff)
         {
             Unit* target = GetUnitOwner();
             if (Player* playerTarget = target->ToPlayer())
@@ -401,7 +453,7 @@ public:
         }
     };
 
-    AuraScript *GetAuraScript() const
+    AuraScript* GetAuraScript() const
     {
         return new spell_hun_sniper_training_AuraScript();
     }
@@ -512,6 +564,7 @@ public:
 
 void AddSC_hunter_spell_scripts()
 {
+    new spell_hun_aspect_of_the_beast();
     new spell_hun_chimera_shot();
     new spell_hun_invigoration();
     new spell_hun_last_stand_pet();

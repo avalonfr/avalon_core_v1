@@ -59,7 +59,7 @@ Map::~Map()
 
     while (!i_worldObjects.empty())
     {
-        WorldObject *obj = *i_worldObjects.begin();
+        WorldObject* obj = *i_worldObjects.begin();
         ASSERT(obj->m_isWorldObject);
         //ASSERT(obj->GetTypeId() == TYPEID_CORPSE);
         obj->RemoveFromWorld();
@@ -83,7 +83,7 @@ bool Map::ExistMap(uint32 mapid, int gx, int gy)
     snprintf(tmp, len, (char *)(sWorld->GetDataPath()+"maps/%03u%02u%02u.map").c_str(), mapid, gx, gy);
 
     bool ret = false;
-    FILE *pf=fopen(tmp, "rb");
+    FILE* pf=fopen(tmp, "rb");
 
     if (!pf)
         sLog->outError("Map file '%s': does not exist!", tmp);
@@ -315,8 +315,8 @@ void Map::SwitchGridContainers(T* obj, bool on)
     obj->m_isWorldObject = on;
 }
 
-template void Map::SwitchGridContainers(Creature *, bool);
-//template void Map::SwitchGridContainers(DynamicObject *, bool);
+template void Map::SwitchGridContainers(Creature* , bool);
+//template void Map::SwitchGridContainers(DynamicObject* , bool);
 
 template<class T>
 void Map::DeleteFromWorld(T* obj)
@@ -534,7 +534,7 @@ void Map::Update(const uint32 t_diff)
         if (plr && plr->IsInWorld())
         {
             //plr->Update(t_diff);
-            WorldSession * pSession = plr->GetSession();
+            WorldSession* pSession = plr->GetSession();
             MapSessionFilter updater(pSession);
             pSession->Update(t_diff, updater);
         }
@@ -777,7 +777,7 @@ Map::PlayerRelocation(Player* player, float x, float y, float z, float orientati
 }
 
 void
-Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
+Map::CreatureRelocation(Creature* creature, float x, float y, float z, float ang, bool respawnRelocationOnFail)
 {
     ASSERT(CheckGridIntegrity(creature, false));
 
@@ -807,7 +807,7 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     ASSERT(CheckGridIntegrity(creature, true));
 }
 
-void Map::AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang)
+void Map::AddCreatureToMoveList(Creature* c, float x, float y, float z, float ang)
 {
     if (!c)
         return;
@@ -842,7 +842,16 @@ void Map::MoveAllCreaturesInMoveList()
                 #ifdef TRINITY_DEBUG
                     sLog->outDebug(LOG_FILTER_MAPS, "Creature (GUID: %u Entry: %u) cannot be move to unloaded respawn grid.", c->GetGUIDLow(), c->GetEntry());
                 #endif
-                AddObjectToRemoveList(c);
+                //AddObjectToRemoveList(Pet*) should only be called in Pet::Remove
+                //This may happen when a player just logs in and a pet moves to a nearby unloaded cell
+                //To avoid this, we can load nearby cells when player log in
+                //But this check is always needed to ensure safety
+                //TODO: pets will disappear if this is outside CreatureRespawnRelocation
+                //need to check why pet is frequently relocated to an unloaded cell
+                if (c->isPet())
+                    ((Pet*)c)->Remove(PET_SAVE_NOT_IN_SLOT, true);
+                else
+                    AddObjectToRemoveList(c);
             }
         }
 
@@ -850,7 +859,7 @@ void Map::MoveAllCreaturesInMoveList()
     }
 }
 
-bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
+bool Map::CreatureCellRelocation(Creature* c, Cell new_cell)
 {
     Cell const& old_cell = c->GetCurrentCell();
     if (!old_cell.DiffGrid(new_cell))                       // in same grid
@@ -911,7 +920,7 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
     return false;
 }
 
-bool Map::CreatureRespawnRelocation(Creature *c)
+bool Map::CreatureRespawnRelocation(Creature* c)
 {
     float resp_x, resp_y, resp_z, resp_o;
     c->GetRespawnCoord(resp_x, resp_y, resp_z, &resp_o);
@@ -935,8 +944,8 @@ bool Map::CreatureRespawnRelocation(Creature *c)
         c->UpdateObjectVisibility(false);
         return true;
     }
-    else
-        return false;
+
+    return false;
 }
 
 bool Map::UnloadGrid(const uint32 x, const uint32 y, bool unloadAll)
@@ -1070,7 +1079,7 @@ bool GridMap::loadData(char *filename)
 
     map_fileheader header;
     // Not return error if file not found
-    FILE *in = fopen(filename, "rb");
+    FILE* in = fopen(filename, "rb");
     if (!in)
         return true;
 
@@ -1126,7 +1135,7 @@ void GridMap::unloadData()
     m_gridGetHeight = &GridMap::getHeightFromFlat;
 }
 
-bool GridMap::loadAreaData(FILE *in, uint32 offset, uint32 /*size*/)
+bool GridMap::loadAreaData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     map_areaHeader header;
     fseek(in, offset, SEEK_SET);
@@ -1144,7 +1153,7 @@ bool GridMap::loadAreaData(FILE *in, uint32 offset, uint32 /*size*/)
     return true;
 }
 
-bool GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 /*size*/)
+bool GridMap::loadHeihgtData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     map_heightHeader header;
     fseek(in, offset, SEEK_SET);
@@ -1190,7 +1199,7 @@ bool GridMap::loadHeihgtData(FILE *in, uint32 offset, uint32 /*size*/)
     return true;
 }
 
-bool  GridMap::loadLiquidData(FILE *in, uint32 offset, uint32 /*size*/)
+bool  GridMap::loadLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
 {
     map_liquidHeader header;
     fseek(in, offset, SEEK_SET);
@@ -1485,7 +1494,7 @@ uint8  GridMap::getTerrainType(float x, float y)
 }
 
 // Get water state on map
-inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData *data)
+inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data)
 {
     // Check water type (if no water return)
     if (!m_liquid_type && !m_liquidType)
@@ -1547,7 +1556,7 @@ inline ZLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 R
     return LIQUID_MAP_ABOVE_WATER;
 }
 
-inline GridMap *Map::GetGrid(float x, float y)
+inline GridMap* Map::GetGrid(float x, float y)
 {
     // half opt method
     int gx=(int)(32-x/SIZE_OF_GRIDS);                       //grid x
@@ -1563,7 +1572,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps, float maxSearchD
 {
     // find raw .map surface under Z coordinates
     float mapHeight;
-    if (GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+    if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
     {
         float _mapheight = gmap->getHeight(x, y);
 
@@ -1672,7 +1681,7 @@ bool Map::GetAreaInfo(float x, float y, float z, uint32 &flags, int32 &adtId, in
     if (vmgr->getAreaInfo(GetId(), x, y, vmap_z, flags, adtId, rootId, groupId))
     {
         // check if there's terrain between player height and object height
-        if (GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+        if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
         {
             float _mapheight = gmap->getHeight(x, y);
             // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
@@ -1706,7 +1715,7 @@ uint16 Map::GetAreaFlag(float x, float y, float z, bool *isOutdoors) const
         areaflag = atEntry->exploreFlag;
     else
     {
-        if (GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+        if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
             areaflag = gmap->getArea(x, y);
         // this used while not all *.map files generated (instances)
         else
@@ -1725,13 +1734,13 @@ uint16 Map::GetAreaFlag(float x, float y, float z, bool *isOutdoors) const
 
 uint8 Map::GetTerrainType(float x, float y) const
 {
-    if (GridMap *gmap = const_cast<Map*>(this)->GetGrid(x, y))
+    if (GridMap* gmap = const_cast<Map*>(this)->GetGrid(x, y))
         return gmap->getTerrainType(x, y);
     else
         return 0;
 }
 
-ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData *data) const
+ZLiquidStatus Map::getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, LiquidData* data) const
 {
     ZLiquidStatus result = LIQUID_MAP_NO_WATER;
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
@@ -1790,7 +1799,7 @@ float Map::GetWaterLevel(float x, float y) const
 
 uint32 Map::GetAreaIdByAreaFlag(uint16 areaflag, uint32 map_id)
 {
-    AreaTableEntry const *entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
+    AreaTableEntry const* entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
 
     if (entry)
         return entry->ID;
@@ -1800,7 +1809,7 @@ uint32 Map::GetAreaIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
 uint32 Map::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
 {
-    AreaTableEntry const *entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
+    AreaTableEntry const* entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
 
     if (entry)
         return (entry->zone != 0) ? entry->zone : entry->ID;
@@ -1810,19 +1819,19 @@ uint32 Map::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
 void Map::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 areaflag, uint32 map_id)
 {
-    AreaTableEntry const *entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
+    AreaTableEntry const* entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
 
     areaid = entry ? entry->ID : 0;
     zoneid = entry ? ((entry->zone != 0) ? entry->zone : entry->ID) : 0;
 }
 
-bool Map::IsInWater(float x, float y, float pZ, LiquidData *data) const
+bool Map::IsInWater(float x, float y, float pZ, LiquidData* data) const
 {
     // Check surface in x, y point for liquid
     if (const_cast<Map*>(this)->GetGrid(x, y))
     {
         LiquidData liquid_status;
-        LiquidData *liquid_ptr = data ? data : &liquid_status;
+        LiquidData* liquid_ptr = data ? data : &liquid_status;
         if (getLiquidStatus(x, y, pZ, MAP_ALL_LIQUIDS, liquid_ptr))
                 return true;
     }
@@ -1990,7 +1999,7 @@ void Map::DelayedUpdate(const uint32 t_diff)
         for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end();)
         {
             NGridType *grid = i->getSource();
-            GridInfo *info = i->getSource()->getGridInfoRef();
+            GridInfo* info = i->getSource()->getGridInfoRef();
             ++i;                                                // The update might delete the map and we need the next map before the iterator gets invalid
             ASSERT(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
             si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, grid->getX(), grid->getY(), t_diff);
@@ -1998,7 +2007,7 @@ void Map::DelayedUpdate(const uint32 t_diff)
     }
 }
 
-void Map::AddObjectToRemoveList(WorldObject *obj)
+void Map::AddObjectToRemoveList(WorldObject* obj)
 {
     ASSERT(obj->GetMapId() == GetId() && obj->GetInstanceId() == GetInstanceId());
 
@@ -2008,7 +2017,7 @@ void Map::AddObjectToRemoveList(WorldObject *obj)
     //sLog->outDebug(LOG_FILTER_MAPS, "Object (GUID: %u TypeId: %u) added to removing list.", obj->GetGUIDLow(), obj->GetTypeId());
 }
 
-void Map::AddObjectToSwitchList(WorldObject *obj, bool on)
+void Map::AddObjectToSwitchList(WorldObject* obj, bool on)
 {
     ASSERT(obj->GetMapId() == GetId() && obj->GetInstanceId() == GetInstanceId());
 
@@ -2026,7 +2035,7 @@ void Map::RemoveAllObjectsInRemoveList()
     while (!i_objectsToSwitch.empty())
     {
         std::map<WorldObject*, bool>::iterator itr = i_objectsToSwitch.begin();
-        WorldObject *obj = itr->first;
+        WorldObject* obj = itr->first;
         bool on = itr->second;
         i_objectsToSwitch.erase(itr);
 
@@ -2178,15 +2187,15 @@ void Map::RemoveFromActive(Creature* c)
     }
 }
 
-template void Map::Add(Corpse *);
-template void Map::Add(Creature *);
-template void Map::Add(GameObject *);
-template void Map::Add(DynamicObject *);
+template void Map::Add(Corpse* );
+template void Map::Add(Creature* );
+template void Map::Add(GameObject* );
+template void Map::Add(DynamicObject* );
 
-template void Map::Remove(Corpse *, bool);
-template void Map::Remove(Creature *, bool);
-template void Map::Remove(GameObject *, bool);
-template void Map::Remove(DynamicObject *, bool);
+template void Map::Remove(Corpse* , bool);
+template void Map::Remove(Creature* , bool);
+template void Map::Remove(GameObject* , bool);
+template void Map::Remove(DynamicObject* , bool);
 
 /* ******* Dungeon Instance Maps ******* */
 
@@ -2242,7 +2251,7 @@ bool InstanceMap::CanEnter(Player* player)
     }
 
     // cannot enter while an encounter is in progress on raids
-    /*Group *pGroup = player->GetGroup();
+    /*Group* pGroup = player->GetGroup();
     if (!player->isGameMaster() && pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->GetMapId() != GetId())*/
     if (IsRaid() && GetInstanceScript() && GetInstanceScript()->IsEncounterInProgress())
     {
@@ -2257,7 +2266,7 @@ bool InstanceMap::CanEnter(Player* player)
 
     if (!playerList.isEmpty())
         for (PlayerList::const_iterator i = playerList.begin(); i != playerList.end(); ++i)
-            if (Player *iPlayer = i->getSource())
+            if (Player* iPlayer = i->getSource())
             {
                 if (iPlayer->isGameMaster()) // bypass GMs
                     continue;
@@ -2303,7 +2312,7 @@ bool InstanceMap::Add(Player* player)
                 player->AddInstanceEnterTime(GetInstanceId(), time(NULL));
 
             // get or create an instance save for the map
-            InstanceSave *mapSave = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
+            InstanceSave* mapSave = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
             if (!mapSave)
             {
                 sLog->outDetail("InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
@@ -2311,7 +2320,7 @@ bool InstanceMap::Add(Player* player)
             }
 
             // check for existing instance binds
-            InstancePlayerBind *playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
+            InstancePlayerBind* playerBind = player->GetBoundInstance(GetId(), Difficulty(GetSpawnMode()));
             if (playerBind && playerBind->perm)
             {
                 // cannot enter other instances if bound permanently
@@ -2326,7 +2335,7 @@ bool InstanceMap::Add(Player* player)
                 if (group)
                 {
                     // solo saves should be reset when entering a group
-                    InstanceGroupBind *groupBind = group->GetBoundInstance(this);
+                    InstanceGroupBind* groupBind = group->GetBoundInstance(this);
                     if (playerBind)
                     {
                         sLog->outError("InstanceMap::Add: player %s(%d) is being put into instance %d, %d, %d, %d, %d, %d but he is in group %d and is bound to instance %d, %d, %d, %d, %d, %d!", player->GetName(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(), mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset(), GUID_LOPART(group->GetLeaderGUID()), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(), playerBind->save->GetDifficulty(), playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(), playerBind->save->CanReset());
@@ -2363,7 +2372,7 @@ bool InstanceMap::Add(Player* player)
                             data << uint32(i_data ? i_data->GetCompletedEncounterMask() : 0);
                             data << uint8(0);
                             player->GetSession()->SendPacket(&data);
-                            player->SetPendingBind(mapSave, 60000);
+                            player->SetPendingBind(mapSave->GetInstanceId(), 60000);
                         }
                     }
                 }
@@ -2497,7 +2506,7 @@ void InstanceMap::PermBindAllPlayers(Player* player)
     if (!IsDungeon())
         return;
 
-    InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
+    InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId());
     if (!save)
     {
         sLog->outError("Cannot bind player (GUID: %u, Name: %s), because no instance save is available for instance map (Name: %s, Entry: %u, InstanceId: %u)!", player->GetGUIDLow(), player->GetName(), player->GetMap()->GetMapName(), player->GetMapId(), GetInstanceId());
@@ -2511,7 +2520,7 @@ void InstanceMap::PermBindAllPlayers(Player* player)
         Player* plr = itr->getSource();
         // players inside an instance cannot be bound to other instances
         // some players may already be permanently bound, in this case nothing happens
-        InstancePlayerBind *bind = plr->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
+        InstancePlayerBind* bind = plr->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
         if (!bind || !bind->perm)
         {
             plr->BindToInstance(save, true);
@@ -2549,7 +2558,7 @@ void InstanceMap::SetResetSchedule(bool on)
     // it is assumed that the reset time will rarely (if ever) change while the reset is scheduled
     if (IsDungeon() && !HavePlayers() && !IsRaidOrHeroicDungeon())
     {
-        if (InstanceSave *save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId()))
+        if (InstanceSave* save = sInstanceSaveMgr->GetInstanceSave(GetInstanceId()))
             sInstanceSaveMgr->ScheduleReset(on, save->GetResetTime(), InstanceSaveManager::InstResetEvent(0, GetId(), Difficulty(GetSpawnMode()), GetInstanceId()));
         else
             sLog->outError("InstanceMap::SetResetSchedule: cannot turn schedule %s, there is no save information for instance (map [id: %u, name: %s], instance id: %u, difficulty: %u)",
