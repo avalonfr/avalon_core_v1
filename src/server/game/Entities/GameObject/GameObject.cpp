@@ -1394,26 +1394,25 @@ void GameObject::Use(Unit* user)
                 // on the current DB there is only one gameobject that uses this (Ritual of Doom)
                 // and its required target number is 1 (outter for loop will run once)
                 if (info->summoningRitual.casterTargetSpell && info->summoningRitual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
-                {
                     for (uint32 i = 0; i < info->summoningRitual.casterTargetSpellTargets; i++)
                         // m_unique_users can contain only player GUIDs
                         if (Player* target = ObjectAccessor::GetPlayer(*this, SelectRandomContainerElement(m_unique_users)))
                             spellCaster->CastSpell(target, info->summoningRitual.casterTargetSpell, true);
 
-                // finish owners spell
-                if (owner)
-                    owner->FinishSpell(CURRENT_CHANNELED_SPELL);
+					// finish owners spell
+					if (owner)
+					    owner->FinishSpell(CURRENT_CHANNELED_SPELL);
 
-                // can be deleted now, if
-                if (!info->summoningRitual.ritualPersistent)
-                    SetLootState(GO_JUST_DEACTIVATED);
-                else
-                {
-                    // reset ritual for this GO
-                    m_ritualOwner = NULL;
-                    m_unique_users.clear();
-                    m_usetimes = 0;
-                }
+					// can be deleted now, if
+					if (!info->summoningRitual.ritualPersistent)
+					    SetLootState(GO_JUST_DEACTIVATED);
+					else
+					{
+					    // reset ritual for this GO
+					    m_ritualOwner = NULL;
+					    m_unique_users.clear();
+					    m_usetimes = 0;
+					}
             }
             else
                 return;
