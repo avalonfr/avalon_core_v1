@@ -280,6 +280,8 @@ enum CreaturesIds
     NPC_TERENAS_FIGHTER                         = 36823,
     NPC_SPIRIT_WARDEN                           = 36824,
     NPC_PLATFORM_DESTRUCTIBLE_EDGE_STALKER      = 22515,
+    NPC_WORLD_TRIGGER                           = 22515,
+
 };
 
 enum GameObjectsIds
