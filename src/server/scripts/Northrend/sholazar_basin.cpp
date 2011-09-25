@@ -760,6 +760,356 @@ public:
 	}
 };
 
+/*######
+## npc_tipsy_mcmanus
+######*/
+
+enum TipsyMcManus
+{
+    DATA_EVENT = 1,
+    DATA_OBJECT_ENTRY = 2,
+    QUEST_STILL_AT_IT = 12644,
+    GOSSIP_TIPSY_MCMANUS_TEXT = 13288,
+    GO_JUNGLE_PUNCH = 190643
+};
+
+static uint32 const goEntry[5] =
+{
+    190635,
+    190636,
+    190637,
+    190638,
+    190639
+};
+
+static char const* Instructions[6] =
+{
+    "Benutze das Druckventil!",
+    "Heize die Kohlenpfanne an!",
+    "Wirf noch eine Orange hinein, schnell!",
+    "Misch ein paar Bananen hinzu!",
+    "Schnell, eine Papaya!",
+    "Nein, das war falsch! Wir muessen noch einmal beginnen."
+};
+
+#define GOSSIP_ITEM_TIPSY "Ich bin bereit, lass uns anfangen."
+
+class npc_tipsy_mcmanus : public CreatureScript
+{
+    public:
+        npc_tipsy_mcmanus() : CreatureScript("npc_tipsy_mcmanus") { }
+
+        bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+        {
+            if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            {
+                player->CLOSE_GOSSIP_MENU();
+                creature->AI()->SetData(DATA_EVENT, 1);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
+            return true;
+        }
+
+        bool OnGossipHello(Player* player, Creature* creature)
+        {
+            if (player->GetQuestStatus(QUEST_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TIPSY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+
+            player->SEND_GOSSIP_MENU(GOSSIP_TIPSY_MCMANUS_TEXT, creature->GetGUID());
+            return true;
+        }
+
+        struct npc_tipsy_mcmanusAI : public ScriptedAI
+        {
+            npc_tipsy_mcmanusAI(Creature* c) : ScriptedAI(c) {}
+
+            void Reset()
+            {
+                _event = false;
+                _choice = true;
+                _rnd = 0;
+                _count = 0;
+                _reactTimer = 10000;
+                me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
+
+            void SetData(uint32 id, uint32 data)
+            {
+                switch (id)
+                {
+                    case DATA_EVENT:
+                        _event = data ? true : false;
+                        break;
+                    case DATA_OBJECT_ENTRY:
+                        if (!_choice && data == goEntry[_rnd]) // used correct object
+                        {
+                            me->HandleEmoteCommand(EMOTE_ONESHOT_CHEER);
+                            _choice = true;
+                            _reactTimer = urand(5000, 7000);
+                        }
+                        break;
+                }
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (UpdateVictim())
+                {
+                    DoMeleeAttackIfReady();
+                    return;
+                }
+
+                if (_event) // active
+                {
+                    if(_reactTimer <= diff)
+                    {
+                        if (_choice) // used correct object
+                        {
+                            ++_count;
+
+                            if (_count > 10) // spawn quest reward and reset
+                            {
+                                float x, y, z;
+                                me->GetPosition(x, y, z);
+                                me->SummonGameObject(GO_JUNGLE_PUNCH, x + 1.2f, y + 0.8f, z - 0.23f, 0, 0, 0, 0, 0, 60);
+                                Reset();
+                                return;
+                            }
+
+                            _rnd = urand(0, 4);
+                            me->MonsterSay(Instructions[_rnd], LANG_UNIVERSAL, 0); // give new instructions
+                            me->HandleEmoteCommand(RAND(EMOTE_ONESHOT_EXCLAMATION, EMOTE_ONESHOT_POINT));
+                            _choice = false; // reset choice
+                        }
+                        else // failed -> reset and try again
+                        {
+                            me->MonsterSay(Instructions[5], LANG_UNIVERSAL, 0);
+                            me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
+                            Reset();
+                            return;
+                        }
+
+                        _reactTimer = 10000;
+                    }
+                    else
+                        _reactTimer -= diff;
+                }
+            }
+
+        private:
+            bool _event;
+            bool _choice;
+            uint8 _count;
+            uint8 _rnd;
+            uint32 _reactTimer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_tipsy_mcmanusAI(creature);
+        }
+};
+
+/*######
+## go_brew_event
+######*/
+
+enum BrewEvent
+{
+    NPC_TIPSY_MCMANUS = 28566
+};
+
+class go_brew_event : public GameObjectScript
+{
+    public:
+        go_brew_event() : GameObjectScript("go_brew_event") { }
+
+        bool OnGossipHello(Player* /*player*/, GameObject* go)
+        {
+            if (Creature* Tipsy = go->FindNearestCreature(NPC_TIPSY_MCMANUS, 30.0f, true))
+                Tipsy->AI()->SetData(DATA_OBJECT_ENTRY, go->GetEntry());
+
+            return false;
+        }
+};
+
+/*######
+## npc_stormwatcher
+######*/
+
+enum eSpells
+{
+    SPELL_CALL_LIGHTNING = 32018,
+    SPELL_THROW_VENTURE_CO_EXPLOSIVES = 53145,
+    SPELL_SUMMON_STORMWATCHERS_HEAD = 53162
+};
+
+class npc_stormwatcher : public CreatureScript
+{
+    public:
+        npc_stormwatcher() : CreatureScript("npc_stormwatcher"){ }
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_stormwatcherAI(pCreature);
+        }
+
+        struct npc_stormwatcherAI : public ScriptedAI
+        {
+            npc_stormwatcherAI(Creature* pCreature) : ScriptedAI (pCreature){ }
+
+            uint32 uiCallLightning_Timer;
+
+            void Reset()
+            {
+                uiCallLightning_Timer = urand (3000,5000);
+            }
+
+            void SpellHit (Unit* /*caster*/, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_THROW_VENTURE_CO_EXPLOSIVES)
+                {
+                    DoCast(me, SPELL_SUMMON_STORMWATCHERS_HEAD, true);
+                    me->DespawnOrUnsummon();
+                }
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if (!UpdateVictim())
+                    return;
+
+                if (uiCallLightning_Timer <= diff)
+                {
+                    DoCastVictim(SPELL_CALL_LIGHTNING);
+                    uiCallLightning_Timer = urand (3000,5000);
+                }
+                else uiCallLightning_Timer -= diff;
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
+/*######
+## Quest: Rejek: First Blood
+######*/
+
+enum enums
+{
+    ENTRY_SAPPHIRE_HIVE_WASP = 28086,
+    ENTRY_HARDKNUCKLE_CHARGER = 28096,
+    ENTRY_MISTWHISPER_ORACLE = 28110,
+    ENTRY_MISTWHISPER_WARRIOR = 28109,
+    // Kill Credit Entries from quest_template
+    NPC_CREDIT_1 = 28040,
+    NPC_CREDIT_2 = 36189,
+    NPC_CREDIT_3 = 29043,
+
+    SPELL_BLOOD_REJEKS_SWORD = 52992,
+    SPELL_WASP_STINGER_RAGE = 34392,
+    SPELL_CHARGER_CHARGE = 49758,
+    SPELL_ORACLE_LIGHTNING_CLOUD= 54921,
+    SPELL_WARRIOR_FLIP_ATTACK = 50533
+};
+
+class npc_rejek_first_blood : public CreatureScript
+{
+    public:
+        npc_rejek_first_blood() : CreatureScript("npc_rejek_first_blood"){ }
+
+        CreatureAI* GetAI(Creature* pCreature) const
+        {
+            return new npc_rejek_first_bloodAI(pCreature);
+        }
+
+        struct npc_rejek_first_bloodAI : public ScriptedAI
+        {
+            npc_rejek_first_bloodAI(Creature* pCreature) : ScriptedAI (pCreature){ }
+
+            uint32 uiFlipAttack_Timer;
+            uint32 uiCharge_Timer;
+            
+            bool Frenzied;
+
+            void Reset()
+            {
+                uiFlipAttack_Timer = urand (2000,6000);
+                uiCharge_Timer = 0;
+            }
+
+            void EnterCombat (Unit* /*who*/)
+            {
+                Frenzied = false;
+
+                if(me->GetEntry() == ENTRY_MISTWHISPER_ORACLE)
+                    DoCast(me, SPELL_ORACLE_LIGHTNING_CLOUD, true);
+            }
+
+            void SpellHit (Unit* caster, SpellInfo const* spell)
+            {
+                if(spell->Id == SPELL_BLOOD_REJEKS_SWORD)
+                {
+                    if(caster && caster->ToPlayer())
+                    {
+                        switch(me->GetEntry())
+                        {
+                            case ENTRY_SAPPHIRE_HIVE_WASP:
+                                caster->ToPlayer()->KilledMonsterCredit(NPC_CREDIT_1,0);
+                                break;
+                            case ENTRY_HARDKNUCKLE_CHARGER:
+                                caster->ToPlayer()->KilledMonsterCredit(NPC_CREDIT_2,0);
+                                break;
+                            case ENTRY_MISTWHISPER_ORACLE:
+                            case ENTRY_MISTWHISPER_WARRIOR:
+                                caster->ToPlayer()->KilledMonsterCredit(NPC_CREDIT_3,0);
+                                break;
+                        }
+                    }
+                }
+            }
+
+            void UpdateAI(const uint32 diff)
+            {
+                if(!UpdateVictim())
+                    return;
+
+                if(me->GetEntry() == ENTRY_SAPPHIRE_HIVE_WASP)
+                {
+                    if(!Frenzied && HealthBelowPct(30))
+                    {
+                        DoCast(me, SPELL_WASP_STINGER_RAGE, true);
+                        Frenzied = true;
+                    }
+                }
+
+                if(me->GetEntry() == ENTRY_HARDKNUCKLE_CHARGER)
+                {
+                    if(uiCharge_Timer <= diff)
+                    {
+                        DoCastVictim(SPELL_CHARGER_CHARGE);
+                        uiCharge_Timer = 5000;
+                    }
+                    else uiCharge_Timer -= diff;
+                }
+
+                if(me->GetEntry() == ENTRY_MISTWHISPER_WARRIOR)
+                {
+                    if(uiFlipAttack_Timer <= diff)
+                    {
+                        DoCastVictim(SPELL_WARRIOR_FLIP_ATTACK);
+                        uiFlipAttack_Timer = urand (4000,7000);
+                    }
+                    else uiFlipAttack_Timer -= diff;
+                }
+
+                DoMeleeAttackIfReady();
+            }
+        };
+};
+
+
+
 void AddSC_sholazar_basin()
 {
     new npc_injured_rainspeaker_oracle();
@@ -770,4 +1120,8 @@ void AddSC_sholazar_basin()
     new npc_adventurous_dwarf();
     new npc_jungle_punch_target();
 	new npc_mosswalker_victim();
+    new npc_tipsy_mcmanus();
+    new go_brew_event();
+    new npc_stormwatcher();
+    new npc_rejek_first_blood();
 }
