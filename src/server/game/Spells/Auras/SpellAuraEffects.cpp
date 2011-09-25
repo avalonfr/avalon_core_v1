@@ -5668,6 +5668,102 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
         case SPELLFAMILY_GENERIC:
             switch (GetId())
             {
+				case 43310: // Ram Level - Neutral
+                case 42992: // Ram - Trot
+                case 42993: // Ram - Canter
+                case 42994: // Ram - Gallop
+                {
+                    if (!caster)
+                        break;
+
+                    // Exhausted Ram
+                    if (!caster->ToPlayer() || caster->HasAura(43332))
+                        break;
+
+                    // Fatigue
+                    int8 mod = 0;
+                    switch (GetId())
+                    {
+                        case 43310: mod = -4; break;
+                        case 42992: mod = -2; break;
+                        case 42993: mod = 1; break;
+                        case 42994: mod = 5; break;
+                    }
+
+
+                    if (Aura* fatigue = caster->GetAura(43052))
+                    {
+
+                       fatigue->ModStackAmount(mod);
+                        if (fatigue && fatigue->GetStackAmount() >= 100)
+                        {
+                            caster->RemoveAurasDueToSpell(42924); // Giddyup!
+                            caster->RemoveAurasDueToSpell(43052); // Fatigue
+                            caster->RemoveAurasDueToSpell(GetId());
+                            caster->CastSpell(caster, 43310, true); // Ram Level - Neutral
+                            caster->CastSpell(caster, 43332, true); // Exhausted Ram
+                            return;
+                        }
+                    }
+                    else if (mod > 0)
+                        caster->CastCustomSpell(43052, SPELLVALUE_AURA_STACK, mod, caster, true);
+
+                    // Quest credits
+                    if (GetBase()->GetDuration() <= 892000)
+                    {
+                        if (caster->ToPlayer()->GetQuestStatus(11318) == QUEST_STATUS_INCOMPLETE ||
+                            caster->ToPlayer()->GetQuestStatus(11409) == QUEST_STATUS_INCOMPLETE)
+                        {
+                            switch (GetId())
+                            {
+                                case 42992: caster->ToPlayer()->KilledMonsterCredit(24263, 0); break;
+                                case 42993: caster->ToPlayer()->KilledMonsterCredit(24264, 0); break;
+                                case 42994: caster->ToPlayer()->KilledMonsterCredit(24265, 0); break;
+                            }
+                        }
+                    }
+
+                    // get number of Giddyup!s
+                    uint8 count = caster->GetAuraCount(42924);
+
+                    uint32 newSpeedAura;
+
+                    switch (GetId())
+                    {
+                        // check every 2 seconds
+                        case 43310:
+                        case 42992:
+                            switch (count)
+                            {
+                                case 0: newSpeedAura = 43310; break;
+                                case 1: newSpeedAura = 42992; break;
+                                case 2: newSpeedAura = 42993; break;
+                                default: newSpeedAura = 42994; break;
+                            }
+                            break;
+                        // check every second
+                        case 42993:
+                        case 42994:
+                            switch (count)
+                            {
+                                case 0: newSpeedAura = 42992; break;
+                                case 1: newSpeedAura = 42993; break;
+                                default: newSpeedAura = 42994; break;
+                            }
+                            break;
+                    }
+
+                    // reset Giddyup!
+                    caster->RemoveAurasDueToSpell(42924);
+
+                    // apply new speed if needed
+                    if (newSpeedAura != GetId())
+                    {
+                        caster->RemoveAurasDueToSpell(GetId());
+                        caster->CastSpell(caster, newSpeedAura, true);
+                    }
+                    break;
+				}
                 case 66149: // Bullet Controller Periodic - 10 Man
                 case 68396: // Bullet Controller Periodic - 25 Man
                 {
