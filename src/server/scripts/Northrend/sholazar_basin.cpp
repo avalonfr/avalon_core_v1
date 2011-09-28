@@ -1108,6 +1108,62 @@ class npc_rejek_first_blood : public CreatureScript
         };
 };
 
+/*######
+## vehicle_haiphoon
+######*/
+
+enum eHaiphoon
+{
+    SPELL_DEVOUR_WIND = 52862,
+    SPELL_DEVOUR_WATER = 52864,
+
+    NPC_HAIPHOON_WATER = 28999,
+    NPC_HAIPHOON_AIR = 28985
+};
+
+class vehicle_haiphoon : public CreatureScript
+{
+public:
+    vehicle_haiphoon() : CreatureScript("vehicle_haiphoon") { }
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new vehicle_haiphoonAI(pCreature);
+    }
+
+    struct vehicle_haiphoonAI : public VehicleAI
+    {
+        vehicle_haiphoonAI(Creature* pCreature) : VehicleAI(pCreature) { }
+
+        void SpellHitTarget(Unit* target,SpellInfo const* spell)
+        {
+            if(target == me)
+                return;
+        
+            if(spell->Id == SPELL_DEVOUR_WIND)
+            {
+                if(Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    player->KilledMonsterCredit(29009, 0);
+                    me->UpdateEntry(NPC_HAIPHOON_AIR);
+                    player->VehicleSpellInitialize();
+                    me->setFaction(player->getFaction());
+                }
+            }
+
+            if(spell->Id == SPELL_DEVOUR_WATER)
+            {
+                if(Player* player = me->GetCharmerOrOwnerPlayerOrPlayerItself())
+                {
+                    player->KilledMonsterCredit(29008, 0);
+                    me->UpdateEntry(NPC_HAIPHOON_WATER);
+                    player->VehicleSpellInitialize();
+                    me->setFaction(player->getFaction());
+                }
+            }
+        }
+	};	
+};
 
 
 void AddSC_sholazar_basin()
@@ -1124,4 +1180,5 @@ void AddSC_sholazar_basin()
     new go_brew_event();
     new npc_stormwatcher();
     new npc_rejek_first_blood();
+	new vehicle_haiphoon();
 }
