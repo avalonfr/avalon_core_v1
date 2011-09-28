@@ -758,6 +758,8 @@ bool ChatHandler::BoutiqueGold(const char* args)
 bool ChatHandler::BoutiqueCustomize(const char* args)
 {
 	int points = 0;
+	int prix_custom = 200;
+	int bilan = 0;
 	Player* character = m_session->GetPlayer();
 
 	//TODO : faire la requete voir si l'object à 1 prix
@@ -774,19 +776,158 @@ bool ChatHandler::BoutiqueCustomize(const char* args)
 
       points = fields[0].GetUInt32();
 
-      if(points < 150)
+      if(points < prix_custom)
       {
       m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 200 points pour votre demande.");
 	  return false;
       }
 
     Player* target = m_session->GetPlayer();
-
+	bilan = points - prix_custom;
     if(target)
     {
         PSendSysMessage(LANG_CUSTOMIZE_PLAYER, GetNameLink(target).c_str());
         target->SetAtLoginFlag(AT_LOGIN_CUSTOMIZE);
+		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '8' WHERE guid = '%u'", target->GetGUIDLow());
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// rename characters
+bool ChatHandler::BoutiqueRename(const char* args)
+{
+	int points = 0;
+	int prix_rename = 100;
+	int bilan = 0;
+	
+	Player* character = m_session->GetPlayer();
+
+	//TODO : faire la requete voir si l'object à 1 prix
+	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+
+    if(!result)
+       return false;
+
+    Field* fields = result->Fetch();
+
+
+     if(!fields)
+       return false;
+
+      points = fields[0].GetUInt32();
+
+      if(points < prix_rename)
+      {
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 100 points pour votre demande.");
+	  return false;
+      }
+
+    Player* target = m_session->GetPlayer();
+	bilan = points - prix_rename;
+    if(target)
+    {
+        PSendSysMessage(LANG_RENAME_PLAYER, GetNameLink(target).c_str());
+        target->SetAtLoginFlag(AT_LOGIN_RENAME);
+		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+        //CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '8' WHERE guid = '%u'", target->GetGUIDLow());
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// race characters
+bool ChatHandler::BoutiqueRace(const char* args)
+{
+	int points = 0;
+	int prix_race = 250;
+	int bilan = 0;
+	
+	Player* character = m_session->GetPlayer();
+
+	//TODO : faire la requete voir si l'object à 1 prix
+	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+
+    if(!result)
+       return false;
+
+    Field* fields = result->Fetch();
+
+
+     if(!fields)
+       return false;
+
+      points = fields[0].GetUInt32();
+
+      if(points < prix_race)
+      {
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 250 points pour votre demande.");
+	  return false;
+      }
+
+    Player* target = m_session->GetPlayer();
+	bilan = points - prix_race;
+    if(target)
+    {
+        PSendSysMessage(LANG_CUSTOMIZE_PLAYER, GetNameLink(target).c_str());
+        target->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '128' WHERE guid = %u", target->GetGUIDLow());
+		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+    }
+    else
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// faction characters
+bool ChatHandler::BoutiqueFaction(const char* args)
+{
+	int points = 0;
+	int prix_faction = 300;
+	int bilan = 0;
+	
+	Player* character = m_session->GetPlayer();
+
+	//TODO : faire la requete voir si l'object à 1 prix
+	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+
+    if(!result)
+       return false;
+
+    Field* fields = result->Fetch();
+
+
+     if(!fields)
+       return false;
+
+      points = fields[0].GetUInt32();
+
+      if(points < prix_faction)
+      {
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 300 points pour votre demande.");
+	  return false;
+      }
+
+    Player* target = m_session->GetPlayer();
+	bilan = points - prix_faction;
+    if(target)
+    {
+        PSendSysMessage(LANG_CUSTOMIZE_PLAYER, GetNameLink(target).c_str());
+        target->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '64' WHERE guid = %u", target->GetGUIDLow());
+		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
     }
     else
     {
