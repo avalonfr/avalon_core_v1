@@ -830,6 +830,59 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
         }
 };
 
+class spell_putricide_expunged_gas : public SpellScriptLoader
+{
+    public:
+        spell_putricide_expunged_gas() : SpellScriptLoader("spell_putricide_expunged_gas") { }
+
+        class spell_putricide_expunged_gas_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_putricide_expunged_gas_SpellScript);
+
+            bool Load()
+            {
+                return GetCaster()->GetTypeId() == TYPEID_UNIT && GetCaster()->GetInstanceScript();
+            }
+
+            void CalcDamage(SpellEffIndex /*effIndex*/)
+            {
+                // checked in script loading, cant be NULL here
+                InstanceScript* instance = GetCaster()->GetInstanceScript();
+                Creature* professor = Unit::GetCreature(*GetCaster(), instance->GetData64(DATA_PROFESSOR_PUTRICIDE));
+                if (!professor)
+                    return;
+
+                int32 dmg = 0;
+                uint32 bloatId = sSpellMgr->GetSpellIdForDifficulty(SPELL_GASEOUS_BLOAT, GetCaster());
+                if (Aura* gasBloat = GetTargetUnit()->GetAura(bloatId))
+                {
+                    uint32 stack = gasBloat->GetStackAmount();
+                    int32 const mod = (GetCaster()->GetMap()->GetSpawnMode() & 1) ? 1500 : 1250;
+                    for (uint8 i = 1; i < stack; ++i)
+                        dmg += mod * stack;
+                }
+
+                SetHitDamage(dmg);
+            }
+
+            void DespawnAfterCast()
+            {
+                GetCaster()->ToCreature()->DespawnOrUnsummon(100);
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_putricide_expunged_gas_SpellScript::CalcDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+                AfterHit += SpellHitFn(spell_putricide_expunged_gas_SpellScript::DespawnAfterCast);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_putricide_expunged_gas_SpellScript();
+        }
+};
+
 class spell_putricide_slime_puddle : public SpellScriptLoader
 {
     public:
@@ -1474,6 +1527,7 @@ void AddSC_boss_professor_putricide()
     new npc_volatile_ooze();
     new spell_putricide_gaseous_bloat();
     new spell_putricide_ooze_channel();
+	new spell_putricide_expunged_gas();
     new spell_putricide_slime_puddle();
 	new spell_putricide_slime_puddle_aura();
     new spell_putricide_unstable_experiment();
