@@ -123,7 +123,9 @@ public:
     {
         boss_gormokAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_pInstance = (InstanceScript*)creature->GetInstanceScript();
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
+			m_pInstance = (InstanceScript*)creature->GetInstanceScript();
         }
 
         InstanceScript* m_pInstance;
@@ -391,6 +393,8 @@ struct boss_jormungarAI : public ScriptedAI
 {
     boss_jormungarAI(Creature* creature) : ScriptedAI(creature)
     {
+		me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+        me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
         instanceScript = creature->GetInstanceScript();
     }
 
@@ -506,7 +510,7 @@ struct boss_jormungarAI : public ScriptedAI
                 DoMeleeAttackIfReady();
                 break;
             case 1: // Submerge
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
                 DoCast(me, SPELL_SUBMERGE_0);
                 DoScriptText(SAY_SUBMERGE, me);
                 me->GetMotionMaster()->MovePoint(0, ToCCommonLoc[1].GetPositionX()+urand(0, 80)-40, ToCCommonLoc[1].GetPositionY()+urand(0, 80)-40, ToCCommonLoc[1].GetPositionZ());
@@ -552,7 +556,7 @@ struct boss_jormungarAI : public ScriptedAI
                 DoSpellAttackIfReady(spitSpell);
                 break;
             case 5: // Submerge
-                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_OOC_NOT_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                me->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE /*| UNIT_FLAG_OOC_NOT_ATTACKABLE*/ | UNIT_FLAG_NOT_SELECTABLE);
                 DoCast(me, SPELL_SUBMERGE_0);
                 DoScriptText(SAY_SUBMERGE, me);
                 me->GetMotionMaster()->MovePoint(0, ToCCommonLoc[1].GetPositionX()+urand(0, 80)-40, ToCCommonLoc[1].GetPositionY()+urand(0, 80)-40, ToCCommonLoc[1].GetPositionZ());
@@ -754,6 +758,8 @@ public:
     {
         boss_icehowlAI(Creature* creature) : ScriptedAI(creature)
         {
+			me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+			me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             m_pInstance = (InstanceScript*)creature->GetInstanceScript();
         }
 
