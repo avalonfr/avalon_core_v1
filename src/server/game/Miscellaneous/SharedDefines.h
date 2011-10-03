@@ -177,6 +177,7 @@ enum Powers
     POWER_RUNE                          = 5,
     POWER_RUNIC_POWER                   = 6,
     MAX_POWERS                          = 7,
+	POWER_HOLY_POWER                    = 8,
     POWER_ALL                           = 127,    // default for class?
     POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
