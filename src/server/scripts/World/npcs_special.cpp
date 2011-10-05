@@ -3299,6 +3299,213 @@ class npc_brew_vendor : public CreatureScript
         }
 };
 
+enum DarkIronAttack
+{
+    GO_FESTIVE_KEG = 186183, // .. 186187
+    GO_MOLE_MACHINE_WRECKAGE_A = 189989,
+    GO_MOLE_MACHINE_WRECKAGE_H = 189990,
+
+    NPC_DARK_IRON_GUZZLER = 23709,
+    NPC_DARK_IRON_HERALD = 24536,
+
+    SPELL_BREWFEST_STUN = 42435,
+    SPELL_MOLE_MACHINE_SPAWN = 43563
+};
+
+class npc_dark_iron_herald : public CreatureScript
+{
+    public:
+        npc_dark_iron_herald() : CreatureScript("npc_dark_iron_herald") { }
+
+        struct npc_dark_iron_heraldAI : public ScriptedAI
+        {
+            npc_dark_iron_heraldAI(Creature* creature) : ScriptedAI(creature), _summons(me)
+            {
+                if (me->isDead())
+                    me->Respawn();
+            }
+
+            void Reset()
+            {
+                _eventTimer = 5*MINUTE*IN_MILLISECONDS;
+                _spawnTimer = 15*IN_MILLISECONDS;
+            }
+
+            void ResetKegs()
+            {
+                for (uint32 i = GO_FESTIVE_KEG; i < GO_FESTIVE_KEG+5; ++i)
+                {
+                    GameObject* keg = me->FindNearestGameObject(i, 100.0f);
+                    if (keg && keg->GetGoState() == GO_STATE_ACTIVE)
+                        keg->SetGoState(GO_STATE_READY);
+                }
+            }
+
+            GameObject* GetKeg() const
+            {
+                std::list<GameObject*> tempList;
+
+                // get all valid near kegs
+                for (uint32 i = GO_FESTIVE_KEG; i < GO_FESTIVE_KEG+5; ++i)
+                {
+                    GameObject* keg = me->FindNearestGameObject(i, 100.0f);
+                    if (keg && keg->GetGoState() != GO_STATE_ACTIVE)
+                        tempList.push_back(keg);
+                }
+
+                // select a random one
+                if (!tempList.empty())
+                {
+                    std::list<GameObject*>::iterator itr = tempList.begin();
+                    std::advance(itr, urand(0, tempList.size() - 1));
+                    if (GameObject* keg = *itr)
+                        return keg;
+                }
+
+                return NULL;
+            }
+
+            void JustSummoned(Creature* summon)
+            {
+                _summons.Summon(summon);
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (_eventTimer <= diff)
+                {
+                    float x, y, z;
+                    me->GetPosition(x, y, z);
+                    uint32 area = me->GetAreaId();
+                    me->SummonGameObject((area == 1) ? GO_MOLE_MACHINE_WRECKAGE_A : GO_MOLE_MACHINE_WRECKAGE_H, x, y, z, 0, 0, 0, 0, 0, 90);
+
+                    _summons.DespawnAll();
+                    ResetKegs();
+                    me->DisappearAndDie();
+                    return;
+                }
+                else
+                    _eventTimer -= diff;
+
+                if (_spawnTimer <= diff)
+                {
+                    if (Creature* guzzler = me->SummonCreature(NPC_DARK_IRON_GUZZLER, *me))
+                    {
+                        guzzler->SetReactState(REACT_PASSIVE);
+
+                        if (GameObject* keg = GetKeg())
+                        {
+                            Position pos;
+                            keg->GetNearPosition(pos, 3.0f, keg->GetAngle(me->GetPositionX(), me->GetPositionZ()) - float(M_PI*rand_norm()));
+                            guzzler->GetMotionMaster()->MovePoint(1, pos);
+                            guzzler->AI()->SetGUID(keg->GetGUID());
+                        }
+                        else
+                        {
+                            _summons.DespawnAll();
+                            ResetKegs();
+                            me->DisappearAndDie();
+                        }
+                    }
+                    _spawnTimer = urand(1, 5)*IN_MILLISECONDS;
+                }
+                else
+                    _spawnTimer -= diff;
+            }
+
+        private:
+            SummonList _summons;
+            uint32 _eventTimer;
+            uint32 _spawnTimer;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_dark_iron_heraldAI(creature);
+        }
+};
+
+class npc_dark_iron_guzzler : public CreatureScript
+{
+    public:
+        npc_dark_iron_guzzler() : CreatureScript("npc_dark_iron_guzzler") { }
+
+        struct npc_dark_iron_guzzlerAI : public ScriptedAI
+        {
+            npc_dark_iron_guzzlerAI(Creature* creature) : ScriptedAI(creature) { }
+
+            void Reset()
+            {
+                _kegGUID = 0;
+                _destroyTimer = 20*IN_MILLISECONDS;
+                _kegReached = false;
+            }
+
+            void SpellHit(Unit* /*caster*/, SpellInfo const* spell)
+            {
+                if (spell->Id == SPELL_BREWFEST_STUN)
+                {
+                    me->GetMotionMaster()->Clear();
+                    me->DespawnOrUnsummon(3*IN_MILLISECONDS);
+                    _kegReached = false;
+                }
+            }
+
+            void SetGUID(uint64 guid, int32 /*id*/ = 0)
+            {
+                _kegGUID = guid;
+            }
+
+            void MovementInform(uint32 type, uint32 id)
+            {
+                if (type != POINT_MOTION_TYPE)
+                    return;
+
+                if (GameObject* keg = ObjectAccessor::GetGameObject(*me, _kegGUID))
+                {
+                    _kegReached = true;
+                    me->SetFacingToObject(keg);
+                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_ONESHOT_ATTACK2HLOOSE);
+                }
+                else
+                    me->DespawnOrUnsummon();
+            }
+
+            void UpdateAI(uint32 const diff)
+            {
+                if (_kegReached)
+                {
+                    GameObject* keg = ObjectAccessor::GetGameObject(*me, _kegGUID);
+                    if (!keg || (keg && keg->GetGoState() == GO_STATE_ACTIVE))
+                    {
+                        me->DespawnOrUnsummon();
+                        _kegReached = false;
+                        return;
+                    }
+
+                    if (_destroyTimer <= diff)
+                    {
+                        keg->SetGoState(GO_STATE_ACTIVE);
+                        me->DespawnOrUnsummon();
+                        _kegReached = false;
+                    }
+                    else
+                        _destroyTimer -= diff;
+                }
+            }
+
+        private:
+            uint64 _kegGUID;
+            uint32 _destroyTimer;
+            bool _kegReached;
+        };
+
+        CreatureAI* GetAI(Creature* creature) const
+        {
+            return new npc_dark_iron_guzzlerAI(creature);
+        }
+};
+
 void AddSC_npcs_special()
 {
     new npc_air_force_bots;
@@ -3338,5 +3545,7 @@ void AddSC_npcs_special()
     new npc_keg_delivery();
     new npc_bark_bunny();
     new npc_brew_vendor();
+	new npc_dark_iron_herald();
+    new npc_dark_iron_guzzler();
 }
 
