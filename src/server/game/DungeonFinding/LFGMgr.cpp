@@ -271,7 +271,7 @@ void LFGMgr::Update(uint32 diff)
             role &= ~ROLE_LEADER;
 
             int32 waitTime = -1;
-            switch(role)
+            switch (role)
             {
                 case ROLE_NONE:                             // Should not happen - just in case
                     waitTime = -1;
@@ -514,7 +514,7 @@ void LFGMgr::Join(Player* plr, uint8 roles, const LfgDungeonSet& selectedDungeon
         bool isDungeon = false;
         for (LfgDungeonSet::const_iterator it = dungeons.begin(); it != dungeons.end() && joinData.result == LFG_JOIN_OK; ++it)
         {
-            switch(GetDungeonType(*it))
+            switch (GetDungeonType(*it))
             {
                 case LFG_TYPE_RANDOM:
                     if (dungeons.size() > 1)               // Only allow 1 random dungeon
@@ -657,7 +657,7 @@ void LFGMgr::Leave(Player* plr, Group* grp /* = NULL*/)
     LfgState state = GetState(guid);
 
     sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::Leave: [" UI64FMTD "]", guid);
-    switch(state)
+    switch (state)
     {
         case LFG_STATE_QUEUED:
             {
@@ -904,7 +904,7 @@ bool LFGMgr::CheckCompatibility(LfgGuidList check, LfgProposal*& pProposal)
     {
         LfgQueueInfoMap::const_iterator itOther = itFirst;
         ++itOther;
-        while(itOther != pqInfoMap.end() && itOther->second->dungeons.find(*itDungeon) != itOther->second->dungeons.end())
+        while (itOther != pqInfoMap.end() && itOther->second->dungeons.find(*itDungeon) != itOther->second->dungeons.end())
             ++itOther;
 
         if (itOther == pqInfoMap.end())
@@ -1308,12 +1308,12 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
         // Save wait times before redoing groups
         for (LfgPlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
         {
-            LfgProposalPlayer* pPlayer = pProposal->players[(*it)->GetGUID()];
+            LfgProposalPlayer* player = pProposal->players[(*it)->GetGUID()];
             uint32 lowgroupguid = (*it)->GetGroup() ? (*it)->GetGroup()->GetLowGUID() : 0;
-            if (pPlayer->groupLowGuid != lowgroupguid)
-                sLog->outError("LFGMgr::UpdateProposal: [" UI64FMTD "] group mismatch: actual (%u) - queued (%u)", (*it)->GetGUID(), lowgroupguid, pPlayer->groupLowGuid);
+            if (player->groupLowGuid != lowgroupguid)
+                sLog->outError("LFGMgr::UpdateProposal: [" UI64FMTD "] group mismatch: actual (%u) - queued (%u)", (*it)->GetGUID(), lowgroupguid, player->groupLowGuid);
 
-            uint64 guid = pPlayer->groupLowGuid ? MAKE_NEW_GUID(pPlayer->groupLowGuid, 0, HIGHGUID_GROUP) : (*it)->GetGUID();
+            uint64 guid = player->groupLowGuid ? MAKE_NEW_GUID(player->groupLowGuid, 0, HIGHGUID_GROUP) : (*it)->GetGUID();
             LfgQueueInfoMap::iterator itQueue = m_QueueInfoMap.find(guid);
             if (itQueue == m_QueueInfoMap.end())
             {
@@ -1358,7 +1358,7 @@ void LFGMgr::UpdateProposal(uint32 proposalId, uint64 guid, bool accept)
             // Update timers
             uint8 role = GetRoles(pguid);
             role &= ~ROLE_LEADER;
-            switch(role)
+            switch (role)
             {
                 case ROLE_DAMAGE:
                 {
@@ -1609,7 +1609,7 @@ void LFGMgr::UpdateBoot(Player* plr, bool accept)
         }
     }
 
-    if (agreeNum == pBoot->votedNeeded ||                  // Vote passed
+    if (agreeNum >= pBoot->votedNeeded ||                  // Vote passed
         votesNum == pBoot->votes.size() ||                 // All voted but not passed
         (pBoot->votes.size() - votesNum + agreeNum) < pBoot->votedNeeded) // Vote didnt passed
     {
@@ -1628,7 +1628,7 @@ void LFGMgr::UpdateBoot(Player* plr, bool accept)
 
         uint64 gguid = grp->GetGUID();
         SetState(gguid, LFG_STATE_DUNGEON);
-        if (agreeNum == pBoot->votedNeeded)                // Vote passed - Kick player
+        if (agreeNum >= pBoot->votedNeeded)                // Vote passed - Kick player
         {
             Player::RemoveFromGroup(grp, pBoot->victim);
             if (Player* victim = ObjectAccessor::FindPlayer(pBoot->victim))
@@ -1719,6 +1719,84 @@ void LFGMgr::TeleportPlayer(Player* plr, bool out, bool fromOpcode /*= false*/)
                     z = at->target_Z;
                     orientation = at->target_Orientation;
                 }
+
+                // FIXME
+                switch (dungeon->ID)
+                {
+                    // world events
+                    case 285: // The Headless Horseman
+                        mapid = 189;
+                        x = 1793.837f;
+                        y = 1347.15f;
+                        z = 20.38f;
+                        orientation = 3.17f;
+                        break;
+                    case 286: // The Frost Lord Ahune
+                        break;
+                    case 287: // Coren Direbrew
+                        mapid = 230;
+                        x = 907.299f;
+                        y = -156.689f;
+                        z = -47.75f;
+                        orientation = 2.108f;
+                        break;
+                    case 288: // The Crown Chemical Co.
+                        break;
+                    // normal dungeons
+                    case 14: // Gnomeregan
+                        mapid = 90;
+                        x = -332.22f;
+                        y = -2.28f;
+                        z = -150.86f;
+                        orientation = 2.77f;
+                        break;
+                    case 22: // Uldaman
+                        mapid = 70;
+                        x = -226.8f;
+                        y = 49.09f;
+                        z = -46.03f;
+                        orientation = 1.39f;
+                        break;
+                    case 30: // Blackrock Depths - Prison
+                    case 276: // Blackrock Depths - Upper City
+                        mapid = 230;
+                        x = 458.32f;
+                        y = 26.52f;
+                        z = -70.67f;
+                        orientation = 4.95f;
+                        break;
+                    case 163: // Scarlet Monastery - Armory
+                        mapid = 189;
+                        x = 1610.83f;
+                        y = -323.433f;
+                        z = 18.6738f;
+                        orientation = 6.28022f;
+                        break;
+                    case 164: // Scarlet Monastery - Cathedral
+                        mapid = 189;
+                        x = 855.683f;
+                        y = 1321.5f;
+                        z = 18.6709f;
+                        orientation = 0.001747f;
+                        break;
+                    case 165: // Scarlet Monastery - Library
+                        mapid = 189;
+                        x = 255.346f;
+                        y = -209.09f;
+                        z = 18.6773f;
+                        orientation = 6.26656f;
+                        break;
+                    case 216: // Gundrak
+                    case 217: // Gundrak (Heroic)
+                        mapid = 604;
+                        x = 1894.58f;
+                        y = 652.713f;
+                        z = 176.666f;
+                        orientation = 4.078f;
+                        break;
+                    default:
+                        break;
+                }
             }
 
             if (error == LFG_TELEPORTERROR_OK)
@@ -1786,9 +1864,9 @@ void LFGMgr::RewardDungeonDoneFor(const uint32 dungeonId, Player* player)
     ClearState(guid);
     SetState(guid, LFG_STATE_FINISHED_DUNGEON);
 
-    // Give rewards only if its a random dungeon
+    // Give rewards only if its a random dungeon or world event
     LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(rDungeonId);
-    if (!dungeon || dungeon->type != LFG_TYPE_RANDOM)
+    if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM && dungeon->grouptype != 11))
     {
         sLog->outDebug(LOG_FILTER_LFG, "LFGMgr::RewardDungeonDoneFor: [" UI64FMTD "] dungeon %u is not random", guid, rDungeonId);
         return;
