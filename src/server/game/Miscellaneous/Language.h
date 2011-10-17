@@ -1080,6 +1080,7 @@ enum TrinityStrings
     // Use for custom patches             11000-11999
     LANG_AUTO_BROADCAST                 = 11000,
     LANG_INVALID_REALMID                = 11001,
+	LANG_BAN_CHEATER                    = 12001,
 	LANG_HAVENT_QUEST = 13002,
 	LANG_QUEST_NOBUG = 13003,
 	LANG_QUEST_EVER_SIGNALED = 13004,

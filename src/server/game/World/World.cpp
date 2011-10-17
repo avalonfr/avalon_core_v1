@@ -1201,6 +1201,9 @@ void World::LoadConfigSettings(bool reload)
     m_int_configs[CONFIG_ANTICHEAT_DETECTIONS_ENABLED] = sConfig->GetIntDefault("Anticheat.DetectionsEnabled",31);
     m_int_configs[CONFIG_ANTICHEAT_MAX_REPORTS_FOR_DAILY_REPORT] = sConfig->GetIntDefault("Anticheat.MaxReportsForDailyReport",70);
 
+	// Make anticheat active, BAN cheaters for 1 hour
+	m_bool_configs[CONFIG_BAN_PLAYER] = sConfig->GetBoolDefault("Anticheat.Ban", true);
+	
 	//Wintergrasp
 	m_bool_configs[CONFIG_OUTDOORPVP_WINTERGRASP_ENABLED] = sConfig->GetBoolDefault("OutdoorPvP.Wintergrasp.Enabled", true);
 	m_int_configs[CONFIG_OUTDOORPVP_WINTERGRASP_SAVESTATE_PERIOD] = sConfig->GetIntDefault("OutdoorPvP.Wintergrasp.SaveState.Period", 10000);
