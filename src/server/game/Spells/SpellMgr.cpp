@@ -3021,6 +3021,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_DEST_CASTER;
                 spellInfo->EffectImplicitTargetA[1] = TARGET_DEST_CASTER;
                 break;
+			case 42132: // Headless Horseman - Start Fire
+				spellInfo->rangeIndex = 13;
+				break;
             case 41376: // Spite
             case 39992: // Needle Spine
             case 29576: // Multi-Shot
