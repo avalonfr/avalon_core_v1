@@ -293,3 +293,24 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (19, 0, @QUEST, 0, 12, 12, 0, 0, 0, '', NULL);
 
 UPDATE `quest_template` SET `RewSpellCast`=44242 WHERE `entry` IN (12133,12155);
+
+-- Fix Dungeon finder
+UPDATE `instance_encounters` SET `creditType`=0,  `creditEntry`=23682  WHERE `entry` IN (692,693);
+
+-- Hack fix quest
+UPDATE `quest_template` SET method = '0' WHERE title = 'Candy Bucket';
+
+-- Fix HF Va s'y parle !
+DELETE FROM `spell_script_names` WHERE `spell_id`=44436;
+INSERT INTO `spell_script_names` (`spell_id`,`ScriptName`) VALUES
+(44436, 'spell_gen_tricky_treat');
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (42965,42966);
+INSERT INTO `spell_linked_spell` (`spell_trigger`,`spell_effect`,`type`,`comment`) VALUES
+(42965,42919,0, 'Hallows End - Tricky Treat'),
+(42966,-42965,0, 'Hallows End - Upset Tummy removes Tricky Treat'),
+(42966,-42919,0, 'Hallows End - Upset Tummy removes Tricky Treat');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId`=17 AND `SourceEntry`=44436;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`,`SourceEntry`,`ConditionTypeOrReference`,`ConditionValue1`) VALUES
+(17, 44436, 11, 42966);
