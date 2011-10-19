@@ -293,3 +293,9 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (19, 0, @QUEST, 0, 12, 12, 0, 0, 0, '', NULL);
 
 UPDATE `quest_template` SET `RewSpellCast`=44242 WHERE `entry` IN (12133,12155);
+
+-- Fix Dungeon finder
+UPDATE `instance_encounters` SET `creditType`=0,  `creditEntry`=23682  WHERE `entry` IN (692,693);
+
+-- Hack fix quest
+UPDATE `quest_template` SET method = '0' WHERE title = 'Candy Bucket';

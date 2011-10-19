@@ -3800,6 +3800,7 @@ enum HallowendFire
     SPELL_HEADLESS_HORSEMAN_START_FIRE = 42132,
     SPELL_BUCKET_LANDS = 42339,
     SPELL_HEADLESS_HORSEMAN_FIRE_EXTINGUISH = 42348,
+    SPELL_HEADLESS_HORSEMAN_LARGE_JACK = 44231,
     // RangoFire
     SPELL_HEADLESS_HORSEMAN_BURNING = 42971,
     SPELL_HEADLESS_HORSEMAN_FIRE = 42074,
@@ -3884,10 +3885,9 @@ public:
             Trinity::AnyPlayerInObjectRangeCheck checker(me, dist);
             Trinity::PlayerListSearcher<Trinity::AnyPlayerInObjectRangeCheck> searcher(me, players, checker);
             me->VisitNearbyWorldObject(dist, searcher);
-
+            me->CastSpell(me->GetPositionX(),me->GetPositionY(), me->GetPositionZ()+1,SPELL_HEADLESS_HORSEMAN_LARGE_JACK,true);
             for (std::list<Player*>::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 (*itr)->CastSpell((*itr),SPELL_HEADLES_HORSEMAN_QUEST_CREDIT,true);
-            me->SummonGameObject(GO_LARGE_JACK, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ()+2, 0.0f, 0, 0, 0, 0 ,25000);
         }
 
         void SetData(uint32 uiType, uint32 uiData)
@@ -4018,9 +4018,9 @@ public:
             return Ui_ID;
         }
 
-        void DoAction(const int32 uiType)
+        void DoAction(int32 const action)
         {
-            switch (uiType)
+            switch (action)
             {
                 case ACTION_FAIL_EVENT:
                     Immuned = true;
@@ -4093,7 +4093,7 @@ public:
             }
         }
    
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (me->HasAura(RangoFire[0]) || Fire)
             {
@@ -4107,7 +4107,7 @@ public:
                     if (!RateFire)
                         return;
                     Fire = true;
-                    IncreaseFireTimer = 10000 / RateFire;
+                    IncreaseFireTimer = 60000 / RateFire;
                 } else
                     if (IncreaseFireTimer <= diff)
                     {
@@ -4122,7 +4122,7 @@ public:
                                 nextFireNode->AddAura(RangoFire[0],nextFireNode);
                                 PostionEventoHallowends[nextFireNode->AI()->GetData(0)].AlreadyFired = true;
                             }
-                            IncreaseFireTimer = 10000 / RateFire;
+                            IncreaseFireTimer = 60000 / RateFire;
                     } else
                         IncreaseFireTimer -= diff;
             }
@@ -4241,9 +4241,9 @@ public:
             PointCur = 0;
         }
 
-        void DoAction(const int32 type)
+        void DoAction(int32 const action)
         {
-            switch (type)
+            switch (action)
             {
                 case ACTION_FAIL_EVENT:
                     me->PlayDirectSound(11967);
@@ -4305,7 +4305,7 @@ public:
             }
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (wp_reached && !MovementFinished)
             {
@@ -4347,7 +4347,7 @@ public:
             StrikeTimer = 10000;
         }
 
-        void UpdateAI(const uint32 diff)
+        void UpdateAI(uint32 const diff)
         {
             if (!UpdateVictim())
                 return;
