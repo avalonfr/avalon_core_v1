@@ -12091,6 +12091,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         return pItem2;
     }
+	SaveToDB();
 }
 
 Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
