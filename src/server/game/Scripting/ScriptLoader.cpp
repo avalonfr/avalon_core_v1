@@ -509,6 +509,7 @@ void AddSC_storm_peaks();
 void AddSC_zuldrak();
 void AddSC_crystalsong_forest();
 void AddSC_isle_of_conquest();
+void AddSC_Argent_Tournament();
 
 //outland
 void AddSC_boss_exarch_maladaar();           //Auchindoun Auchenai Crypts
@@ -1221,6 +1222,7 @@ void AddNorthrendScripts()
     AddSC_crystalsong_forest();
     AddSC_isle_of_conquest();
 	AddSC_wintergrasp();
+	AddSC_Argent_Tournament();
 #endif
 }
 

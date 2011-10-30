@@ -21,7 +21,7 @@
 #include "ScriptMgr.h"
 #include "Group.h"
 #include "ScriptedFollowerAI.h"
-#include "Vehicle.h"
+#include "vehicle.h"
 
 /*######
 ## Quest Soporte Threat From Above
@@ -63,6 +63,12 @@ enum SpellGral
     YELLOW_ROSE_FIREWORK                    = 11544
 };
 
+enum seats
+{
+    SEAT_1 = 0,
+    SEAT_2 = 1,
+    SEAT_3 = 2,
+};
 
 class npc_chillmaw : public CreatureScript
 {
@@ -71,13 +77,13 @@ public:
 
     struct npc_chillmawAI : public ScriptedAI
     {
-        npc_chillmawAI(Creature *c) : ScriptedAI(c), _vehicle(me->GetVehicleKit())
+        npc_chillmawAI(Creature *creature) : ScriptedAI(creature), vehicle(creature->GetVehicleKit())
         {
-            assert(_vehicle);
+            assert(vehicle);
         }
         
         EventMap events;
-        Vehicle *_vehicle;
+        Vehicle *vehicle;
 
         uint32 Spell_FrostBreath_Timer;
         uint32 Spell_WingBuffet_Timer;
@@ -119,20 +125,20 @@ public:
 
             if (!Pasajero_1 && (me->GetHealth() < me->GetMaxHealth() * 0.70))
             {
-                if (Creature *Bombardier1 = CAST_CRE(_vehicle->GetPassenger(BOMBARDIER_1)))
+                if (Creature *Bombardier1 = CAST_CRE(vehicle->GetPassenger(BOMBARDIER_1)))
                 {
-                    Bombardier1->ExitVehicle();
+                    /*Bombardier1->ExitVehicle();
                     Bombardier1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     Bombardier1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     Bombardier1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE_1);
-                    Bombardier1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    Bombardier1->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);*/
                 }
                 Pasajero_1 = true;
             }
 
             if (!Pasajero_2 && (me->GetHealth() < me->GetMaxHealth() * 0.50))
             {
-                if (Creature *Bombardier2 = CAST_CRE(_vehicle->GetPassenger(BOMBARDIER_2)))
+                if (Creature *Bombardier2 = CAST_CRE(vehicle->GetPassenger(BOMBARDIER_2)))
                 {
                     Bombardier2->ExitVehicle();
                     Bombardier2->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -145,7 +151,7 @@ public:
 
             if (!Pasajero_3 && (me->GetHealth() < me->GetMaxHealth() * 0.25))
             {
-                if (Creature *Bombardier3 = CAST_CRE(_vehicle->GetPassenger(BOMBARDIER_3)))
+                if (Creature *Bombardier3 = CAST_CRE(vehicle->GetPassenger(BOMBARDIER_3)))
                 {
                     Bombardier3->ExitVehicle();
                     Bombardier3->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);                    
@@ -1488,7 +1494,6 @@ public:
             }
         }
     };
-
 };
 
 class npc_lady_nightswood : public CreatureScript
@@ -2740,13 +2745,13 @@ public:
                         uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_02;
                         break;
                     case 3:
-                       DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_03, me);
+                        DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_03, me);
                         uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_03;
                         break;
                     case 4:
                         DoScriptText(NPC_TEXTID_MAIDEN_OF_DRAK_MAR_04, me);
                         if(GameObject* go = me->SummonGameObject(MAIDEN_OF_DRAK_MAR_GOB_02,4603.351f,-1599.288f,156.8822f,2.234018f,0,0,0,0,0))
-                        secondGobGuid = go->GetGUID(); 
+                           secondGobGuid = go->GetGUID(); 
                         uiPhaseTimer = MAIDEN_OF_DRAK_MAR_TIMER_04;
                         break;
                     case 5:
@@ -2960,7 +2965,135 @@ public:
     }
 };
 
-void AddSC_Argen_Tournament()
+enum BlackKnightOrders
+{
+  QUEST_THE_BLACK_KNIGHT_ORDERS = 13663,
+  NPC_CREDIT_BLACK_GRYPHON      = 33519,
+  SPELL_EJECT_PASSENGER         = 50630,
+};
+
+const Position BlackKnightGryphonWaypoints[44] =
+{
+    {8521.271f,  569.596f,  552.8375f},
+    {8517.864f,  579.1095f, 553.2125f},
+    {8513.146f,  594.6724f, 551.2125f},
+	{8505.263f, 606.5569f, 550.4177f},
+	{8503.017f, 628.4188f, 547.4177f},
+    {8480.271f, 652.7083f, 547.4177f},
+    {8459.121f, 686.1427f, 547.4177f},
+    {8436.802f, 713.8687f, 547.3428f},
+    {8405.380f, 740.0045f, 547.4177f},
+    {8386.139f, 770.6009f, 547.5881f},
+    {8374.297f, 802.2525f, 547.9304f},
+    {8374.271f, 847.0363f, 548.0427f},
+    {8385.988f, 868.9881f, 548.0491f},
+    {8413.027f, 867.8573f, 547.2991f},
+    {8452.552f, 869.0339f, 547.2991f},
+    {8473.058f, 875.2012f, 547.2955f},
+    {8472.278f, 912.3134f, 547.4169f},
+    {8479.666f, 954.1650f, 547.3298f},
+    {8477.349f, 1001.368f, 547.3372f},
+    {8484.538f, 1025.797f, 547.4622f},
+    {8525.363f, 1029.284f, 547.4177f},
+    {8532.808f, 1052.904f, 548.1677f},
+    {8537.356f, 1077.927f, 554.5791f},
+    {8540.528f, 1083.379f, 569.6827f},
+    {8563.641f, 1140.965f, 569.6827f},
+    {8594.897f, 1205.458f, 569.6827f},
+    {8617.104f, 1257.399f, 566.1833f},
+    {8648.496f, 1329.349f, 558.0187f},
+    {8667.723f, 1388.411f, 546.188f},
+    {8699.145f, 1474.898f, 528.2197f},
+    {8726.869f, 1546.006f, 501.7741f},
+    {8739.058f, 1592.157f, 478.5511f},
+    {8750.799f, 1636.771f, 455.0797f},
+    {8760.006f, 1669.482f, 423.2208f},
+    {8783.31f, 1701.852f, 375.8872f},
+    {8817.336f, 1735.731f, 343.3323f},
+    {8882.32f, 1789.754f, 301.5807f},
+    {8958.597f, 1841.807f, 259.9141f},
+	{9045.891f, 1908.076f, 233.4143f},
+    {9107.177f, 1964.594f, 215.9704f},
+    {9134.763f, 2036.925f, 175.1925f},
+    {9128.608f, 2089.091f, 141.3593f},
+    {9093.364f, 2128.384f, 99.38685f},
+    {9050.709f, 2123.656f, 60.24802f}
+};
+class npc_black_knight_gryphon : public CreatureScript
+{
+public:
+    npc_black_knight_gryphon() : CreatureScript("npc_black_knight_gryphon") { }
+
+    struct npc_black_knight_gryphonAI : public ScriptedAI
+    {
+        npc_black_knight_gryphonAI(Creature* creature) : ScriptedAI(creature) { }
+
+        uint8 count;
+        bool wp_reached;
+        bool movementStarted;
+
+    void Reset()
+        {
+            count = 0;
+            wp_reached = false;
+            movementStarted = false;
+        }
+
+        void PassengerBoarded(Unit* who, int8 /*seatId*/, bool apply) 
+        {
+            if (who && apply)
+            {
+                    wp_reached = true;
+                    me->SetFlying(true);
+                    me->SetSpeed(MOVE_FLIGHT, 5.0f);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id)
+        {
+            if (type != POINT_MOTION_TYPE || id != count)
+                return;
+
+            if (id < 43)
+            {
+                ++count;
+                wp_reached = true;
+            }
+            else 
+            {
+                Unit* player = me->GetVehicleKit()->GetPassenger(0);
+                if (player && player->GetTypeId() == TYPEID_PLAYER && player->ToPlayer()->GetQuestStatus(QUEST_THE_BLACK_KNIGHT_ORDERS) == QUEST_STATUS_INCOMPLETE)
+                {
+                    player->ToPlayer()->KilledMonsterCredit(NPC_CREDIT_BLACK_GRYPHON, 0);
+                    me->CastSpell(player,SPELL_EJECT_PASSENGER,true);
+                    me->DespawnOrUnsummon(5000);
+                }
+            }
+        }
+
+        void UpdateAI(const uint32 /*diff*/)
+        {
+            if (!me->isCharmed() && !movementStarted)
+            {
+                movementStarted = true;
+            }
+
+            if (wp_reached)
+            {
+                wp_reached = false;
+                me->GetMotionMaster()->MovePoint(count, BlackKnightGryphonWaypoints[count]);
+            }
+        }
+
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_black_knight_gryphonAI(creature);
+    }
+};
+
+void AddSC_Argent_Tournament()
 {
     new npc_chillmaw;
     new spell_tournament_charge;
