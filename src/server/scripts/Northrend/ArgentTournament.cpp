@@ -21,7 +21,7 @@
 #include "ScriptMgr.h"
 #include "Group.h"
 #include "ScriptedFollowerAI.h"
-#include "vehicle.h"
+#include "Vehicle.h"
 
 /*######
 ## Quest Soporte Threat From Above
