@@ -8966,8 +8966,8 @@ bool Unit::HandleProcTriggerSpell(Unit* victim, uint32 damage, AuraEffect* trigg
         case 63156:
         case 63158:
             // Can proc only if target has hp below 35%
-            if (!victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
-                return false;
+            if (!victim || !victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, procSpell, this))
+			return false;
             break;
         // Deathbringer Saurfang - Rune of Blood
         case 72408:
