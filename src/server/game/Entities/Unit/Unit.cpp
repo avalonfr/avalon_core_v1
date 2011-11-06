@@ -11584,7 +11584,9 @@ uint32 Unit::SpellHealingBonus(Unit* victim, SpellInfo const* spellProto, uint32
     // no bonus for heal potions/bandages
     if (spellProto->SpellFamilyName == SPELLFAMILY_POTION)
         return healamount;
-
+    // Warlock Healthstones No bonus heal.
+    if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags[0] & 0x10000))
+        return healamount;
     // Healing Done
     // Taken/Done total percent damage auras
     float  DoneTotalMod = 1.0f;
