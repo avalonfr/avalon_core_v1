@@ -78,14 +78,20 @@ WeeklyQuest const WeeklyQuestData[WeeklyNPCs] =
 class instance_icecrown_citadel : public InstanceMapScript
 {
     public:
-        instance_icecrown_citadel() : InstanceMapScript(ICCScriptName, 631) { }
+        instance_icecrown_citadel() : InstanceMapScript("instance_icecrown_citadel", 631) { }
 
-        struct instance_icecrown_citadel_InstanceMapScript : public InstanceScript
+		InstanceScript* GetInstanceScript(InstanceMap* pMap) const
         {
-            instance_icecrown_citadel_InstanceMapScript(InstanceMap* map) : InstanceScript(map)
+            return new instance_icecrown_citadel_InstanceMapScript(pMap);
+        }
+
+		struct instance_icecrown_citadel_InstanceMapScript : public InstanceScript
+        {
+            instance_icecrown_citadel_InstanceMapScript(InstanceMap* pMap) : InstanceScript(pMap)
             {
-                SetBossNumber(EncounterCount);
+                SetBossNumber(14);
                 LoadDoorData(doorData);
+
                 TeamInInstance = 0;
                 HeroicAttempts = MaxHeroicAttempts;
                 LadyDeathwisperElevatorGUID = 0;
@@ -118,6 +124,17 @@ class instance_icecrown_citadel : public InstanceMapScript
                 RimefangGUID = 0;
                 DreamwalkerCache = 0;
                 TheLichKingGUID = 0;
+				npc_muradin_bronzebeardGUID = 0;
+				hordeGSGuid = 0;
+				alliGSGuid = 0; 
+				hordeGS2Guid = 0;
+				alliGS2Guid = 0 ;
+
+				hordeGSBattleGuid = 0;
+				alliGSBattleGuid = 0;
+
+
+
                 FrostwyrmCount = 0;
                 SpinestalkerTrashCount = 0;
                 RimefangTrashCount = 0;
@@ -185,7 +202,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (Player* player = players.begin()->getSource())
                             TeamInInstance = player->GetTeam();
                 }
-
+				
                 switch (creature->GetEntry())
                 {
                     case NPC_KOR_KRON_GENERAL:
@@ -309,6 +326,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                         break;
                     case NPC_SPIRIT_WARDEN:
                         SpiritWarden = creature->GetGUID();
+						break;
+					case NPC_MURADIN_BRONZEBEARD:
+						npc_muradin_bronzebeardGUID = creature->GetGUID();
                     default:
                         break;
                 }
@@ -504,6 +524,24 @@ class instance_icecrown_citadel : public InstanceMapScript
                         EdgeDestroyWarning = go->GetGUID();
                         go->SetGoState(GO_STATE_READY);
                         break;
+					case GO_HORDE_GUNSHIP:
+						hordeGSGuid = go->GetGUID();
+						break;
+					case GO_ALLI_GUNSHIP:
+						alliGSGuid = go->GetGUID();
+						break;
+					case GO_HORDE_GUNSHIP_2:
+						hordeGS2Guid = go->GetGUID();
+						break;
+					case GO_ALLI_GUNSHIP_2:
+						alliGS2Guid = go->GetGUID();
+						break;
+					case GO_HORDE_GUNSHIP_BATTLE :
+						hordeGSBattleGuid = go->GetGUID();
+						break;
+					case GO_ALLI_GUNSHIP_BATTLE	:
+						alliGSBattleGuid = go->GetGUID();
+						break;
                     default:
                         break;
                 }
@@ -649,6 +687,27 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return FrostyEdgeInner;
                     case DATA_EDGE_DESTROY_WARNING:
                         return EdgeDestroyWarning;
+					case DATA_NPC_MAURADIN:
+						return npc_muradin_bronzebeardGUID;
+
+					case GO_HORDE_GUNSHIP:
+						return hordeGSGuid;
+						break;
+					case GO_ALLI_GUNSHIP:
+						return alliGSGuid;
+						break;
+					case GO_HORDE_GUNSHIP_2:
+						return hordeGS2Guid;
+						break;
+					case GO_ALLI_GUNSHIP_2:
+						return alliGS2Guid;
+						break;
+					case GO_HORDE_GUNSHIP_BATTLE :
+						return hordeGSBattleGuid;
+						break;
+					case GO_ALLI_GUNSHIP_BATTLE :
+						return alliGSBattleGuid;
+						break;
                     default:
                         break;
                 }
@@ -664,7 +723,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_LADY_DEATHWHISPER:
-                        SetBossState(DATA_GUNSHIP_BATTLE_EVENT, state);// TEMP HACK UNTIL GUNSHIP SCRIPTED
+                        //SetBossState(DATA_GUNSHIP_BATTLE_EVENT, state);// TEMP HACK UNTIL GUNSHIP SCRIPTED
                         if (state == DONE)
                         {
                             if (GameObject* elevator = instance->GetGameObject(LadyDeathwisperElevatorGUID))
@@ -690,15 +749,20 @@ class instance_icecrown_citadel : public InstanceMapScript
                                 break;
                         }
                         break;
-                    /*case DATA_GUNSHIP_BATTLE_EVENT:
+                    case DATA_GUNSHIP_BATTLE_EVENT:
                         switch(state)
                         {
                             case DONE:
                                 break;
                             case NOT_STARTED:
                                 break;
+							case TO_BE_DECIDED:
+								SetBossState(DATA_GUNSHIP_BATTLE_EVENT, NOT_STARTED);
+
+								break;
+
                         }
-                        break;*/
+                        break;
                     case DATA_FESTERGUT:
                         if (state == DONE)
                         {
@@ -1023,10 +1087,9 @@ class instance_icecrown_citadel : public InstanceMapScript
 
                 std::istringstream loadStream(str);
                 loadStream >> dataHead1 >> dataHead2;
-
                 if (dataHead1 == 'I' && dataHead2 == 'C')
                 {
-                    for (uint32 i = 0; i < EncounterCount; ++i)
+                    for (uint8 i = 0; i < 14; ++i)
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;
@@ -1108,6 +1171,7 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 RimefangGUID;
             uint64 DreamwalkerCache;
             uint64 TheLichKingGUID;
+			uint64 npc_muradin_bronzebeardGUID;
             uint64 Tirion;
             uint64 TerenasFighter;
             uint64 SpiritWarden;
@@ -1120,6 +1184,12 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint64 EdgeDestroyWarning;
             uint64 FrozenLavaman;
             uint64 LavamanPillars;
+			uint64 hordeGSGuid;
+			uint64 alliGSGuid; 
+			uint64 hordeGS2Guid;
+			uint64 alliGS2Guid ;
+			uint64 hordeGSBattleGuid;
+			uint64 alliGSBattleGuid;
             uint32 TeamInInstance;
             uint32 BloodQuickeningTimer;
             uint32 ColdflameJetsState;
@@ -1128,7 +1198,8 @@ class instance_icecrown_citadel : public InstanceMapScript
             uint32 RimefangTrashCount;
             uint32 BloodQuickeningState;
             uint32 HeroicAttempts;
-            uint32 uiEncounter[MAX_ENCOUNTER];            uint16 BloodQuickeningMinutes;
+            uint32 uiEncounter[MAX_ENCOUNTER];
+			uint16 BloodQuickeningMinutes;
             uint8 BeenWaiting;
             uint8 NeckDeep;
             uint8 NecroticStack;
@@ -1139,10 +1210,6 @@ class instance_icecrown_citadel : public InstanceMapScript
             bool IsOrbWhispererEligible;
         };
 
-        InstanceScript* GetInstanceScript(InstanceMap* map) const
-        {
-            return new instance_icecrown_citadel_InstanceMapScript(map);
-        }
 };
 
 void DespawnAllCreaturesAround(Creature *ref, uint32 entry)

@@ -24,7 +24,7 @@
 
 #define ICCScriptName "instance_icecrown_citadel"
 
-uint32 const EncounterCount = 13;
+uint32 const EncounterCount = 14;
 uint32 const WeeklyNPCs = 9;
 uint32 const MaxHeroicAttempts = 50;
 
@@ -75,7 +75,6 @@ enum DataTypes
     DATA_THE_LICH_KING              = 12,
 
     // Additional data
-    DATA_GUNSHIP_EVENT                = 52,
     DATA_SAURFANG_EVENT_NPC         = 13,
     DATA_BONED_ACHIEVEMENT          = 14,
     DATA_OOZE_DANCE_ACHIEVEMENT     = 15,
@@ -118,6 +117,11 @@ enum DataTypes
     DATA_EDGE_DESTROY_WARNING       = 48,
     DATA_FROZEN_LAVAMAN             = 49,
     DATA_LAVAMAN_PILLARS            = 50,
+
+	//GUNSHIP
+	DATA_GUNSHIP_EVENT              = 52,
+	DATA_NPC_MAURADIN				= 53,		
+	
 };
 
 enum CreaturesIds
@@ -171,6 +175,15 @@ enum CreaturesIds
     NPC_REANIMATED_ADHERENT                     = 38010,
     NPC_VENGEFUL_SHADE                          = 38222,
 
+	 //Gunship Battle
+	 NPC_ALLIGSTRIGGER_10            			= 400031,
+	 NPC_HORDEGSTRIGGER_10            			= 400030,
+	 NPC_ALLIGSTRIGGER_25            			= 400036,
+	 NPC_HORDEGSTRIGGER_25            			= 400035,
+	 NPC_CANONTRIGGER              				= 400032,
+	 NPC_FIGHTTRIGGER              				= 400033,
+	 NPC_PORTAL                  				= 400034,
+	
     // Deathbringer Saurfang
     NPC_DEATHBRINGER_SAURFANG                   = 37813,
     NPC_BLOOD_BEAST                             = 38508,
@@ -282,6 +295,10 @@ enum CreaturesIds
     NPC_PLATFORM_DESTRUCTIBLE_EDGE_STALKER      = 22515,
     NPC_WORLD_TRIGGER                           = 22515,
 
+	//GUNSHIP BATTLE
+	NPC_SAUFRANG_G								= 36939,
+	NPC_MURADIN_BRONZEBEARD						= 36948,
+
 };
 
 enum GameObjectsIds
@@ -301,6 +318,18 @@ enum GameObjectsIds
     GO_ORATORY_OF_THE_DAMNED_ENTRANCE       = 201563,
     GO_LADY_DEATHWHISPER_ELEVATOR           = 202220,
 
+	//Gunship Battle
+	GO_HORDE_GUNSHIP                = 1915002,
+	GO_ALLI_GUNSHIP                 = 1914902,
+	GO_HORDE_GUNSHIP_2              = 1915001,
+	GO_ALLI_GUNSHIP_2               = 1914901,
+	GO_HORDE_GUNSHIP_BATTLE			= 1915003,
+	GO_ALLI_GUNSHIP_BATTLE			= 1914903,
+	GO_GUNSHIP_CACHE_10N			= 201872,
+    GO_GUNSHIP_CACHE_25N			= 201873,
+    GO_GUNSHIP_CACHE_10H			= 201874,
+    GO_GUNSHIP_CACHE_25H			= 201875,
+
     // Deathbringer Saurfang
     GO_SAURFANG_S_DOOR                      = 201825,
     GO_DEATHBRINGER_S_CACHE_10N             = 202239,
@@ -308,6 +337,7 @@ enum GameObjectsIds
     GO_DEATHBRINGER_S_CACHE_10H             = 202238,
     GO_DEATHBRINGER_S_CACHE_25H             = 202241,
     GO_SCOURGE_TRANSPORTER_SAURFANG         = 202244,
+
 
     // Professor Putricide
     GO_ORANGE_PLAGUE_MONSTER_ENTRANCE       = 201371,

@@ -1,27 +1,33 @@
 /*
- * Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
- *
- * Copyright (C) Blackcore, Desarrollo completo Blackcore.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- */
+* Copyright (C) 2008-2010 TrinityCore <http://www.trinitycore.org/>
+*
+* Copyright (C) Blackcore, Desarrollo completo Blackcore.
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+*/
  
- /* % Completado: 92 %
-  * Requiere datos de posiciones, correcciones y
-  * concluir soporte SQL
-  * Autor: Equipo de Desarrollo Blackcore
-  */
+ /* % Completado: 98 %
+Autor: DarkSoe
+
+Rewriter : by s@m & the team of
+http://wow.avalonserver.org/
+
+Thx ChaosCore & Vlad
+!sry but the real source may be available in 2-3 month if no more leechers
+
+TODO : the transport ><
+*/
 
 #include "ScriptPCH.h"
 #include "icecrown_citadel.h"
@@ -34,28 +40,28 @@ http://www.wowwiki.com/Gunship_Battle
 */
 
 // Fusileros
-#define NPC_ZAFOD_BOOMBOX                                       37184
-#define ITEM_GOBLIN_ROCKET_PACK                         49278
+#define NPC_ZAFOD_BOOMBOX 37184
+#define ITEM_GOBLIN_ROCKET_PACK 49278
 
-const Position SpawnZafodAlliance               =       {0.0f, 0.0f, 0.0f, 0.0f};
-const Position SpawnZafodHorde                  =       {0.0f, 0.0f, 0.0f, 0.0f};
+const Position SpawnZafodAlliance = {0.0f, 0.0f, 0.0f, 0.0f};
+const Position SpawnZafodHorde = {0.0f, 0.0f, 0.0f, 0.0f};
 
-#define ZAFOD_BOOMBOX_GOSSIP_GET                        1000
-#define ZAFOD_BOOMBOX_GOSSIP_CANCEL                     1001
+#define ZAFOD_BOOMBOX_GOSSIP_GET 1000
+#define ZAFOD_BOOMBOX_GOSSIP_CANCEL 1001
 
 // Do_Action
-#define DO_ACTION_START_GUNSHIP_BATTLE          0
-#define DO_ACTION_FINISH_GUNSHIP_BATTLE         1
+#define DO_ACTION_START_GUNSHIP_BATTLE 0
+#define DO_ACTION_FINISH_GUNSHIP_BATTLE 1
 
 // tp de fin
 const Position DeathbringerRise = { -549.80548f, 2211.19238f, 539.29119f, 6.27718f};
 
 // Spawns de NPCs
-#define SPAWN_SERGEANT                                          0
-#define SPAWN_DISTANCE_0                                        1       // Soldado con Mortero o Lanza Cohetes
-#define SPAWN_CAC                                                       2       // Infante de marina o Saqueador
-#define SPAWN_CAST                                                      3       // Hechizero o Mago de batalla
-#define SPAWN_DISTANCE_1                                        4       // Fusileros o Lanzadores de hachas
+#define SPAWN_SERGEANT 0
+#define SPAWN_DISTANCE_0 1 // Soldado con Mortero o Lanza Cohetes
+#define SPAWN_CAC 2 // Infante de marina o Saqueador
+#define SPAWN_CAST 3 // Hechizero o Mago de batalla
+#define SPAWN_DISTANCE_1 4 // Fusileros o Lanzadores de hachas
 
 // Zonas de Spawns
 const Position SpawnPosAlliance[] =
@@ -77,124 +83,124 @@ const Position SpawnPosHorde[] =
 
 //-----------------------------------------------------------------------
 // Alianza :
-#define GO_SKYBREAKER                                           192242
-#define GO_GUNSHIP_STAIRS_ALLIANCE                      201709  // Acceso innecesario, imposible
-#define GO_ALLIANCE_GUNSHIP_PORTAL                      195371  // z Útiles ?
-#define NPC_GUNSHIP_CANNON_ALLIANCE                     34929
+#define GO_SKYBREAKER 192242
+#define GO_GUNSHIP_STAIRS_ALLIANCE 201709 // Acceso innecesario, imposible
+#define GO_ALLIANCE_GUNSHIP_PORTAL 195371 // z Útiles ?
+#define NPC_GUNSHIP_CANNON_ALLIANCE 34929
 
-#define SKYBREAKER_X                                            0
-#define SKYBREAKER_Y                                            0
-#define SKYBREAKER_Z                                            0
-#define SKYBREAKER_RAYON                                        0
+#define SKYBREAKER_X 0
+#define SKYBREAKER_Y 0
+#define SKYBREAKER_Z 0
+#define SKYBREAKER_RAYON 0
 
-#define NPC_MURADIN_BRONZEBEARD                         36948
+#define NPC_MURADIN_BRONZEBEARD 36948
 
 // Dialogos
-#define ALLIANCE_GOSSIP_ACTION_START            10875
-#define ALLIANCE_GOSSIP_ACTION_CANCEL           1001
-#define ALLIANCE_GOSSIP_ACTION_TP                       1002
+#define ALLIANCE_GOSSIP_ACTION_START 10875
+#define ALLIANCE_GOSSIP_ACTION_CANCEL 1001
+#define ALLIANCE_GOSSIP_ACTION_TP 1002
 
 const Position PosMuradinBronzebeard[]=
 {
     {-472.596f, 2466.8701f, 190.7371f, 6.204f}, // Primera posicion
-    {0.0f, 0.0f, 0.0f, 0.0f}                                    // Segunda posicion
+    {0.0f, 0.0f, 0.0f, 0.0f} // Segunda posicion
 };
 
-#define NPC_SKYBREAKER_SERGEANT                         36961
-#define NPC_SKYBREAKER_MORTAR_SOLDIER           36978
-#define NPC_SKYBREAKER_MARINE                           36950
-#define NPC_SKYBREAKER_SORCERER                         37026
-#define NPC_SKYBREAKER_RIFLEMAN                         36969
+#define NPC_SKYBREAKER_SERGEANT 36961
+#define NPC_SKYBREAKER_MORTAR_SOLDIER 36978
+#define NPC_SKYBREAKER_MARINE 36950
+#define NPC_SKYBREAKER_SORCERER 37026
+#define NPC_SKYBREAKER_RIFLEMAN 36969
 
-#define AURA_ON_SKYBREAKER                                      70120
+#define AURA_ON_SKYBREAKER 70120
 
 //-----------------------------------------------------------------------
 
 //-----------------------------------------------------------------------
 // HORDA :
-#define GO_OGRIM_HAMMER                                         192241
-#define GO_GUNSHIP_STAIRS_HORDE                         202211  // Innecesario.
-#define GO_HORDE_GUNSHIP_PORTAL                         196413  // z Útil ?
-#define NPC_GUNSHIP_CANNON_HORDE                        34935
+#define GO_OGRIM_HAMMER 192241
+#define GO_GUNSHIP_STAIRS_HORDE 202211 // Innecesario.
+#define GO_HORDE_GUNSHIP_PORTAL 196413 // z Útil ?
+#define NPC_GUNSHIP_CANNON_HORDE 34935
 
-#define OGRIM_HAMMER_X                                          0
-#define OGRIM_HAMMER_Y                                          0
-#define OGRIM_HAMMER_Z                                          0
-#define OGRIM_HAMMER_RAYON                                      0
+#define OGRIM_HAMMER_X 0
+#define OGRIM_HAMMER_Y 0
+#define OGRIM_HAMMER_Z 0
+#define OGRIM_HAMMER_RAYON 0
 
-#define NPC_HIGH_OVERLORD_VAROK_SAURFANG        36939
+#define NPC_HIGH_OVERLORD_VAROK_SAURFANG 36939
 
 // Dialogos
-#define HORDE_GOSSIP_ACTION_START                       10876
-#define HORDE_GOSSIP_ACTION_CANCEL                      1004
-#define HORDE_GOSSIP_ACTION_TP                          1005
+#define HORDE_GOSSIP_ACTION_START 10876
+#define HORDE_GOSSIP_ACTION_CANCEL 1004
+#define HORDE_GOSSIP_ACTION_TP 1005
 
 const Position PosHighOverlordVarokSaurfang[]=
 {
-        {0.0f, 0.0f, 0.0f, 0.0f},       // Primera posicion
-    {0.0f, 0.0f, 0.0f, 0.0f}    // Segunda posicion
+        {0.0f, 0.0f, 0.0f, 0.0f}, // Primera posicion
+    {0.0f, 0.0f, 0.0f, 0.0f} // Segunda posicion
 };
 
-#define NPC_KORKRON_SERGEANT                            36960
-#define NPC_KORKRON_ROCKETEER                           36982
-#define NPC_KORKRON_REAVER                                      36957
-#define NPC_KORKRON_BATTLE_MAGE                         37117
-#define NPC_KORKRON_AXETHROWER                          36968
+#define NPC_KORKRON_SERGEANT 36960
+#define NPC_KORKRON_ROCKETEER 36982
+#define NPC_KORKRON_REAVER 36957
+#define NPC_KORKRON_BATTLE_MAGE 37117
+#define NPC_KORKRON_AXETHROWER 36968
 
-#define AURA_ON_OGRIM_HAMMER                            70121
+#define AURA_ON_OGRIM_HAMMER 70121
 
 //-----------------------------------------------------------------------
 
 // CANON_GUNSHIP
-#define SPELL_CANNON_BLAST                                      69400
-#define SPELL_INCINERATING_BLAST                        69402
+#define SPELL_CANNON_BLAST 69400
+#define SPELL_INCINERATING_BLAST 69402
 
 // MURADIN BARBABRONCE// ALTO_SENOR_SUPREMO_COLMILLOSAURIO
-#define SPELL_CLEAVE                                            15284
-#define SPELL_RENDING_THROW                                     70309
-#define SPELL_TASTE_OF_BLOOD                            69634
+#define SPELL_CLEAVE 15284
+#define SPELL_RENDING_THROW 70309
+#define SPELL_TASTE_OF_BLOOD 69634
 
-#define AURA_BATTLE_FURY_10                                     72306
-#define AURA_BATTLE_FURY_25                                     72307
+#define AURA_BATTLE_FURY_10 72306
+#define AURA_BATTLE_FURY_25 72307
 
 // TODOS LOS ENEMIGOS TIENEN ESTE HECHIZO EXCEPTO LOS COMANDANTES
-#define SPELL_BURNING_PITCH                                     71335
+#define SPELL_BURNING_PITCH 71335
 
 // HECHICERO // MAGO_DE_BATALLA
-#define SPELL_BELOW_ZERO                                        69705
+#define SPELL_BELOW_ZERO 69705
 
 // SOLDADO_CON_MORTERO // LANZACOHETES
-#define SPELL_ROCKET_ARTILLERY                          69679
-#define SPELL_EXPLOSION                                         69680   // Efecto, cuando el cohete explosiona en el suelo.
+#define SPELL_ROCKET_ARTILLERY 69679
+#define SPELL_EXPLOSION 69680 // Efecto, cuando el cohete explosiona en el suelo.
 
 // SARGENTO
-#define SPELL_BLADESTORM                                        69652
-#define SPELL_BLADESTORM_TRIGGER                        69653   // Uso innecesario SPELL_BLADESTORM
-#define SPELL_DESPERATE_RESOLVE_10_NM           69647
-#define SPELL_DESPERATE_RESOLVE_10_HM           72537
-#define SPELL_DESPERATE_RESOLVE_25_NM           72536
-#define SPELL_DESPERATE_RESOLVE_25_HM           72538
-#define SPELL_WOUNDING_STRIKE_10_NM                     69651
-#define SPELL_WOUNDING_STRIKE_10_HM                     72570
-#define SPELL_WOUNDING_STRIKE_25_NM                     72569
-#define SPELL_WOUNDING_STRIKE_25_HM                     72571
+#define SPELL_BLADESTORM 69652
+#define SPELL_BLADESTORM_TRIGGER 69653 // Uso innecesario SPELL_BLADESTORM
+#define SPELL_DESPERATE_RESOLVE_10_NM 69647
+#define SPELL_DESPERATE_RESOLVE_10_HM 72537
+#define SPELL_DESPERATE_RESOLVE_25_NM 72536
+#define SPELL_DESPERATE_RESOLVE_25_HM 72538
+#define SPELL_WOUNDING_STRIKE_10_NM 69651
+#define SPELL_WOUNDING_STRIKE_10_HM 72570
+#define SPELL_WOUNDING_STRIKE_25_NM 72569
+#define SPELL_WOUNDING_STRIKE_25_HM 72571
 
 // FUSILEROS
-#define SPELL_SHOOT_10_NM                                       70162
-#define SPELL_SHOOT_10_HM                                       72567
-#define SPELL_SHOOT_25_NM                                       72566
-#define SPELL_SHOOT_25_HM                                       72568
+#define SPELL_SHOOT_10_NM 70162
+#define SPELL_SHOOT_10_HM 72567
+#define SPELL_SHOOT_25_NM 72566
+#define SPELL_SHOOT_25_HM 72568
 
 // LANZADORES_DE_HACHAS
-#define SPELL_HURL_AXE_10_NM                            70161
-#define SPELL_HURL_AXE_10_HM                            72540
-#define SPELL_HURL_AXE_25_NM                            72539
-#define SPELL_HURL_AXE_25_HM                            72541
+#define SPELL_HURL_AXE_10_NM 70161
+#define SPELL_HURL_AXE_10_HM 72540
+#define SPELL_HURL_AXE_25_NM 72539
+#define SPELL_HURL_AXE_25_HM 72541
 
 // BUFFOS_DE_EXPERIENCIA
-#define SPELL_EXPERIENCED                                       71188
-#define SPELL_VETERAN                                           71193
-#define SPELL_ELITE                                                     71195
+#define SPELL_EXPERIENCED 71188
+#define SPELL_VETERAN 71193
+#define SPELL_ELITE 71195
 
 //-----------------------------------------------------------------------
 //------------------------------ GRITOS ----------------------------------
@@ -202,89 +208,89 @@ const Position PosHighOverlordVarokSaurfang[]=
 // HORDA ----------------------------------------------------------------
 //-----------------------------------------------------------------------
 // PRIMERA_ESCUADRA_ASISTIDA
-#define SAY_KORKRON_FIRST_SQUAD_0       "Thank the spirits for you, brothers and sisters. The Skybreaker has already left. Quickly now, to Orgrim's Hammer! If you leave soon, you may be able to catch them."
-#define SAY_KORKRON_FIRST_SQUAD_1       "This should be helpin'ya!"
+#define SAY_KORKRON_FIRST_SQUAD_0 "Thank the spirits for you, brothers and sisters. The Skybreaker has already left. Quickly now, to Orgrim's Hammer! If you leave soon, you may be able to catch them."
+#define SAY_KORKRON_FIRST_SQUAD_1 "This should be helpin'ya!"
 
 // SEGUNDA_ESCUADRA_ASISTIDA
-#define SAY_KORKRON_SECOND_SQUAD_0      "Aka'Magosh, brave warriors. The alliance is in great number here."
-#define SAY_KORKRON_SECOND_SQUAD_1      "Captain Saurfang will be pleased to see you aboard Orgrim's Hammer. Make haste, we will secure the area until you are ready for take-off."
+#define SAY_KORKRON_SECOND_SQUAD_0 "Aka'Magosh, brave warriors. The alliance is in great number here."
+#define SAY_KORKRON_SECOND_SQUAD_1 "Captain Saurfang will be pleased to see you aboard Orgrim's Hammer. Make haste, we will secure the area until you are ready for take-off."
 
 // COMIENZA_EL_EVENTO
 #define YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_0 "Rise up, sons and daughters of the Horde! Today we battle a hated enemy of the Horde! LOK'TAR OGAR! Kor'kron, take us out!"
 #define YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_1 "What is that?! Something approaching in the distance!"
 #define YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_2 "ALLIANCE GUNSHIP! ALL HANDS ON DECK!"
-#define YELL_EVENT_BEGIN_HORDE_MURADIN_BRONZEBEARD_0    "Move yer jalopy or we'll blow it out of the sky, orc! The Horde's got no business here!"
+#define YELL_EVENT_BEGIN_HORDE_MURADIN_BRONZEBEARD_0 "Move yer jalopy or we'll blow it out of the sky, orc! The Horde's got no business here!"
 #define YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_3 "You will know our business soon! KOR'KRON, ANNIHILATE THEM!"
 
 // EMBARQUE AL MARTILLO ORGRIMMAR
-#define YELL_BOARDING_ORGRIM_S_HAMMER_MURADIN_BRONZEBEARD_0             "Marines, Sergeants, attack!"
-#define YELL_BOARDING_ORGRIM_S_HAMMER_HIGH_OVERLORD_SAURFANG_0  "You DARE board my ship? Your death will come swiftly."
+#define YELL_BOARDING_ORGRIM_S_HAMMER_MURADIN_BRONZEBEARD_0 "Marines, Sergeants, attack!"
+#define YELL_BOARDING_ORGRIM_S_HAMMER_HIGH_OVERLORD_SAURFANG_0 "You DARE board my ship? Your death will come swiftly."
 
 // NUEVO_FUSILERO
-#define YELL_NEW_RIFLEMEN_MURADIN               "Riflemen, shoot faster!"
+#define YELL_NEW_RIFLEMEN_MURADIN "Riflemen, shoot faster!"
 // NUEVO_EQUIPO_DE_MORTERO
-#define YELL_NEW_MORTAR_TEAM_MURADIN    "Mortar team, reload!"
+#define YELL_NEW_MORTAR_TEAM_MURADIN "Mortar team, reload!"
 // NUEVO_MAGO
-#define YELL_NEW_MAGE_MURADIN                   "We're taking hull damage, get a sorcerer out here to shut down those cannons!"
+#define YELL_NEW_MAGE_MURADIN "We're taking hull damage, get a sorcerer out here to shut down those cannons!"
 // VICTORIA_HORDA
-#define YELL_HORDE_VICTORY_SAURFANG             "The Alliance falter. Onward to the Lich King!"
+#define YELL_HORDE_VICTORY_SAURFANG "The Alliance falter. Onward to the Lich King!"
 // DERROTA_HORDA
-#define YELL_HORDE_DEFEAT_SAURFANG              "Damage control! Put those fires out! You haven't seen the last of the Horde!"
+#define YELL_HORDE_DEFEAT_SAURFANG "Damage control! Put those fires out! You haven't seen the last of the Horde!"
 
 // ALIANZA -------------------------------------------------------------
 //-----------------------------------------------------------------------
 // PRIMERA_ESCUADRA_ASISTIDA
-#define SAY_SKYBREAKER_FIRST_SQUAD_0    "Thank goodness you arrived when you did, heroes. Orgrim's Hammer has already left. Quickly now, to The Skybreaker! If you leave soon, you may be able to catch them."
-#define SAY_SKYBREAKER_FIRST_SQUAD_1    "This ought to help!"
+#define SAY_SKYBREAKER_FIRST_SQUAD_0 "Thank goodness you arrived when you did, heroes. Orgrim's Hammer has already left. Quickly now, to The Skybreaker! If you leave soon, you may be able to catch them."
+#define SAY_SKYBREAKER_FIRST_SQUAD_1 "This ought to help!"
 
 // SEGUNDA_ESCUADRA_ASISTIDA
-#define SAY_SKYBREAKER_SECOND_SQUAD_0   "You have my thanks. We were outnumbered until you arrived."
-#define SAY_SKYBREAKER_SECOND_SQUAD_1   "Captain Muradin is waiting aboard The Skybreaker. We'll secure the area until you are ready for take off."
-#define SAY_SKYBREAKER_SECOND_SQUAD_2   "Skybreaker infantry, hold position!"
+#define SAY_SKYBREAKER_SECOND_SQUAD_0 "You have my thanks. We were outnumbered until you arrived."
+#define SAY_SKYBREAKER_SECOND_SQUAD_1 "Captain Muradin is waiting aboard The Skybreaker. We'll secure the area until you are ready for take off."
+#define SAY_SKYBREAKER_SECOND_SQUAD_2 "Skybreaker infantry, hold position!"
 
 // COMIENZA_EL_EVENTO
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_0         "Fire up the engines! We got a meetin' with destiny, lads!"
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_1         "Hold on to yer hats!"
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_2         "What in the world is that? Grab me spyglass, crewman!"
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_3         "By me own beard! HORDE SAILIN' IN FAST 'N HOT!"
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_4         "EVASIVE ACTION! MAN THE GUNS!"
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_5         "Cowardly dogs! Ye blindsided us!"
-#define YELL_EVENT_BEGIN_ALLIANCE_HIGH_OVERLORD_SAURFANG_0      "This is not your battle, dwarf. Back down or we will be forced to destroy your ship."
-#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_6         "Not me battle? I dunnae who ye? think ye are, mister, but I got a score to settle with Arthas and yer not gettin' in me way! FIRE ALL GUNS! FIRE! FIRE!"
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_0 "Fire up the engines! We got a meetin' with destiny, lads!"
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_1 "Hold on to yer hats!"
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_2 "What in the world is that? Grab me spyglass, crewman!"
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_3 "By me own beard! HORDE SAILIN' IN FAST 'N HOT!"
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_4 "EVASIVE ACTION! MAN THE GUNS!"
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_5 "Cowardly dogs! Ye blindsided us!"
+#define YELL_EVENT_BEGIN_ALLIANCE_HIGH_OVERLORD_SAURFANG_0 "This is not your battle, dwarf. Back down or we will be forced to destroy your ship."
+#define YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_6 "Not me battle? I dunnae who ye? think ye are, mister, but I got a score to settle with Arthas and yer not gettin' in me way! FIRE ALL GUNS! FIRE! FIRE!"
 
 // EMBARCANDO_EL_ROMPECIELOS
-#define YELL_BOARDING_THE_SKYBREAKER_HIGH_OVERLORD_SAURFANG_0   "Reavers, Sergeants, attack!"
-#define YELL_BOARDING_THE_SKYBREAKER_MURADIN_BRONZEBEARD_0              "What's this then?! Ye won't be takin' this son o' Ironforge's vessel without a fight!."
+#define YELL_BOARDING_THE_SKYBREAKER_HIGH_OVERLORD_SAURFANG_0 "Reavers, Sergeants, attack!"
+#define YELL_BOARDING_THE_SKYBREAKER_MURADIN_BRONZEBEARD_0 "What's this then?! Ye won't be takin' this son o' Ironforge's vessel without a fight!."
 
 // NUEVO_LANZAHACHAS
-#define YELL_NEW_AXETHROWERS_HIGH_OVERLORD_SAURFANG_0   "Axethrowers, hurl faster!"
+#define YELL_NEW_AXETHROWERS_HIGH_OVERLORD_SAURFANG_0 "Axethrowers, hurl faster!"
 
 // NUEVO_FUSILEROS
-#define YELL_NEW_ROCKETEERS_HIGH_OVERLORD_SAURFANG_0    "Rocketeers, reload!"
+#define YELL_NEW_ROCKETEERS_HIGH_OVERLORD_SAURFANG_0 "Rocketeers, reload!"
 
 // NUEVO_MAGO_DE_BATALLA
-#define YELL_NEW_BATTLE_MAGE_HIGH_OVERLORD_SAURFANG_0   "We're taking hull damage, get a battle-mage out here to shut down those cannons!"
+#define YELL_NEW_BATTLE_MAGE_HIGH_OVERLORD_SAURFANG_0 "We're taking hull damage, get a battle-mage out here to shut down those cannons!"
 
 // VICTORIA_ALIANZA
-#define YELL_ALLIANCE_VICTORY_MURADIN_BRONZEBEARD_0             "Don't say I didn't warn ya, scoundrels! Onward, brothers and sisters!"
+#define YELL_ALLIANCE_VICTORY_MURADIN_BRONZEBEARD_0 "Don't say I didn't warn ya, scoundrels! Onward, brothers and sisters!"
 
 // DERROTA_ALIANZA
-#define YELL_ALLIANCE_DEFEAT_MURADIN_BRONZEBEARD_0              "Captain Bartlett, get us out of here! We're taken too much damage to stay afloat!"
+#define YELL_ALLIANCE_DEFEAT_MURADIN_BRONZEBEARD_0 "Captain Bartlett, get us out of here! We're taken too much damage to stay afloat!"
 
 
 //-----------------------------------------------------------------------
-#define SPELL_ACHIEVEMENT                                                               72959
+#define SPELL_ACHIEVEMENT 72959
 
 //-----------------------------------------------------------------------
-#define PHASE_NOT_STARTED       0
-#define PHASE_DISTANCE          1
-#define PHASE_BOARDING          2
-#define PHASE_END                       3
+#define PHASE_NOT_STARTED 0
+#define PHASE_DISTANCE 1
+#define PHASE_BOARDING 2
+#define PHASE_END 3
 
-#define EXP_NULL                        0
-#define EXP_EXPERIENCED         20000
-#define EXP_VETERAN                     40000
-#define EXP_ELITE                       80000
+#define EXP_NULL 0
+#define EXP_EXPERIENCED 20000
+#define EXP_VETERAN 40000
+#define EXP_ELITE 80000
 
 //-----------------------------------------------------------------------
 
@@ -339,13 +345,13 @@ class npc_zafod_boombox : public CreatureScript
                         player->CLOSE_GOSSIP_MENU();
 
                         switch( action) {
-                                case    ALLIANCE_GOSSIP_ACTION_START    :
+                                case ALLIANCE_GOSSIP_ACTION_START :
                                                         pCreature->AI()->DoAction( DO_ACTION_START_GUNSHIP_BATTLE); // lancement de la cannonicre !
                                                         return true;
-                                case    ALLIANCE_GOSSIP_ACTION_TP               :
+                                case ALLIANCE_GOSSIP_ACTION_TP :
                                                         pCreature->AI()->DoAction( DO_ACTION_FINISH_GUNSHIP_BATTLE); // aprcs fin de la cannonicre !
                                                         return true;
-                                case    ALLIANCE_GOSSIP_ACTION_CANCEL   :
+                                case ALLIANCE_GOSSIP_ACTION_CANCEL :
                                                         return true;
                         };
 
@@ -378,9 +384,9 @@ class boss_muradin_bronzebeard : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Cleave            =       urand( 8000, 10000);
-                                timer_RendingThrow      =       urand( 10000, 12000);
-                                timer_TasteOfBlood      =       0;      // -40%
+                                timer_Cleave = urand( 8000, 10000);
+                                timer_RendingThrow = urand( 10000, 12000);
+                                timer_TasteOfBlood = 0; // -40%
 
                                 bDialog = false;
                                 dialogID = 0;
@@ -401,19 +407,19 @@ class boss_muradin_bronzebeard : public CreatureScript
                         {
                                 uint8 spawn = floor( (long double) urand( 0, 5));
                                 switch( code) {
-                                        case    SPAWN_SERGEANT          :
+                                        case SPAWN_SERGEANT :
                                                 lSummons.push_back( DoSpawnCreature( NPC_KORKRON_SERGEANT, SpawnPosHorde[spawn].GetPositionX(), SpawnPosHorde[spawn].GetPositionY(), SpawnPosHorde[spawn].GetPositionZ(), SpawnPosHorde[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_DISTANCE_0        :
+                                        case SPAWN_DISTANCE_0 :
                                                 lSummons.push_back( DoSpawnCreature( NPC_KORKRON_ROCKETEER, SpawnPosHorde[spawn].GetPositionX(), SpawnPosHorde[spawn].GetPositionY(), SpawnPosHorde[spawn].GetPositionZ(), SpawnPosHorde[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_CAC                       :
+                                        case SPAWN_CAC :
                                                 lSummons.push_back( DoSpawnCreature( NPC_KORKRON_REAVER, SpawnPosHorde[spawn].GetPositionX(), SpawnPosHorde[spawn].GetPositionY(), SpawnPosHorde[spawn].GetPositionZ(), SpawnPosHorde[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_CAST                      :
+                                        case SPAWN_CAST :
                                                 lSummons.push_back( DoSpawnCreature( NPC_KORKRON_BATTLE_MAGE, SpawnPosHorde[spawn].GetPositionX(), SpawnPosHorde[spawn].GetPositionY(), SpawnPosHorde[spawn].GetPositionZ(), SpawnPosHorde[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_DISTANCE_1        :
+                                        case SPAWN_DISTANCE_1 :
                                                 lSummons.push_back( DoSpawnCreature( NPC_KORKRON_AXETHROWER, SpawnPosHorde[spawn].GetPositionX(), SpawnPosHorde[spawn].GetPositionY(), SpawnPosHorde[spawn].GetPositionZ(), SpawnPosHorde[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
                                 };
@@ -425,56 +431,56 @@ class boss_muradin_bronzebeard : public CreatureScript
                                 
                         }
 
-                        void UpdateAI( const uint32 diff) 
+                        void UpdateAI( const uint32 diff)
                         {
                                 if( bDialog) {
                                         if( dialogTimer <= diff) {
                                                 switch( dialogID) {
 
                                                 // START_EVENT
-                                                        case    0       :
+                                                        case 0 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_0, LANG_UNIVERSAL, 0);
                                                                 dialogID = 1;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    1       :
+                                                        case 1 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_1, LANG_UNIVERSAL, 0);
                                                                 dialogID = 2;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    2       :
+                                                        case 2 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_2, LANG_UNIVERSAL, 0);
                                                                 dialogID = 3;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    3       :
+                                                        case 3 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_3, LANG_UNIVERSAL, 0);
                                                                 dialogID = 4;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    4       :
+                                                        case 4 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_4, LANG_UNIVERSAL, 0);
                                                                 dialogID = 5;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    5       :
+                                                        case 5 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_5, LANG_UNIVERSAL, 0);
                                                                 dialogID = 6;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    6       :
+                                                        case 6 :
                                                                 if( Creature* pHighOverlordSaurfang = Unit::GetCreature(*me, instance->GetData64( NPC_HIGH_OVERLORD_VAROK_SAURFANG))) {
                                                                         pHighOverlordSaurfang->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_HIGH_OVERLORD_SAURFANG_0, LANG_UNIVERSAL, 0);
                                                                         dialogID = 7;
                                                                         dialogTimer = 2000;
                                                                 }
                                                                 break;
-                                                        case    7       :
+                                                        case 7 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_ALLIANCE_MURADIN_BRONZEBEARD_6, LANG_UNIVERSAL, 0);
                                                                 dialogID = 8;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    8       :
+                                                        case 8 :
                                                                 {
                                                                         Position tp = PosMuradinBronzebeard[1];
                                                                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
@@ -494,19 +500,19 @@ class boss_muradin_bronzebeard : public CreatureScript
                                                                 break;
 
                                                 // EMBARQUE_EVENTO
-                                                        case    9       :
+                                                        case 9 :
                                                                 if( Creature* pHighOverlordSaurfang = Unit::GetCreature(*me, instance->GetData64( NPC_HIGH_OVERLORD_VAROK_SAURFANG))) {
                                                                         pHighOverlordSaurfang->MonsterYell( YELL_BOARDING_ORGRIM_S_HAMMER_HIGH_OVERLORD_SAURFANG_0, LANG_UNIVERSAL, 0);
                                                                         dialogID = 10;
                                                                         dialogTimer = 2000;
                                                                 }
                                                                 break;
-                                                        case    10      :
+                                                        case 10 :
                                                                 me->MonsterYell( YELL_BOARDING_ORGRIM_S_HAMMER_MURADIN_BRONZEBEARD_0, LANG_UNIVERSAL, 0);
                                                                 dialogID = 11;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    11      :
+                                                        case 11 :
                                                                 // BEGINNING OF THE BATTLE OF ROYALTIES !
                                                                 this->Start();
                                                                 break;
@@ -542,7 +548,7 @@ class boss_muradin_bronzebeard : public CreatureScript
                         void DoAction(const int32 param)
                         {
                                 switch( param) {
-                                        case    DO_ACTION_START_GUNSHIP_BATTLE  :
+                                        case DO_ACTION_START_GUNSHIP_BATTLE :
                                                 health_theSkybreaker = RAID_MODE( 600000, 1200000);
                                                 health_ogrimsHammer = RAID_MODE( 600000, 1200000);
 
@@ -554,7 +560,7 @@ class boss_muradin_bronzebeard : public CreatureScript
                                                 dialogTimer = 0;
                                                 break;
 
-                                        case    DO_ACTION_FINISH_GUNSHIP_BATTLE :
+                                        case DO_ACTION_FINISH_GUNSHIP_BATTLE :
                                                 Position tp = DeathbringerRise;
                                                 Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                                                 if( !PlayerList.isEmpty()) {
@@ -617,13 +623,13 @@ class boss_muradin_bronzebeard : public CreatureScript
                         player->CLOSE_GOSSIP_MENU();
 
                         switch( action) {
-                                case    ALLIANCE_GOSSIP_ACTION_START    :
+                                case ALLIANCE_GOSSIP_ACTION_START :
                                                         pCreature->AI()->DoAction( DO_ACTION_START_GUNSHIP_BATTLE); // ? Lanzamiento de los Canones !
                                                         return true;
-                                case    ALLIANCE_GOSSIP_ACTION_TP               :
+                                case ALLIANCE_GOSSIP_ACTION_TP :
                                                         pCreature->AI()->DoAction( DO_ACTION_FINISH_GUNSHIP_BATTLE); // ? Fin de los canones !
                                                         return true;
-                                case    ALLIANCE_GOSSIP_ACTION_CANCEL   :
+                                case ALLIANCE_GOSSIP_ACTION_CANCEL :
                                                         return true;
                         };
 
@@ -656,9 +662,9 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Cleave            =       urand( 8000, 10000);
-                                timer_RendingThrow      =       urand( 10000, 12000);
-                                timer_TasteOfBlood      =       0;      // -40%
+                                timer_Cleave = urand( 8000, 10000);
+                                timer_RendingThrow = urand( 10000, 12000);
+                                timer_TasteOfBlood = 0; // -40%
 
                                 bDialog = false;
                                 dialogID = 0;
@@ -679,59 +685,59 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
                         {
                                 uint8 spawn = floor( (long double) urand( 0, 5));
                                 switch( code) {
-                                        case    SPAWN_SERGEANT          :
+                                        case SPAWN_SERGEANT :
                                                 lSummons.push_back( DoSpawnCreature( NPC_SKYBREAKER_SERGEANT, SpawnPosAlliance[spawn].GetPositionX(), SpawnPosAlliance[spawn].GetPositionY(), SpawnPosAlliance[spawn].GetPositionZ(), SpawnPosAlliance[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_DISTANCE_0        :
+                                        case SPAWN_DISTANCE_0 :
                                                 lSummons.push_back( DoSpawnCreature( NPC_SKYBREAKER_MORTAR_SOLDIER, SpawnPosAlliance[spawn].GetPositionX(), SpawnPosAlliance[spawn].GetPositionY(), SpawnPosAlliance[spawn].GetPositionZ(), SpawnPosAlliance[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_CAC                       :
+                                        case SPAWN_CAC :
                                                 lSummons.push_back( DoSpawnCreature( NPC_SKYBREAKER_MARINE, SpawnPosAlliance[spawn].GetPositionX(), SpawnPosAlliance[spawn].GetPositionY(), SpawnPosAlliance[spawn].GetPositionZ(), SpawnPosAlliance[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_CAST                      :
+                                        case SPAWN_CAST :
                                                 lSummons.push_back( DoSpawnCreature( NPC_SKYBREAKER_SORCERER, SpawnPosAlliance[spawn].GetPositionX(), SpawnPosAlliance[spawn].GetPositionY(), SpawnPosAlliance[spawn].GetPositionZ(), SpawnPosAlliance[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
-                                        case    SPAWN_DISTANCE_1        :
+                                        case SPAWN_DISTANCE_1 :
                                                 lSummons.push_back( DoSpawnCreature( NPC_SKYBREAKER_RIFLEMAN, SpawnPosAlliance[spawn].GetPositionX(), SpawnPosAlliance[spawn].GetPositionY(), SpawnPosAlliance[spawn].GetPositionZ(), SpawnPosAlliance[spawn].GetOrientation(), TEMPSUMMON_DEAD_DESPAWN,0));
                                                 break;
                                 };
                         }
 
-                        void UpdateAI( const uint32 diff) 
+                        void UpdateAI( const uint32 diff)
                         {
                                 if( bDialog) {
                                         if( dialogTimer <= diff) {
                                                 switch( dialogID) {
 
                                                 // COMIENZA_EL_EVENTO
-                                                        case    0       :
+                                                        case 0 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_0, LANG_UNIVERSAL, 0);
                                                                 dialogID = 1;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    1       :
+                                                        case 1 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_1, LANG_UNIVERSAL, 0);
                                                                 dialogID = 2;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    2       :
+                                                        case 2 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_2, LANG_UNIVERSAL, 0);
                                                                 dialogID = 3;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    3       :
+                                                        case 3 :
                                                                 if( Creature* pMuradinBronzebeard = Unit::GetCreature(*me, instance->GetData64( NPC_MURADIN_BRONZEBEARD))) {
                                                                         pMuradinBronzebeard->MonsterYell( YELL_EVENT_BEGIN_HORDE_MURADIN_BRONZEBEARD_0, LANG_UNIVERSAL, 0);
                                                                         dialogID = 4;
                                                                         dialogTimer = 2000;
                                                                 }
                                                                 break;
-                                                        case    4       :
+                                                        case 4 :
                                                                 me->MonsterYell( YELL_EVENT_BEGIN_HORDE_HIGH_OVERLORD_SAURFANG_3, LANG_UNIVERSAL, 0);
                                                                 dialogID = 5;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    5       :
+                                                        case 5 :
                                                                 {
                                                                         Position tp = PosHighOverlordVarokSaurfang[1];
                                                                         Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
@@ -751,19 +757,19 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
                                                                 break;
 
                                                 // EMBARQUE_EVENTO
-                                                        case    6       :
+                                                        case 6 :
                                                                 if( Creature* pMuradinBronzebeard = Unit::GetCreature(*me, instance->GetData64( NPC_MURADIN_BRONZEBEARD))) {
                                                                         pMuradinBronzebeard->MonsterYell( YELL_BOARDING_ORGRIM_S_HAMMER_MURADIN_BRONZEBEARD_0, LANG_UNIVERSAL, 0);
                                                                         dialogID = 7;
                                                                         dialogTimer = 2000;
                                                                 }
                                                                 break;
-                                                        case    7       :
+                                                        case 7 :
                                                                 me->MonsterYell( YELL_BOARDING_ORGRIM_S_HAMMER_HIGH_OVERLORD_SAURFANG_0, LANG_UNIVERSAL, 0);
                                                                 dialogID = 8;
                                                                 dialogTimer = 2000;
                                                                 break;
-                                                        case    8       :
+                                                        case 8 :
                                                                 // ? COMIENZO DE LA BATALLA DE LOS CANONES !
                                                                 
                                                                 
@@ -800,7 +806,7 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
                         void DoAction(const int32 param)
                         {
                                 switch( param) {
-                                        case    DO_ACTION_START_GUNSHIP_BATTLE  :
+                                        case DO_ACTION_START_GUNSHIP_BATTLE :
                                                 health_theSkybreaker = RAID_MODE( 600000, 1200000);
                                                 health_ogrimsHammer = RAID_MODE( 600000, 1200000);
 
@@ -812,7 +818,7 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
                                                 dialogTimer = 0;
                                                 break;
 
-                                        case    DO_ACTION_FINISH_GUNSHIP_BATTLE :
+                                        case DO_ACTION_FINISH_GUNSHIP_BATTLE :
                                                 Position tp = DeathbringerRise;
                                                 Map::PlayerList const &PlayerList = me->GetMap()->GetPlayers();
                                                 if( !PlayerList.isEmpty()) {
@@ -874,13 +880,13 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
                         player->CLOSE_GOSSIP_MENU();
 
                         switch( action) {
-                                case    HORDE_GOSSIP_ACTION_START       :
+                                case HORDE_GOSSIP_ACTION_START :
                                                         pCreature->AI()->DoAction( DO_ACTION_START_GUNSHIP_BATTLE); // Comienzo !
                                                         return true;
-                                case    HORDE_GOSSIP_ACTION_TP          :
+                                case HORDE_GOSSIP_ACTION_TP :
                                                         pCreature->AI()->DoAction( DO_ACTION_FINISH_GUNSHIP_BATTLE); // Fin !
                                                         return true;
-                                case    HORDE_GOSSIP_ACTION_CANCEL      :
+                                case HORDE_GOSSIP_ACTION_CANCEL :
                                                         return true;
                         };
 
@@ -905,15 +911,15 @@ class npc_sergeant : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Spawn                             =       0;
+                                timer_Spawn = 0;
 
-                                timer_Bladestorm                =       7000;
-                                timer_WoundingStrike    =       urand( 10000, 12000);
-                                timer_BurningPitch              =       60000;
-                                timer_DesperateResolve  =       0; // -40% de Vida
+                                timer_Bladestorm = 7000;
+                                timer_WoundingStrike = urand( 10000, 12000);
+                                timer_BurningPitch = 60000;
+                                timer_DesperateResolve = 0; // -40% de Vida
                         }
 
-                        void UpdateAI( const uint32 diff) 
+                        void UpdateAI( const uint32 diff)
                         {
                                 timer_Spawn += diff;
                                 buffExp( this, timer_Spawn);
@@ -974,10 +980,10 @@ class npc_skybreaker_rifleman : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Spawn                             =       0;
+                                timer_Spawn = 0;
 
-                                timer_Shoot                             =       urand( 2000, 4000);
-                                timer_BurningPitch              =       60000;
+                                timer_Shoot = urand( 2000, 4000);
+                                timer_BurningPitch = 60000;
                         }
 
                         void UpdateAI( const uint32 diff)
@@ -1025,10 +1031,10 @@ class npc_korkron_axethrower : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Spawn                             =       0;
+                                timer_Spawn = 0;
 
-                                timer_HurlAxe                   =       urand( 2000, 4000);
-                                timer_BurningPitch              =       60000;
+                                timer_HurlAxe = urand( 2000, 4000);
+                                timer_BurningPitch = 60000;
                         }
 
                         void UpdateAI( const uint32 diff)
@@ -1076,10 +1082,10 @@ class npc_marine_or_reaver : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Spawn                             =       0;
+                                timer_Spawn = 0;
 
-                                timer_BurningPitch              =       60000;
-                                timer_DesperateResolve  =       0; // -40% de Vida
+                                timer_BurningPitch = 60000;
+                                timer_DesperateResolve = 0; // -40% de Vida
                         }
 
                         void UpdateAI( const uint32 diff)
@@ -1131,10 +1137,10 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Spawn                             =       0;
+                                timer_Spawn = 0;
 
-                                timer_RocketArtillery   =       urand( 10000, 15000);
-                                timer_BurningPitch              =       60000;
+                                timer_RocketArtillery = urand( 10000, 15000);
+                                timer_BurningPitch = 60000;
                         }
 
                         void UpdateAI( const uint32 diff)
@@ -1154,7 +1160,7 @@ class npc_mortar_soldier_or_rocketeer : public CreatureScript
                                 if( timer_RocketArtillery <= diff) {
                                         if( Unit* pTarget = SelectTarget(SELECT_TARGET_RANDOM, 0, 10000, true)) {
                                                 DoCast( pTarget, SPELL_ROCKET_ARTILLERY);
-                                                timer_RocketArtillery   =       urand( 10000, 15000);
+                                                timer_RocketArtillery = urand( 10000, 15000);
                                         }
                                 } else timer_RocketArtillery -= diff;
                         }
@@ -1184,10 +1190,10 @@ class npc_sorcerer_or_battle_mage : public CreatureScript
 
                         void Reset()
                         {
-                                timer_Spawn                             =       0;
+                                timer_Spawn = 0;
 
-                                timer_BurningPitch              =       60000;
-                                timer_BelowZero                 =       urand( 10000, 15000);
+                                timer_BurningPitch = 60000;
+                                timer_BelowZero = urand( 10000, 15000);
                         }
 
                         void UpdateAI( const uint32 diff)
