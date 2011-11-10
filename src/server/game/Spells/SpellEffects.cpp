@@ -1898,12 +1898,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 m_caster->CastSpell(unitTarget, spell->Id, true);
             return;
         }
-        // Righteous Defense
-        case 31980:
-        {
-            m_caster->CastSpell(unitTarget, 31790, true);
-            return;
-        }
         // Cloak of Shadows
         case 35729:
         {
@@ -1923,13 +1917,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 else
                     ++iter;
             }
-            return;
-        }
-        // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
-        case 41967:
-        {
-            if (Unit* pet = unitTarget->GetGuardianPet())
-                pet->CastSpell(pet, 28305, true);
             return;
         }
         // Empower Rune Weapon
@@ -4171,13 +4158,43 @@ void Spell::SpellDamageWeaponDmg(SpellEffIndex effIndex)
         }
         case SPELLFAMILY_PALADIN:
         {
-            // Seal of Command Unleashed
-            if (m_spellInfo->Id == 20467)
+            // Seal of Command - Increase damage by 36% on every swing
+            if (m_spellInfo->SpellFamilyFlags[0] & 0x2000000)
             {
-                spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()));
+                totalDamagePercentMod *= 1.36f; //136% damage
             }
-            break;
+			//Templar's Verdict
+				if (m_spellInfo->Id == 85256)
+				{
+				switch (m_caster->GetPower(POWER_HOLY_POWER))
+				{
+			// 1 Holy Power
+				case 1:
+				totalDamagePercentMod *= 1.30f; // 130%
+				(m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.3f : 0; //Crusade Rank 1,2,3 - 133%
+				break;
+			// 2 Holy Power
+				case 2:
+				totalDamagePercentMod *= 1.30f; // 130%
+				(m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.3f : 0; //Crusade Rank 1,2,3 - 133%
+				break;
+			// 3 Holy Power
+				case 3:
+				totalDamagePercentMod *= 1.90f; // 190%
+				(m_caster->HasAura(31866 || 31867 || 31868)) ? totalDamagePercentMod += 0.9f : 0; //Crusade Rank 1,2,3 - 199%
+				break;
+					}
+					(m_caster->HasAura(63220)) ? totalDamagePercentMod *= 1.15f : 0 ; // Glyphe of Templar's Verdict
+					m_caster->SetPower(POWER_HOLY_POWER, 0);
+					}
+
+            // Seal of Command Unleashed
+				else if (m_spellInfo->Id == 20467)
+				{
+					spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+					spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()));
+				}
+				break;
         }
         case SPELLFAMILY_SHAMAN:
         {
@@ -5837,7 +5854,13 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     if (!spellInfo)
         return;
     Spell spell(pTarget, spellInfo, TRIGGERED_FULL_MASK);
-    spell.SendSpellCooldown();
+    // fix cooldown .st
+    if (spell.getState() == SPELL_STATE_IDLE)
+    {
+        pTarget->TeleportTo(pTarget->GetStartPosition(), unitTarget == m_caster ? TELE_TO_SPELL : 0);
+        spell.SendSpellCooldown();
+    }
+    else spell.cast(true);
 }
 
 void Spell::EffectSummonPlayer(SpellEffIndex /*effIndex*/)

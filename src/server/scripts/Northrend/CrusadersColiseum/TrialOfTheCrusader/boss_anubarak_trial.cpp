@@ -174,9 +174,7 @@ public:
             m_uiSummonScarabTimer = 2*IN_MILLISECONDS;
 
             m_uiSummonFrostSphereTimer = 20*IN_MILLISECONDS;
-
 			m_uitargetflag = 3600 * 24 * IN_MILLISECONDS;
-
             m_uiBerserkTimer = 10*MINUTE*IN_MILLISECONDS;
             m_uiStage = 0;
             m_uiScarabSummoned = 0;
@@ -287,7 +285,7 @@ public:
 
                     if (m_uiPenetratingColdTimer <= uiDiff)
                     {
-                        me->CastCustomSpell(SPELL_PENETRATING_COLD, SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5));
+                        me->CastCustomSpell(SPELL_PENETRATING_COLD, SPELLVALUE_MAX_TARGETS, RAID_MODE(2, 5, 2, 5));
                         m_uiPenetratingColdTimer = 20*IN_MILLISECONDS;
                     } else m_uiPenetratingColdTimer -= uiDiff;
 

@@ -1433,10 +1433,10 @@ void Player::HandleDrowning(uint32 time_diff)
                 uint32 damage = urand(600, 700);
                 if (m_MirrorTimerFlags & UNDERWATER_INLAVA)
                     EnvironmentalDamage(DAMAGE_LAVA, damage);
-                // need to skip Slime damage in Undercity,
+                // need to skip Slime damage in Undercity and Ruins of Lordaeron (Arena),
                 // maybe someone can find better way to handle environmental damage
-                else if (m_zoneUpdateId != 1497)
-                    EnvironmentalDamage(DAMAGE_SLIME, damage);
+                else if (m_zoneUpdateId != 1497 && m_zoneUpdateId != 3968)
+				EnvironmentalDamage(DAMAGE_SLIME, damage);
             }
         }
     }
@@ -12091,6 +12091,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         return pItem2;
     }
+	SaveToDB();
 }
 
 Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
@@ -23593,6 +23594,13 @@ void Player::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 mis
 void Player::CompletedAchievement(AchievementEntry const* entry)
 {
     GetAchievementMgr().CompletedAchievement(entry);
+}
+
+bool Player::HasAchieved(uint32 entry)
+{
+    if(AchievementEntry const *achievement = sAchievementStore.LookupEntry(entry))
+        return GetAchievementMgr().HasAchieved(achievement);
+    return false;
 }
 
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)

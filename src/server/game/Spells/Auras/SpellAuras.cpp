@@ -1125,6 +1125,29 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     }
                 }
                 break;
+            case SPELLFAMILY_HUNTER:
+                // Rapid Killing
+                if (GetSpellInfo()->SpellFamilyFlags[1] & 0x01000000)
+                {
+                    if (AuraEffect * auraEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3560, 1))
+                    {
+                        uint32 spellId;
+                        switch (auraEff->GetId())
+                        {
+                            case 53228: spellId = 56654; break;
+                            case 53232: spellId = 58882; break;
+                        }
+                        target->CastSpell(target, spellId, true);
+                    }
+                }
+                // Animal Handler
+                else if (GetId() == 68361)
+                {
+                    if (Unit * owner = target->GetOwner())
+                        if (AuraEffect * auraEff = owner->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 2234, 1))
+                            GetEffect(0)->SetAmount(auraEff->GetAmount());
+                }
+                break;
             case SPELLFAMILY_MAGE:
                 if (!caster)
                     break;
@@ -1189,25 +1212,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         break;
                 }
                 break;
-			case SPELLFAMILY_HUNTER:
-				// Rapid Killing
-				if (GetSpellInfo()->SpellFamilyFlags[1] & 0x01000000)
-				{
-					// Rapid Recuperation
-					// FIXME: this is completely wrong way to fixing this talent
-					// but for unknown reason it won't proc if your target are dead
-					if (AuraEffect * auraEff = target->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_HUNTER, 3560, 1))
-					{
-						uint32 spellId;
-						switch (auraEff->GetId())
-						{
-							case 53228: spellId = 56654; break;
-							case 53232: spellId = 58882; break;
-						}
-						target->CastSpell(target, spellId, true);
-					}
-				}
-				break;
             case SPELLFAMILY_WARLOCK:
                 switch(GetId())
                 {
@@ -1368,6 +1372,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (removeMode != AURA_REMOVE_BY_EXPIRE)
                             break;
                         target->CastSpell(target, 32612, true, NULL, GetEffect(1));
+						target->CombatStop();
                         break;
                     case 74396: // Fingers of Frost
                         // Remove the IGNORE_AURASTATE aura

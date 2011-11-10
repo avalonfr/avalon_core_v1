@@ -190,13 +190,21 @@ class item_mysterious_egg : public ItemScript
 {
 public:
     item_mysterious_egg() : ItemScript("item_mysterious_egg") { }
+	
     bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/)
     {
+		uint32 IdItem = 39883;
+		uint8 count = 1;
         ItemPosCountVec dest;
-        uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
+        /*uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
         if (msg == EQUIP_ERR_OK)
-            player->StoreNewItem(dest, 39883, true, Item::GenerateItemRandomPropertyId(39883));
-
+            player->StoreNewItem(dest, 39883, true, Item::GenerateItemRandomPropertyId(39883));*/
+			
+        if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, IdItem, count) == EQUIP_ERR_OK)
+        {
+            Item* item = player->StoreNewItem(dest, IdItem, true, Item::GenerateItemRandomPropertyId(IdItem));
+             player->SendNewItem(item, count, true, false);
+        }
         return true;
     }
 };
@@ -449,6 +457,37 @@ public:
     }
 };
 
+/*#####
+# item_hallowsend_tricky_treat
+#####*/
+enum HallowsendTrickyTreats
+{
+    SPELL_TRICKY_TREAT_STACKING_SPEED = 42919,
+    SPELL_UPSET_TUMMY = 42966
+};
+
+class item_hallowsend_tricky_treat : public ItemScript
+{
+public:
+    item_hallowsend_tricky_treat() : ItemScript("item_hallowsend_tricky_treat") { }
+
+   bool OnUse(Player *player, Item *pItem, SpellCastTargets const& targets)
+   {
+       if (player->HasAura(SPELL_UPSET_TUMMY))
+       {
+           player->SendEquipError(EQUIP_ERR_CANT_DO_RIGHT_NOW ,pItem);
+           return true;
+       }
+       player->CastSpell(player,SPELL_TRICKY_TREAT_STACKING_SPEED,true);
+       if (player->HasAura(SPELL_TRICKY_TREAT_STACKING_SPEED))
+       {
+           if (player->GetAura(SPELL_TRICKY_TREAT_STACKING_SPEED)->GetStackAmount() > 2 && roll_chance_i(20 * player->GetAura(SPELL_TRICKY_TREAT_STACKING_SPEED)->GetStackAmount()))
+               player->CastSpell(player,SPELL_UPSET_TUMMY,true);
+       }
+       return false;
+   }
+};
+
 void AddSC_item_scripts()
 {
     new item_only_for_flight();
@@ -463,4 +502,5 @@ void AddSC_item_scripts()
     new item_dehta_trap_smasher();
     new item_trident_of_nazjan();
     new item_captured_frog();
+	new item_hallowsend_tricky_treat();
 }

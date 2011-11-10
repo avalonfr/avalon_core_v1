@@ -218,7 +218,7 @@ class boss_lady_deathwhisper : public CreatureScript
         struct boss_lady_deathwhisperAI : public BossAI
         {
             boss_lady_deathwhisperAI(Creature* creature) : BossAI(creature, DATA_LADY_DEATHWHISPER),
-                _dominateMindCount(RAID_MODE<uint8>(0, 1, 1, 3)), _introDone(false)
+                _dominateMindCount(RAID_MODE<uint8>(1, 1, 1, 3)), _introDone(false)
             {
             }
 
@@ -372,7 +372,7 @@ class boss_lady_deathwhisper : public CreatureScript
                     {
                         me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
                         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
-                        events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, urand(30000, 60000), 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, 45000, 0, PHASE_TWO);
                     }
                 }
             }
@@ -439,14 +439,13 @@ class boss_lady_deathwhisper : public CreatureScript
                             break;
                         case EVENT_DOMINATE_MIND_H:
                             Talk(SAY_DOMINATE_MIND);
-                            for (uint8 i = 0; i < _dominateMindCount; i++)
-                                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_DOMINATE_MIND_H))
+                            if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
                                     DoCast(target, SPELL_DOMINATE_MIND_H);
                             events.ScheduleEvent(EVENT_DOMINATE_MIND_H, urand(40000, 45000));
                             break;
                         case EVENT_P1_SUMMON_WAVE:
                             SummonWaveP1();
-                            events.ScheduleEvent(EVENT_P1_SUMMON_WAVE, 60000, 0, PHASE_ONE);
+                            events.ScheduleEvent(EVENT_P1_SUMMON_WAVE, IsHeroic() ? 45000 : 60000, 0, PHASE_ONE);
                             break;
                         case EVENT_P1_SHADOW_BOLT:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM))
@@ -482,7 +481,7 @@ class boss_lady_deathwhisper : public CreatureScript
                             break;
                         case EVENT_P2_SUMMON_WAVE:
                             SummonWaveP2();
-                            events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, 60000, 0, PHASE_TWO);
+                            events.ScheduleEvent(EVENT_P2_SUMMON_WAVE, 45000, 0, PHASE_TWO);
                             break;
                         case EVENT_BERSERK:
                             DoCast(me, SPELL_BERSERK);

@@ -35,6 +35,7 @@ at_warsong_farms                q11686
 at_stormwright_shelf            q12741
 at_last_rites                   q12019
 at_sholazar_waygate             q12548
+at_azure_dragons_sanctuary      q12110/q12107
 EndContentData */
 
 #include "ScriptPCH.h"
@@ -368,6 +369,29 @@ class AreaTrigger_at_sholazar_waygate : public AreaTriggerScript
         }
 };
 
+/*#####
+## at_azure_dragons_sanctuary
+######*/
+enum eDragonsSanctuary
+{
+    QUEST_THE_END_OF_THE_LINE_A = 12107,
+    QUEST_THE_END_OF_THE_LINE_H = 12110,
+    NPC_THE_END_OF_THE_LINE_AT_KILL_CREDIT_BUNNY = 26889
+};
+
+class AreaTrigger_at_azure_dragons_sanctuary : public AreaTriggerScript
+{
+public:
+    AreaTrigger_at_azure_dragons_sanctuary() : AreaTriggerScript("at_azure_dragons_sanctuary") { }
+    bool OnTrigger(Player * player, AreaTriggerEntry const * /*trigger*/)
+    {
+        // Should we use the GUID of the NPC spawned where the areatrigger is ?
+        if (player->GetQuestStatus(QUEST_THE_END_OF_THE_LINE_A) == QUEST_STATUS_INCOMPLETE || player->GetQuestStatus(QUEST_THE_END_OF_THE_LINE_H) == QUEST_STATUS_INCOMPLETE)
+            player->KilledMonsterCredit(NPC_THE_END_OF_THE_LINE_AT_KILL_CREDIT_BUNNY,0);
+        return true;
+    }
+};
+
 void AddSC_areatrigger_scripts()
 {
     new AreaTrigger_at_aldurthar_gate();
@@ -379,4 +403,5 @@ void AddSC_areatrigger_scripts()
     new AreaTrigger_at_scent_larkorwi();
     new AreaTrigger_at_last_rites();
     new AreaTrigger_at_sholazar_waygate();
+	new AreaTrigger_at_azure_dragons_sanctuary();
 }

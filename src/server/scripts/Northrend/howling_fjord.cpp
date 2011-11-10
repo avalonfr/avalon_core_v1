@@ -427,6 +427,92 @@ public:
     }
 };
 
+/*######
+## Fix Quest Drop It then Rock It 11429
+######*/
+
+enum DropItTheRockIT
+{
+    NPC_WINTERSKORN_DEFENDER = 24015,
+    QUEST_DROP_IT_THEN_ROCK_IT = 11429
+};
+
+class npc_alliance_banner_standard : public CreatureScript
+{
+public:
+    npc_alliance_banner_standard() : CreatureScript("npc_alliance_banner_standard") { }
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_alliance_banner_standardAI(creature);
+    }
+
+    struct npc_alliance_banner_standardAI : public ScriptedAI
+    {
+        npc_alliance_banner_standardAI(Creature *c) : ScriptedAI(c), lSummons(me)
+        {
+            summonNumber = 0;
+            summonTimer = 2000;
+        }
+
+        uint32 summonTimer;
+        uint8 summonNumber;
+        uint8 summons;
+        SummonList lSummons;
+
+        void Reset()
+        {
+            me->SetReactState(REACT_PASSIVE);
+        }
+
+        void JustSummoned(Creature* summon)
+        {
+            lSummons.Summon(summon);
+        }
+
+        void JustDied(Unit *who)
+        {
+            lSummons.DespawnAll();
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (summonTimer <= diff)
+            {
+                if (summonNumber >= 3)
+                {
+                    if (Unit* owner = me->GetOwner())
+                    {
+                        if (owner->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            Player* player = CAST_PLR(owner);
+                            player->GroupEventHappens(QUEST_DROP_IT_THEN_ROCK_IT, me);
+                        }
+                    }
+                    me->DisappearAndDie();
+                }
+                if (summonNumber <= 3)
+                    summons = 1;
+                else if(summonNumber <= 4)
+                    summons = 2;
+                else summons = 3;
+                for (int i = 0 ; i < summons ; i++)
+                {
+                    Creature* defender = me->SummonCreature(NPC_WINTERSKORN_DEFENDER, me->GetPositionX()+20, me->GetPositionY()+20, me->GetPositionZ());
+                    if (defender)
+                    {
+                        defender->AI()->AttackStart(me) ;
+                    }
+                }
+                summonNumber ++;
+                summonTimer = 16000;
+            } else summonTimer -= diff;
+            if (!UpdateVictim())
+                return;
+        }
+    };
+};
+
 void AddSC_howling_fjord()
 {
     new npc_apothecary_hanes;
@@ -434,4 +520,5 @@ void AddSC_howling_fjord()
     new npc_razael_and_lyana;
     new npc_mcgoyver;
     new npc_daegarn;
+	new npc_alliance_banner_standard;
  }

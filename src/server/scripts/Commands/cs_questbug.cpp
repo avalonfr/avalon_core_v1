@@ -9,26 +9,21 @@ class questbug_commandscript : public CommandScript
 {
     public:
         questbug_commandscript() : CommandScript("questdebug_commandscript") { }
-		
 		ChatCommand* GetCommands() const
     {
       static ChatCommand QuestbugAddRemoveCommandTable[] =
       {
-
         { "add",        SEC_GAMEMASTER, false, &HandleQuestBugAddCommand,    "", NULL },
-
         { "remove",     SEC_GAMEMASTER, false, &HandleQuestBugRemoveCommand, "", NULL },
-
         { NULL, 0, false, NULL, "", NULL }
       };
       static ChatCommand QuestbugCommandTable[] =
       {
         { "valide",     SEC_PLAYER,     false, &HandlePlayerQuestCompleteCommand, "", NULL },
-
         { "questbug",   SEC_GAMEMASTER, false, NULL, "", QuestbugAddRemoveCommandTable},
-
         { NULL, 0, false, NULL, "", NULL }
       };
+	  
       return QuestbugCommandTable;
     }
 	

@@ -133,8 +133,6 @@ class instance_icecrown_citadel : public InstanceMapScript
 				hordeGSBattleGuid = 0;
 				alliGSBattleGuid = 0;
 
-
-
                 FrostwyrmCount = 0;
                 SpinestalkerTrashCount = 0;
                 RimefangTrashCount = 0;
@@ -202,7 +200,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                         if (Player* player = players.begin()->getSource())
                             TeamInInstance = player->GetTeam();
                 }
-				
+
                 switch (creature->GetEntry())
                 {
                     case NPC_KOR_KRON_GENERAL:
@@ -689,7 +687,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return EdgeDestroyWarning;
 					case DATA_NPC_MAURADIN:
 						return npc_muradin_bronzebeardGUID;
-
 					case GO_HORDE_GUNSHIP:
 						return hordeGSGuid;
 						break;
@@ -723,7 +720,6 @@ class instance_icecrown_citadel : public InstanceMapScript
                 switch (type)
                 {
                     case DATA_LADY_DEATHWHISPER:
-                        //SetBossState(DATA_GUNSHIP_BATTLE_EVENT, state);// TEMP HACK UNTIL GUNSHIP SCRIPTED
                         if (state == DONE)
                         {
                             if (GameObject* elevator = instance->GetGameObject(LadyDeathwisperElevatorGUID))
@@ -749,6 +745,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                                 break;
                         }
                         break;
+
                     case DATA_GUNSHIP_BATTLE_EVENT:
                         switch(state)
                         {
@@ -758,9 +755,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                                 break;
 							case TO_BE_DECIDED:
 								SetBossState(DATA_GUNSHIP_BATTLE_EVENT, NOT_STARTED);
-
 								break;
-
                         }
                         break;
                     case DATA_FESTERGUT:
@@ -1090,6 +1085,7 @@ class instance_icecrown_citadel : public InstanceMapScript
                 if (dataHead1 == 'I' && dataHead2 == 'C')
                 {
                     for (uint8 i = 0; i < 14; ++i)
+
                     {
                         uint32 tmpState;
                         loadStream >> tmpState;

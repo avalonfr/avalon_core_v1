@@ -97,7 +97,7 @@ enum Spells
     SPELL_SUMMON_BLOOD_BEAST_25_MAN     = 72356, // Additional cast, does not replace
     SPELL_FRENZY                        = 72737,
     SPELL_BLOOD_NOVA_TRIGGER            = 72378,
-    SPELL_BLOOD_NOVA                    = 72380,
+    SPELL_BLOOD_NOVA                    = 73058,
     SPELL_BLOOD_POWER                   = 72371,
     SPELL_BLOOD_LINK_POWER              = 72195,
     SPELL_BLOOD_LINK_DUMMY              = 72202,
@@ -533,7 +533,7 @@ class boss_deathbringer_saurfang : public CreatureScript
                     }
                     case ACTION_MARK_OF_THE_FALLEN_CHAMPION:
                     {
-                        Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION);
+                        Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 30.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION);
                         if(!target)
 							target = SelectTarget(SELECT_TARGET_RANDOM, 0, 0.0f, true, -SPELL_MARK_OF_THE_FALLEN_CHAMPION);
 						if(target)
@@ -1273,7 +1273,9 @@ class spell_deathbringer_blood_nova_targeting : public SpellScriptLoader
                 if (targetsAtRange < minTargets)
                     targetsAtRange = std::min<uint32>(unitList.size() - 1, minTargets);
 
-                target = SelectRandomContainerElement(unitList);
+                std::list<Unit*>::iterator itr = unitList.begin();
+                std::advance(itr, urand(0, targetsAtRange));
+                target = *itr;
                 unitList.clear();
                 unitList.push_back(target);
             }
@@ -1323,7 +1325,9 @@ class spell_deathbringer_boiling_blood : public SpellScriptLoader
                 if (unitList.empty())
                     return;
 
-                Unit* target = SelectRandomContainerElement(unitList);
+                std::list<Unit*>::iterator itr = unitList.begin();
+                std::advance(itr, urand(0, unitList.size() - 1));
+                Unit* target = *itr;
                 unitList.clear();
                 unitList.push_back(target);
             }

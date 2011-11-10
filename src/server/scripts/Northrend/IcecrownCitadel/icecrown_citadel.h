@@ -118,6 +118,7 @@ enum DataTypes
     DATA_FROZEN_LAVAMAN             = 49,
     DATA_LAVAMAN_PILLARS            = 50,
 
+
 	//GUNSHIP
 	DATA_GUNSHIP_EVENT              = 52,
 	DATA_NPC_MAURADIN				= 53,		
@@ -175,6 +176,7 @@ enum CreaturesIds
     NPC_REANIMATED_ADHERENT                     = 38010,
     NPC_VENGEFUL_SHADE                          = 38222,
 
+
 	 //Gunship Battle
 	 NPC_ALLIGSTRIGGER_10            			= 400031,
 	 NPC_HORDEGSTRIGGER_10            			= 400030,
@@ -184,6 +186,7 @@ enum CreaturesIds
 	 NPC_FIGHTTRIGGER              				= 400033,
 	 NPC_PORTAL                  				= 400034,
 	
+
     // Deathbringer Saurfang
     NPC_DEATHBRINGER_SAURFANG                   = 37813,
     NPC_BLOOD_BEAST                             = 38508,
@@ -299,6 +302,7 @@ enum CreaturesIds
 	NPC_SAUFRANG_G								= 36939,
 	NPC_MURADIN_BRONZEBEARD						= 36948,
 
+
 };
 
 enum GameObjectsIds
@@ -318,6 +322,7 @@ enum GameObjectsIds
     GO_ORATORY_OF_THE_DAMNED_ENTRANCE       = 201563,
     GO_LADY_DEATHWHISPER_ELEVATOR           = 202220,
 
+
 	//Gunship Battle
 	GO_HORDE_GUNSHIP                = 1915002,
 	GO_ALLI_GUNSHIP                 = 1914902,
@@ -330,6 +335,7 @@ enum GameObjectsIds
     GO_GUNSHIP_CACHE_10H			= 201874,
     GO_GUNSHIP_CACHE_25H			= 201875,
 
+
     // Deathbringer Saurfang
     GO_SAURFANG_S_DOOR                      = 201825,
     GO_DEATHBRINGER_S_CACHE_10N             = 202239,
@@ -337,7 +343,6 @@ enum GameObjectsIds
     GO_DEATHBRINGER_S_CACHE_10H             = 202238,
     GO_DEATHBRINGER_S_CACHE_25H             = 202241,
     GO_SCOURGE_TRANSPORTER_SAURFANG         = 202244,
-
 
     // Professor Putricide
     GO_ORANGE_PLAGUE_MONSTER_ENTRANCE       = 201371,

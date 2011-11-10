@@ -67,8 +67,8 @@ public:
         {
             if (who->GetEntry() == MOB_ZOMBIE && me->IsWithinDistInMap(who, 7))
             {
-                SetGazeOn(who);
-                // TODO: use a script text
+                AttackStart(who);
+                me->SetReactState(REACT_PASSIVE);                
                 me->MonsterTextEmote(EMOTE_NEARBY, 0, true);
             }
             else

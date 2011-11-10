@@ -1414,6 +1414,83 @@ public:
     }
 };
 
+/*###########
+# Quest 12555
+############*/
+
+enum ATangledSkein
+{
+    NPC_PLAGUE_SPRAYER_TRIGGER = 29457,
+    NPC_PLAGUE_SPRAYER_CREDIT = 28289,
+    SPELL_TANGLED_SKEIN_THROWER = 51165,
+    SPELL_SPRAYER_HUGE_EXPLOSION = 53236,
+    SPELL_SUMMON_BROKEN_SPRAYER = 51314
+};
+
+class npc_plague_sprayer : public CreatureScript
+{
+public:
+    npc_plague_sprayer() : CreatureScript("npc_plague_sprayer") {}
+
+    struct npc_plague_sprayerAI : public ScriptedAI
+    {
+       npc_plague_sprayerAI(Creature* creature) : ScriptedAI(creature) {}
+
+        EventMap events;
+        uint64 _playerGUID;
+        bool hit;
+
+        void Reset()
+        {
+            _playerGUID = 0;
+            hit = false;
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            events.Update(diff);
+
+switch (events.ExecuteEvent())
+            {
+                case 1:
+                    if (Player* player = me->GetPlayer(*me, _playerGUID))
+                    {
+                        DoCast(me, SPELL_SPRAYER_HUGE_EXPLOSION);
+                        player->KilledMonsterCredit(NPC_PLAGUE_SPRAYER_CREDIT, 0);
+                        events.ScheduleEvent(2, 1000);
+                    }
+                    break;
+                case 2:
+                    if (Creature* trigger = me->FindNearestCreature(NPC_PLAGUE_SPRAYER_TRIGGER, 15.0f, true)) // what is this trigger supposed to do? there's only 1
+                    {
+                        trigger->AI()->DoCast(me, SPELL_SUMMON_BROKEN_SPRAYER); // when should this be casted? who casts it?
+                        me->DespawnOrUnsummon();
+                    } else me->DespawnOrUnsummon();
+                    break;
+            }
+        }
+
+        void SpellHit(Unit* caster, const SpellInfo* spell)
+        {
+            if (!caster->ToPlayer())
+                return;
+
+            if (spell->Id == SPELL_TANGLED_SKEIN_THROWER && !hit)
+            {
+                _playerGUID = caster->GetGUID();
+                me->GetMotionMaster()->MovePoint(0, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+                events.ScheduleEvent(1, 4000);
+                hit = true;
+            }
+        }
+    };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new npc_plague_sprayerAI(creature);
+    }
+};
+
 void AddSC_zuldrak()
 {
     new npc_drakuru_shackles;
@@ -1429,4 +1506,5 @@ void AddSC_zuldrak()
     new npc_elemental_lord;
     new npc_fiend_elemental;
     new go_scourge_enclosure;
+	new npc_plague_sprayer;
 }

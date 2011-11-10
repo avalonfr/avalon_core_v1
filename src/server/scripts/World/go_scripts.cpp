@@ -1186,6 +1186,49 @@ public:
     }
 };
 
+/*######
+## http://www.wowhead.com/object=180574
+## Wickerman Ember
+## go_wickerman_ember
+######*/
+
+#define GOSSIP_WICKERMAN_SPELL "Smear the on my face like war paint!"
+
+enum WickermanEmberGo
+{
+    SPELL_GRIM_VISAGE = 24705, // http://www.wowhead.com/spell=24705/grim-visage
+};
+
+class go_wickerman_ember : public GameObjectScript
+{
+public:
+    go_wickerman_ember() : GameObjectScript("go_wickerman_ember") { }
+
+    bool OnGossipHello(Player* player, GameObject* pGO)
+    {
+        player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_WICKERMAN_SPELL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(pGO), pGO->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, GameObject* pGO, uint32 /*uiSender*/, uint32 uiAction)
+    {
+        player->PlayerTalkClass->ClearMenus();
+        if (player->HasAura(SPELL_GRIM_VISAGE))
+        {
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(pGO), pGO->GetGUID());
+            player->CLOSE_GOSSIP_MENU();
+            
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF +1)
+        {
+            pGO->CastSpell(player, SPELL_GRIM_VISAGE);
+			player->CLOSE_GOSSIP_MENU();
+        }
+        return true;
+    }
+};
+
 void AddSC_go_scripts()
 {
     new go_cat_figurine;
@@ -1224,4 +1267,5 @@ void AddSC_go_scripts()
     new go_amberpine_outhouse;
     new go_hive_pod;
     new go_massive_seaforium_charge;
+	new go_wickerman_ember;
 }
