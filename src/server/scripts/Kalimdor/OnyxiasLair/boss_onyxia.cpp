@@ -117,11 +117,11 @@ public:
     {
         boss_onyxiaAI(Creature* creature) : ScriptedAI(creature), Summons(me)
         {
-            m_pInstance = creature->GetInstanceScript();
+            m_instance = creature->GetInstanceScript();
             Reset();
         }
 
-        InstanceScript* m_pInstance;
+        InstanceScript* m_instance;
         SummonList Summons;
 
         uint32 m_uiPhase;
@@ -172,11 +172,11 @@ public:
             m_uiSummonWhelpCount = 0;
             m_bIsMoving = false;
 
-            if (m_pInstance)
+            if (m_instance)
             {
-                m_pInstance->SetData(DATA_ONYXIA, NOT_STARTED);
-                m_pInstance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
-                m_pInstance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
+                m_instance->SetData(DATA_ONYXIA, NOT_STARTED);
+                m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
+                m_instance->DoStopTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
             }
         }
 
@@ -185,17 +185,17 @@ public:
             DoScriptText(SAY_AGGRO, me);
             me->SetInCombatWithZone();
 
-            if (m_pInstance)
+            if (m_instance)
             {
-                m_pInstance->SetData(DATA_ONYXIA, IN_PROGRESS);
-                m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
+                m_instance->SetData(DATA_ONYXIA, IN_PROGRESS);
+                m_instance->DoStartTimedAchievement(ACHIEVEMENT_TIMED_TYPE_EVENT,  ACHIEV_TIMED_START_EVENT);
             }
         }
 
         void JustDied(Unit* /*killer*/)
         {
-            if (m_pInstance)
-                m_pInstance->SetData(DATA_ONYXIA, DONE);
+            if (m_instance)
+                m_instance->SetData(DATA_ONYXIA, DONE);
 
             Summons.DespawnAll();
         }
@@ -268,8 +268,8 @@ public:
                         me->GetMotionMaster()->MovePoint(11, Phase2Location.GetPositionX(), Phase2Location.GetPositionY(), Phase2Location.GetPositionZ()+25);
                         me->SetSpeed(MOVE_FLIGHT, 1.0f);
                         DoScriptText(SAY_PHASE_2_TRANS, me);
-                        if (m_pInstance)
-                            m_pInstance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
+                        if (m_instance)
+                            m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
                         m_uiWhelpTimer = 5000;
                         m_uiLairGuardTimer = 15000;
                         break;
@@ -304,9 +304,9 @@ public:
                 (pSpell->Id >= 22267 && pSpell->Id <= 22268)) &&
                 (target->GetTypeId() == TYPEID_PLAYER))
             {
-                if (m_pInstance)
+                if (m_instance)
                 {
-                    m_pInstance->SetData(DATA_SHE_DEEP_BREATH_MORE, FAIL);
+                    m_instance->SetData(DATA_SHE_DEEP_BREATH_MORE, FAIL);
                 }
             }
         }
@@ -365,8 +365,8 @@ public:
                         Trinity::GameObjectInRangeCheck check(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 15);
                         Trinity::GameObjectLastSearcher<Trinity::GameObjectInRangeCheck> searcher(me, pFloor, check);
                         me->VisitNearbyGridObject(30, searcher);
-                        if (m_pInstance && pFloor)
-                            m_pInstance->SetData64(DATA_FLOOR_ERUPTION_GUID, pFloor->GetGUID());
+                        if (m_instance && pFloor)
+                            m_instance->SetData64(DATA_FLOOR_ERUPTION_GUID, pFloor->GetGUID());
                         m_uiBellowingRoarTimer = 30000;
                     }
                     else
@@ -412,8 +412,8 @@ public:
                 if (HealthBelowPct(40))
                 {
                     m_uiPhase = PHASE_END;
-                    if (m_pInstance)
-                        m_pInstance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
+                    if (m_instance)
+                        m_instance->SetData(DATA_ONYXIA_PHASE, m_uiPhase);
                     DoScriptText(SAY_PHASE_3_TRANS, me);
 
                     SetCombatMovement(true);

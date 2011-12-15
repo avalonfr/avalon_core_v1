@@ -308,9 +308,9 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (Player* plr = grp->GetInvited(guid))
+    if (Player* player = grp->GetInvited(guid))
     {
-        plr->UninviteFromGroup();
+        player->UninviteFromGroup();
         return;
     }
 
@@ -352,9 +352,9 @@ void WorldSession::HandleGroupUninviteOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if (Player* plr = grp->GetInvited(membername))
+    if (Player* player = grp->GetInvited(membername))
     {
-        plr->UninviteFromGroup();
+        player->UninviteFromGroup();
         return;
     }
 
@@ -852,10 +852,8 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
 
     if (mask & GROUP_UPDATE_FLAG_VEHICLE_SEAT)
     {
-        if (player->GetVehicle()){
-            Vehicle* vv=player->GetVehicle();
-            *data << (uint32) vv->GetVehicleInfo()->m_seatID[player->m_movementInfo.t_seat];
-        }
+        if (Vehicle* veh = player->GetVehicle())
+            *data << (uint32) veh->GetVehicleInfo()->m_seatID[player->m_movementInfo.t_seat];
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)

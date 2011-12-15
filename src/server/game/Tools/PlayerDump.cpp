@@ -352,6 +352,15 @@ bool PlayerDumpWriter::GetDump(uint32 guid, std::string &dump)
 
 DumpReturn PlayerDumpWriter::WriteDump(const std::string& file, uint32 guid)
 {
+    if (sWorld->getBoolConfig(CONFIG_PDUMP_NO_PATHS))
+        if (strstr(file.c_str(), "\\") || strstr(file.c_str(), "/"))
+            return DUMP_FILE_OPEN_ERROR;
+    if (sWorld->getBoolConfig(CONFIG_PDUMP_NO_OVERWRITE))
+        if (FILE* f = fopen(file.c_str(), "r"))
+        {
+            fclose(f);
+            return DUMP_FILE_OPEN_ERROR;
+        }
     FILE* fout = fopen(file.c_str(), "w");
     if (!fout)
         return DUMP_FILE_OPEN_ERROR;
@@ -434,6 +443,10 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
     typedef PetIds::value_type PetIdsPair;
     PetIds petids;
 
+    uint8 gender = GENDER_NONE;
+    uint8 race = RACE_NONE;
+    uint8 playerClass = 0;
+
     SQLTransaction trans = CharacterDatabase.BeginTransaction();
     while (!feof(fin))
     {
@@ -493,7 +506,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         }
 
         // change the data to server values
-        switch(type)
+        switch (type)
         {
             case DTT_CHARACTER:
             {
@@ -503,6 +516,9 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
                 if (!changenth(line, 2, chraccount))        // characters.account update
                     ROLLBACK(DUMP_FILE_BROKEN);
 
+                race = uint8(atol(getnth(line, 4).c_str()));
+                playerClass = uint8(atol(getnth(line, 5).c_str()));
+                gender = uint8(atol(getnth(line, 6).c_str()));
                 if (name == "")
                 {
                     // check if the original name already exists
@@ -511,10 +527,8 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
                     result = CharacterDatabase.PQuery("SELECT 1 FROM characters WHERE name = '%s'", name.c_str());
                     if (result)
-                    {
                         if (!changenth(line, 37, "1"))       // characters.at_login set to "rename on login"
                             ROLLBACK(DUMP_FILE_BROKEN);
-                    }
                 }
                 else if (!changenth(line, 3, name.c_str())) // characters.name
                     ROLLBACK(DUMP_FILE_BROKEN);
@@ -645,6 +659,9 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
     CharacterDatabase.CommitTransaction(trans);
 
+    // in case of name conflict player has to rename at login anyway
+    sWorld->AddCharacterNameData(guid, name, gender, race, playerClass);
+
     sObjectMgr->m_hiItemGuid += items.size();
     sObjectMgr->m_mailid     += mails.size();
 
@@ -655,4 +672,3 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
 
     return DUMP_SUCCESS;
 }
-

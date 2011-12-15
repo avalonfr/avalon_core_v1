@@ -55,12 +55,12 @@ bool MapSessionFilter::Process(WorldPacket* packet)
     if (opHandle.packetProcessing == PROCESS_THREADUNSAFE)
         return false;
 
-    Player* plr = m_pSession->GetPlayer();
-    if (!plr)
+    Player* player = m_pSession->GetPlayer();
+    if (!player)
         return false;
 
     //in Map::Update() we do not process packets where player is not in world!
-    return plr->IsInWorld();
+    return player->IsInWorld();
 }
 
 //we should process ALL packets when player is not in world/logged in
@@ -77,12 +77,12 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
         return true;
 
     //no player attached? -> our client! ^^
-    Player* plr = m_pSession->GetPlayer();
-    if (!plr)
+    Player* player = m_pSession->GetPlayer();
+    if (!player)
         return true;
 
     //lets process all packets for non-in-the-world player
-    return (plr->IsInWorld() == false);
+    return (player->IsInWorld() == false);
 }
 
 /// WorldSession constructor
@@ -441,8 +441,8 @@ void WorldSession::LogoutPlayer(bool Save)
             HandleMoveWorldportAckOpcode();
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-        if (Guild* pGuild = sGuildMgr->GetGuildById(_player->GetGuildId()))
-            pGuild->HandleMemberLogout(this);
+        if (Guild* guild = sGuildMgr->GetGuildById(_player->GetGuildId()))
+            guild->HandleMemberLogout(this);
 
         ///- Remove pet
         _player->RemovePet(NULL, PET_SAVE_AS_CURRENT, true);
@@ -492,9 +492,9 @@ void WorldSession::LogoutPlayer(bool Save)
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
         _player->CleanupsBeforeDelete();
-        sLog->outChar("Account: %d (IP: %s) Logout Character:[%s] (GUID: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName() , _player->GetGUIDLow());
+        sLog->outChar("Account: %d (IP: %s) Logout Character:[%s] (GUID: %u)", GetAccountId(), GetRemoteAddress().c_str(), _player->GetName(), _player->GetGUIDLow());
         Map* _map = _player->GetMap();
-        _map->Remove(_player, true);
+        _map->RemovePlayerFromMap(_player, true);
         SetPlayer(NULL);                                    // deleted in Remove call
 
         ///- Send the 'logout complete' packet to the client
@@ -964,9 +964,9 @@ void WorldSession::SendAddonsInfo()
     SendPacket(&data);
 }
 
-void WorldSession::SetPlayer(Player* plr)
+void WorldSession::SetPlayer(Player* player)
 {
-    _player = plr;
+    _player = player;
 
     // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset
     if (_player)
@@ -984,22 +984,6 @@ void WorldSession::ProcessQueryCallbacks()
 {
     QueryResult result;
 
-    //! HandleNameQueryOpcode
-    while (!_nameQueryCallbacks.is_empty())
-    {
-        QueryResultFuture lResult;
-        ACE_Time_Value timeout = ACE_Time_Value::zero;
-        if (_nameQueryCallbacks.next_readable(lResult, &timeout) != 1)
-           break;
-
-        if (lResult.ready())
-        {
-            lResult.get(result);
-            SendNameQueryOpcodeFromDBCallBack(result);
-            lResult.cancel();
-        }
-    }
-
     //! HandleCharEnumOpcode
     if (_charEnumCallback.ready())
     {
@@ -1015,6 +999,7 @@ void WorldSession::ProcessQueryCallbacks()
         HandleCharCreateCallback(pResult, _charCreateCallback.GetParam());
         // Don't call FreeResult() here, the callback handler will do that depending on the events in the callback chain
     }
+
     //! HandlePlayerLoginOpcode
     if (_charLoginCallback.ready())
     {

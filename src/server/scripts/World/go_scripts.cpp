@@ -165,7 +165,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* /*pGO*/)
     {
-        if (player->HasSkill(SKILL_ENGINERING) && player->GetBaseSkillValue(SKILL_ENGINERING) >= 300 && !player->HasSpell(22704))
+        if (player->HasSkill(SKILL_ENGINEERING) && player->GetBaseSkillValue(SKILL_ENGINEERING) >= 300 && !player->HasSpell(22704))
         {
             player->CastSpell(player, 22864, false);
         }
@@ -317,7 +317,7 @@ public:
                 {
                     uint32 Spell = 0;
 
-                    switch(pFaction->faction)
+                    switch (pFaction->faction)
                     {
                         case 1011: Spell = SPELL_REP_LC; break;
                         case 935: Spell = SPELL_REP_SHAT; break;
@@ -434,7 +434,7 @@ public:
         float fX, fY, fZ;
         pGO->GetClosePoint(fX, fY, fZ, pGO->GetObjectSize(), INTERACTION_DISTANCE);
 
-        switch(pGO->GetEntry())
+        switch (pGO->GetEntry())
         {
             case GO_SHRINE_HAWK:
                 BirdEntry = NPC_HAWK_GUARD;
@@ -566,7 +566,7 @@ public:
     bool OnGossipSelect(Player* player, GameObject* pGO, uint32 /*uiSender*/, uint32 uiAction)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch(uiAction)
+        switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF:
                 player->CastSpell(player, SPELL_CREATE_1_FLASK_OF_BEAST, false);
@@ -625,7 +625,7 @@ public:
     bool OnGossipSelect(Player* player, GameObject* pGO, uint32 /*uiSender*/, uint32 uiAction)
     {
         player->PlayerTalkClass->ClearMenus();
-        switch(uiAction)
+        switch (uiAction)
         {
             case GOSSIP_ACTION_INFO_DEF:
                 player->CastSpell(player, SPELL_CREATE_1_FLASK_OF_SORCERER, false);
@@ -675,7 +675,7 @@ public:
 
     bool OnGossipHello(Player* player, GameObject* pGO)
     {
-        switch(pGO->GetEntry())
+        switch (pGO->GetEntry())
         {
             case MATRIX_PUNCHOGRAPH_3005_A:
                 if (player->HasItemCount(ITEM_WHITE_PUNCH_CARD, 1))
@@ -853,7 +853,7 @@ public:
 
         pPrisoner->DisappearAndDie();
         player->KilledMonsterCredit(NPC_EBON_BLADE_PRISONER_HUMAN, 0);
-        switch(pPrisoner->GetEntry())
+        switch (pPrisoner->GetEntry())
         {
             case NPC_EBON_BLADE_PRISONER_HUMAN:
                 player->CastSpell(player, SPELL_SUMMON_BLADE_KNIGHT_H, true);
@@ -1009,7 +1009,7 @@ public:
         if (qInfo)
         {
             //TODO: prisoner should help player for a short period of time
-            player->KilledMonsterCredit(qInfo->ReqCreatureOrGOId[0], 0);
+            player->KilledMonsterCredit(qInfo->RequiredNpcOrGo[0], 0);
             pPrisoner->DisappearAndDie();
         }
         return true;
@@ -1176,14 +1176,79 @@ public:
 
 class go_massive_seaforium_charge : public GameObjectScript
 {
-public:
-    go_massive_seaforium_charge() : GameObjectScript("go_massive_seaforium_charge") { }
+    public:
+        go_massive_seaforium_charge() : GameObjectScript("go_massive_seaforium_charge") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* pGo)
-    {
-        pGo->SetLootState(GO_JUST_DEACTIVATED);
-        return true;
-    }
+        bool OnGossipHello(Player* /*player*/, GameObject* go)
+        {
+            go->SetLootState(GO_JUST_DEACTIVATED);
+            return true;
+        }
+};
+
+/*######
+## go_gjalerbron_cage
+######*/
+
+enum OfKeysAndCages
+{
+    QUEST_ALLIANCE_OF_KEYS_AND_CAGES    = 11231,
+    QUEST_HORDE_OF_KEYS_AND_CAGES       = 11265,
+    NPC_GJALERBRON_PRISONER             = 24035,
+    SAY_FREE                            = 0,
+};
+
+class go_gjalerbron_cage : public GameObjectScript
+{
+    public:
+        go_gjalerbron_cage() : GameObjectScript("go_gjalerbron_cage") { }
+
+        bool OnGossipHello(Player* player, GameObject* go)
+        {
+            if ((player->GetTeamId() == TEAM_ALLIANCE && player->GetQuestStatus(QUEST_ALLIANCE_OF_KEYS_AND_CAGES) == QUEST_STATUS_INCOMPLETE) ||
+                (player->GetTeamId() == TEAM_HORDE && player->GetQuestStatus(QUEST_HORDE_OF_KEYS_AND_CAGES) == QUEST_STATUS_INCOMPLETE))
+            {
+                if (Creature* prisoner = go->FindNearestCreature(NPC_GJALERBRON_PRISONER, 5.0f))
+                {
+                    go->UseDoorOrButton();
+
+                    if (player)
+                        player->KilledMonsterCredit(NPC_GJALERBRON_PRISONER, 0);
+
+                    prisoner->AI()->Talk(SAY_FREE);
+                    prisoner->ForcedDespawn(6000);
+                }
+            }
+            return true;
+        }
+};
+
+/*########
+## go_large_gjalerbron_cage
+#####*/
+
+class go_large_gjalerbron_cage : public GameObjectScript
+{
+    public:
+        go_large_gjalerbron_cage() : GameObjectScript("go_large_gjalerbron_cage") { }
+
+        bool OnGossipHello(Player* player, GameObject* go)
+        {
+            if ((player->GetTeamId() == TEAM_ALLIANCE && player->GetQuestStatus(QUEST_ALLIANCE_OF_KEYS_AND_CAGES) == QUEST_STATUS_INCOMPLETE) ||
+                (player->GetTeamId() == TEAM_HORDE && player->GetQuestStatus(QUEST_HORDE_OF_KEYS_AND_CAGES) == QUEST_STATUS_INCOMPLETE))
+            {
+                std::list<Creature*> prisonerList;
+                GetCreatureListWithEntryInGrid(prisonerList, go, NPC_GJALERBRON_PRISONER, INTERACTION_DISTANCE);
+                for (std::list<Creature*>::const_iterator itr = prisonerList.begin(); itr != prisonerList.end(); ++itr)
+                {
+                    go->UseDoorOrButton();
+                    player->KilledMonsterCredit(NPC_GJALERBRON_PRISONER, (*itr)->GetGUID());
+                    (*itr)->ForcedDespawn(6000);
+                    (*itr)->AI()->Talk(SAY_FREE);
+                }
+            }
+            return false;
+        }
 };
 
 /*######
@@ -1268,4 +1333,6 @@ void AddSC_go_scripts()
     new go_hive_pod;
     new go_massive_seaforium_charge;
 	new go_wickerman_ember;
+    new go_gjalerbron_cage;
+    new go_large_gjalerbron_cage;
 }

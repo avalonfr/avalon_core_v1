@@ -175,7 +175,7 @@ public:
 
         void SetPosition(uint8 i)
         {
-            switch(i)
+            switch (i)
             {
                 case 0:
                     x = me->GetPositionX() + 4;
@@ -276,8 +276,8 @@ public:
 
                 if (timeBombTimer <= uiDiff)
                 {
-                    if (Unit* pUnit = SelectTarget(SELECT_TARGET_RANDOM))
-                        DoCast(pUnit, SPELL_TIME_BOMB);
+                    if (Unit* unit = SelectTarget(SELECT_TARGET_RANDOM))
+                        DoCast(unit, SPELL_TIME_BOMB);
 
                     timeBombTimer = urand(20000, 25000);
                 } else timeBombTimer -= uiDiff;
@@ -289,6 +289,7 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             _JustDied();
+            DoCast(me, SPELL_DEATH_SPELL, true); // we cast the spell as triggered or the summon effect does not occur 
         }
 
         void LeaveCombat()
@@ -300,7 +301,7 @@ public:
 
         void SpellHit(Unit* /*pCaster*/, const SpellInfo* pSpell)
         {
-            switch(pSpell->Id)
+            switch (pSpell->Id)
             {
                 case SPELL_SUMMON_MENAGERIE:
                     me->SetHomePosition(968.66f, 1042.53f, 527.32f, 0.077f);

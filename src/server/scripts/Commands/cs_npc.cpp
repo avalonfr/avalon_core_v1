@@ -147,15 +147,18 @@ public:
         uint32 db_guid = creature->GetDBTableGUIDLow();
 
         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-        creature->LoadFromDB(db_guid, map);
+        if (!creature->LoadCreatureFromDB(db_guid, map))
+        {
+            delete creature;
+            return false;
+        }
 
-        map->Add(creature);
         sObjectMgr->AddCreatureToGrid(db_guid, sObjectMgr->GetCreatureData(db_guid));
         return true;
     }
 
     //add item in vendorlist
-    static bool HandleNpcAddVendorItemCommand(ChatHandler* handler, const char* args)
+    static bool HandleNpcAddVendorItemCommand(ChatHandler* handler, char const* args)
     {
         if (!*args)
             return false;
@@ -168,7 +171,11 @@ public:
             return false;
         }
 
-        uint32 itemId = atol(pitem);
+        int32 item_int = atol(pitem);
+        if (item_int <= 0)
+            return false;
+
+        uint32 itemId = item_int;
 
         char* fmaxcount = strtok(NULL, " ");                    //add maxcount, default: 0
         uint32 maxcount = 0;
@@ -623,7 +630,7 @@ public:
                 const_cast<CreatureData*>(data)->posZ = z;
                 const_cast<CreatureData*>(data)->orientation = o;
             }
-            creature->GetMap()->CreatureRelocation(creature, x, y, z, o);
+            creature->SetPosition(x, y, z, o);
             creature->GetMotionMaster()->Initialize();
             if (creature->isAlive())                            // dead creature will reset movement generator at respawn
             {
@@ -952,7 +959,7 @@ public:
 
         // make some emotes
         char lastchar = args[strlen(args) - 1];
-        switch(lastchar)
+        switch (lastchar)
         {
         case '?':   creature->HandleEmoteCommand(EMOTE_ONESHOT_QUESTION);      break;
         case '!':   creature->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);   break;
@@ -1119,7 +1126,7 @@ public:
         }
 
         // Everything looks OK, create new pet
-        Pet* pet = player->CreateTamedPetFrom (creatureTarget);
+        Pet* pet = player->CreateTamedPetFrom(creatureTarget);
         if (!pet)
         {
             handler->PSendSysMessage (LANG_CREATURE_NON_TAMEABLE, cInfo->Entry);
@@ -1142,7 +1149,7 @@ public:
         pet->SetUInt32Value(UNIT_FIELD_LEVEL, level - 1);
 
         // add to world
-        pet->GetMap()->Add(pet->ToCreature());
+        pet->GetMap()->AddToMap(pet->ToCreature());
 
         // visual effect for levelup
         pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
@@ -1272,7 +1279,7 @@ public:
         bool added = false;
         if (tmpItem)
         {
-            switch(SlotID)
+            switch (SlotID)
             {
                 case 1:
                     creature->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ItemID);

@@ -396,7 +396,7 @@ public:
             {
                 while (uint32 eventId = events.GetEvent())
                 {
-                    switch(eventId)
+                    switch (eventId)
                     {
                         case EVENT_WASTE:
                             DoSummon(NPC_WASTE, Pos[RAND(0, 3, 6, 9)]);
@@ -491,7 +491,7 @@ public:
 
                 if (uint32 eventId = events.GetEvent())
                 {
-                    switch(eventId)
+                    switch (eventId)
                     {
                         case EVENT_BOLT:
                             DoCastVictim(RAID_MODE(SPELL_FROST_BOLT, H_SPELL_FROST_BOLT));
@@ -540,7 +540,7 @@ public:
 
                                     if (Unit* target = SelectTarget(SELECT_TARGET_TOPAGGRO, 0, NotCharmedTargetSelector()))
                                     {
-                                        switch(player->getClass())
+                                        switch (player->getClass())
                                         {
                                             case CLASS_DRUID:
                                                 if (urand(0, 1))
@@ -658,16 +658,16 @@ class at_kelthuzad_center : public AreaTriggerScript
 public:
     at_kelthuzad_center() : AreaTriggerScript("at_kelthuzad_center") { }
 
-    bool OnTrigger(Player* player, const AreaTriggerEntry*  /*at*/)
+    bool OnTrigger(Player* player, const AreaTriggerEntry* /*at*/)
     {
         if (player->isGameMaster())
             return false;
 
-        InstanceScript* pInstance = player->GetInstanceScript();
-        if (!pInstance || pInstance->IsEncounterInProgress() || pInstance->GetBossState(BOSS_KELTHUZAD) == DONE)
+        InstanceScript* instance = player->GetInstanceScript();
+        if (!instance || instance->IsEncounterInProgress() || instance->GetBossState(BOSS_KELTHUZAD) == DONE)
             return false;
 
-        Creature* pKelthuzad = CAST_CRE(Unit::GetUnit(*player, pInstance->GetData64(DATA_KELTHUZAD)));
+        Creature* pKelthuzad = CAST_CRE(Unit::GetUnit(*player, instance->GetData64(DATA_KELTHUZAD)));
         if (!pKelthuzad)
             return false;
 
@@ -676,14 +676,14 @@ public:
             return false;
 
         pKelthuzadAI->AttackStart(player);
-        if (GameObject* trigger = pInstance->instance->GetGameObject(pInstance->GetData64(DATA_KELTHUZAD_TRIGGER)))
+        if (GameObject* trigger = instance->instance->GetGameObject(instance->GetData64(DATA_KELTHUZAD_TRIGGER)))
         {
             if (trigger->getLootState() == GO_READY)
                 trigger->UseDoorOrButton();
 
             // Note: summon must be done by trigger and not by KT.
             // Otherwise, they attack immediately as KT is in combat.
-            for (uint8 i = 0; i <= MAX_ABOMINATIONS; ++i)
+            for (uint8 i = 0; i < MAX_ABOMINATIONS; ++i)
             {
                 if (Creature* sum = trigger->SummonCreature(NPC_ABOMINATION, PosAbominations[i]))
                 {
@@ -692,7 +692,7 @@ public:
                     sum->SetReactState(REACT_DEFENSIVE);
                 }
             }
-            for (uint8 i = 0; i <= MAX_WASTES; ++i)
+            for (uint8 i = 0; i < MAX_WASTES; ++i)
             {
                 if (Creature* sum = trigger->SummonCreature(NPC_WASTE, PosWastes[i]))
                 {
@@ -701,7 +701,7 @@ public:
                     sum->SetReactState(REACT_DEFENSIVE);
                 }
             }
-            for (uint8 i = 0; i <= MAX_WEAVERS; ++i)
+            for (uint8 i = 0; i < MAX_WEAVERS; ++i)
             {
                 if (Creature* sum = trigger->SummonCreature(NPC_WEAVER, PosWeavers[i]))
                 {

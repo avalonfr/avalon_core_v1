@@ -350,18 +350,18 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
 
     std::string bannedby = "unknown";
     std::string banreason = "";
-    if (QueryResult result = LoginDatabase.PQuery("SELECT unbandate, bandate = unbandate, bannedby, banreason FROM account_banned "
+    if (QueryResult result2 = LoginDatabase.PQuery("SELECT unbandate, bandate = unbandate, bannedby, banreason FROM account_banned "
                                                   "WHERE id = '%u' AND active ORDER BY bandate ASC LIMIT 1", accId))
     {
-        Field* fields = result->Fetch();
+        Field* fields = result2->Fetch();
         banTime = fields[1].GetBool() ? 0 : fields[0].GetUInt64();
         bannedby = fields[2].GetString();
         banreason = fields[3].GetString();
     }
-    else if (QueryResult result = CharacterDatabase.PQuery("SELECT unbandate, bandate = unbandate, bannedby, banreason FROM character_banned "
+    else if (QueryResult result3 = CharacterDatabase.PQuery("SELECT unbandate, bandate = unbandate, bannedby, banreason FROM character_banned "
                                                            "WHERE guid = '%u' AND active ORDER BY bandate ASC LIMIT 1", GUID_LOPART(target_guid)))
     {
-        Field* fields = result->Fetch();
+        Field* fields = result3->Fetch();
         banTime = fields[1].GetBool() ? 0 : fields[0].GetUInt64();
         bannedby = fields[2].GetString();
         banreason = fields[3].GetString();
@@ -374,7 +374,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         PSendSysMessage(LANG_PINFO_BAN, banTime > 0 ? secsToTimeString(banTime - time(NULL), true).c_str() : "permanently", bannedby.c_str(), banreason.c_str());
 
     std::string race_s, Class_s;
-    switch(race)
+    switch (race)
     {
         case RACE_HUMAN:            race_s = "Human";       break;
         case RACE_ORC:              race_s = "Orc";         break;
@@ -387,7 +387,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         case RACE_BLOODELF:         race_s = "Blood Elf";   break;
         case RACE_DRAENEI:          race_s = "Draenei";     break;
     }
-    switch(Class)
+    switch (Class)
     {
         case CLASS_WARRIOR:         Class_s = "Warrior";        break;
         case CLASS_PALADIN:         Class_s = "Paladin";        break;
@@ -862,10 +862,6 @@ bool ChatHandler::HandleCreatePetCommand(const char* /*args*/)
 
     // Everything looks OK, create new pet
     Pet* pet = new Pet(player, HUNTER_PET);
-
-    if (!pet)
-      return false;
-
     if (!pet->CreateBaseAtCreature(creatureTarget))
     {
         delete pet;
@@ -896,7 +892,7 @@ bool ChatHandler::HandleCreatePetCommand(const char* /*args*/)
     pet->InitPetCreateSpells();
     pet->SetFullHealth();
 
-    pet->GetMap()->Add(pet->ToCreature());
+    pet->GetMap()->AddToMap(pet->ToCreature());
 
     // visual effect for levelup
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, creatureTarget->getLevel());
@@ -913,8 +909,8 @@ bool ChatHandler::HandlePetLearnCommand(const char* args)
     if (!*args)
         return false;
 
-    Player* plr = m_session->GetPlayer();
-    Pet* pet = plr->GetPet();
+    Player* player = m_session->GetPlayer();
+    Pet* pet = player->GetPet();
 
     if (!pet)
     {
@@ -956,8 +952,8 @@ bool ChatHandler::HandlePetUnlearnCommand(const char *args)
     if (!*args)
         return false;
 
-    Player* plr = m_session->GetPlayer();
-    Pet* pet = plr->GetPet();
+    Player* player = m_session->GetPlayer();
+    Pet* pet = player->GetPet();
 
     if (!pet)
     {

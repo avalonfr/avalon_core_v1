@@ -779,9 +779,9 @@ public:
 
             if (TempSummon* summon = me->ToTempSummon())
                 if (summon->isSummon())
-                    if (Unit* pTemp = summon->GetSummoner())
-                        if (pTemp->GetTypeId() == TYPEID_PLAYER)
-                            CAST_PLR(pTemp)->KilledMonsterCredit(me->GetEntry(), 0);
+                    if (Unit* temp = summon->GetSummoner())
+                        if (temp->GetTypeId() == TYPEID_PLAYER)
+                            CAST_PLR(temp)->KilledMonsterCredit(me->GetEntry(), 0);
 
             if (GameObject* go_caribou = me->GetMap()->GetGameObject(go_caribouGUID))
                 go_caribou->SetGoState(GO_STATE_READY);
@@ -920,7 +920,7 @@ public:
             {
                 if (IntroTimer <= diff)
                 {
-                    switch(IntroPhase)
+                    switch (IntroPhase)
                     {
                         case 1:
                             //DoScriptText(SAY_WP_1_LUR_START, me);
@@ -975,15 +975,15 @@ public:
         return new npc_lurgglbrAI(creature);
     }
 
-    bool OnQuestAccept(Player* player, Creature* creature, Quest const* pQuest)
+    bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-        if (pQuest->GetQuestId() == QUEST_ESCAPE_WINTERFIN_CAVERNS)
+        if (quest->GetQuestId() == QUEST_ESCAPE_WINTERFIN_CAVERNS)
         {
-            if (GameObject* pGo = creature->FindNearestGameObject(GO_CAGE, 5.0f))
+            if (GameObject* go = creature->FindNearestGameObject(GO_CAGE, 5.0f))
             {
-                pGo->SetRespawnTime(0);
-                pGo->SetGoType(GAMEOBJECT_TYPE_BUTTON);
-                pGo->UseDoorOrButton(20);
+                go->SetRespawnTime(0);
+                go->SetGoType(GAMEOBJECT_TYPE_BUTTON);
+                go->UseDoorOrButton(20);
             }
 
             if (npc_escortAI* pEscortAI = CAST_AI(npc_lurgglbr::npc_lurgglbrAI, creature->AI()))
@@ -1202,7 +1202,7 @@ public:
             if (!player)
                 return;
 
-            switch(uiPointId)
+            switch (uiPointId)
             {
                 case 3:
                     SetEscortPaused(true);
@@ -1887,12 +1887,12 @@ public:
         {
         }
 
-        void SpellHit(Unit* pUnit, const SpellInfo* pSpell)
+        void SpellHit(Unit* unit, const SpellInfo* pSpell)
         {
-            if (pSpell->Id == SPELL_NEURAL_NEEDLE && pUnit->GetTypeId() == TYPEID_PLAYER)
+            if (pSpell->Id == SPELL_NEURAL_NEEDLE && unit->GetTypeId() == TYPEID_PLAYER)
             {
                 ++uiPhase;
-                CasterGUID = pUnit->GetGUID();
+                CasterGUID = unit->GetGUID();
             }
         }
 
@@ -2042,7 +2042,7 @@ public:
             if (!player)
                 return;
 
-            switch(i)
+            switch (i)
             {
             case 10:
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EXCLAMATION);
@@ -2143,7 +2143,7 @@ public:
             if (!player)
                 return;
 
-            switch(i)
+            switch (i)
             {
                 case 29:
                     if (player)
@@ -2306,7 +2306,7 @@ public:
             {
                 Quest const* qInfo = sObjectMgr->GetQuestTemplate(QUEST_YOU_RE_NOT_SO_BIG_NOW);
                 if (qInfo)
-                    CAST_PLR(killer)->KilledMonsterCredit(qInfo->ReqCreatureOrGOId[0], 0);
+                    CAST_PLR(killer)->KilledMonsterCredit(qInfo->RequiredNpcOrGo[0], 0);
             }
         }
     };
@@ -2463,7 +2463,7 @@ public:
                 std::list<Creature*> orbList;
                 GetCreatureListWithEntryInGrid(orbList, me, NPC_TRANSITUS_SHIELD_DUMMY, 32.0f);
 
-                switch(me->GetEntry())
+                switch (me->GetEntry())
                 {
                     case NPC_WARMAGE_HOLLISTER:
                     {
@@ -2621,10 +2621,10 @@ public:
         {
             if (uiEventTimer && uiEventTimer <= uiDiff)
             {
-                switch(uiEventPhase)
+                switch (uiEventPhase)
                 {
                     case 1:
-                        switch(me->GetEntry())
+                        switch (me->GetEntry())
                         {
                             case NPC_SALTY_JOHN_THORPE:
                                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
@@ -2645,7 +2645,7 @@ public:
                         }
                         break;
                     case 2:
-                        switch(me->GetEntry())
+                        switch (me->GetEntry())
                         {
                             case NPC_SALTY_JOHN_THORPE:
                                 DoScriptText(SAY_HIDDEN_CULTIST_4, me);
@@ -2691,7 +2691,7 @@ public:
         uint32 uiGossipText = 0;
         const char* charGossipItem;
 
-        switch(creature->GetEntry())
+        switch (creature->GetEntry())
         {
             case NPC_TOM_HEGGER:
                 uiGossipText = GOSSIP_TEXT_TOM_HEGGER;

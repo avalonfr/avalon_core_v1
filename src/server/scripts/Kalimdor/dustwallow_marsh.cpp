@@ -299,7 +299,7 @@ public:
 
             if (bYellTimer && uiYellTimer <= uiDiff)
             {
-                switch(uiStep)
+                switch (uiStep)
                 {
                     case 0:
                         DoScriptText(RAND(SAY_QUEST2, SAY_QUEST3, SAY_QUEST4, SAY_QUEST5, SAY_QUEST6), me);
@@ -431,9 +431,9 @@ class npc_private_hendel : public CreatureScript
 public:
     npc_private_hendel() : CreatureScript("npc_private_hendel") { }
 
-    bool OnQuestAccept(Player* /*player*/, Creature* creature, const Quest* pQuest)
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, const Quest* quest)
     {
-        if (pQuest->GetQuestId() == QUEST_MISSING_DIPLO_PT16)
+        if (quest->GetQuestId() == QUEST_MISSING_DIPLO_PT16)
             creature->setFaction(FACTION_HOSTILE);
 
         return true;
@@ -535,8 +535,8 @@ public:
             SetCombatMovement(true);
 
             if (me->isInCombat())
-                if (Unit* pUnit = me->getVictim())
-                    me->GetMotionMaster()->MoveChase(pUnit);
+                if (Unit* unit = me->getVictim())
+                    me->GetMotionMaster()->MoveChase(unit);
         }
 
         void MoveToDock()
@@ -590,7 +590,7 @@ public:
 
     bool OnQuestAccept(Player* player, Creature* creature, Quest const* quest)
     {
-         if (quest->GetQuestId() == QUEST_STINKYS_ESCAPE_H || QUEST_STINKYS_ESCAPE_A)
+         if (quest->GetQuestId() == QUEST_STINKYS_ESCAPE_H || quest->GetQuestId() == QUEST_STINKYS_ESCAPE_A)
          {
              if (npc_stinkyAI* pEscortAI = CAST_AI(npc_stinky::npc_stinkyAI, creature->AI()))
              {
@@ -728,7 +728,7 @@ class spell_ooze_zap : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_ooze_zap_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_ooze_zap_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
                 OnCheckCast += SpellCheckCastFn(spell_ooze_zap_SpellScript::CheckRequirement);
             }
         };
@@ -765,7 +765,7 @@ class spell_ooze_zap_channel_end : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_ooze_zap_channel_end_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_ooze_zap_channel_end_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -811,7 +811,7 @@ class spell_energize_aoe : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_energize_aoe_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_energize_aoe_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_energize_aoe_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENTRY);
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_energize_aoe_SpellScript::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENTRY);
             }
@@ -821,6 +821,36 @@ class spell_energize_aoe : public SpellScriptLoader
         {
             return new spell_energize_aoe_SpellScript();
         }
+};
+
+/*######
+## go_blackhoof_cage
+######*/
+
+enum PrisonersOfTheGrimTotems
+{
+    NPC_THERAMORE_PRISONER                          = 23720,
+    SAY_FREE                                        = 0,
+};
+
+class go_blackhoof_cage : public GameObjectScript
+{
+public:
+    go_blackhoof_cage() : GameObjectScript("go_blackhoof_cage") { }
+
+    bool OnGossipHello(Player* player, GameObject* go)
+    {
+        if (Creature* prisoner = go->FindNearestCreature(NPC_THERAMORE_PRISONER, 1.0f))
+        {
+            go->UseDoorOrButton();
+            if (player)
+                player->KilledMonsterCredit(NPC_THERAMORE_PRISONER, 0);
+
+            prisoner->AI()->Talk(SAY_FREE); // We also emote cry here (handled in creature_text.emote)
+            prisoner->ForcedDespawn(6000);
+        }
+        return true;
+    }
 };
 
 void AddSC_dustwallow_marsh()
@@ -836,4 +866,5 @@ void AddSC_dustwallow_marsh()
     new spell_ooze_zap();
     new spell_ooze_zap_channel_end();
     new spell_energize_aoe();
+    new go_blackhoof_cage();
 }

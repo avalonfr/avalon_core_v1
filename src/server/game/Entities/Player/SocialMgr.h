@@ -124,7 +124,7 @@ class PlayerSocial
         void RemoveFromSocialList(uint32 friend_guid, bool ignore);
         void SetFriendNote(uint32 friend_guid, std::string note);
         // Packet send's
-        void SendSocialList(Player* plr);
+        void SendSocialList(Player* player);
         // Misc
         bool HasFriend(uint32 friend_guid);
         bool HasIgnore(uint32 ignore_guid);
@@ -139,9 +139,12 @@ class PlayerSocial
 class SocialMgr
 {
     friend class ACE_Singleton<SocialMgr, ACE_Null_Mutex>;
-    SocialMgr();
-    public:
+
+    private:
+        SocialMgr();
         ~SocialMgr();
+
+    public:
         // Misc
         void RemovePlayerSocial(uint32 guid) { m_socialMap.erase(guid); }
 

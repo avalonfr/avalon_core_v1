@@ -161,7 +161,7 @@ namespace VMAP
         if ((iFlags[tx + ty*iTilesX] & 0x0F) == 0x0F)
             return false;
 
-        // (dx, dy) coordinates inside tile, in [0,1]^2
+        // (dx, dy) coordinates inside tile, in [0, 1]^2
         float dx = tx_f - (float)tx;
         float dy = ty_f - (float)ty;
 
@@ -169,7 +169,7 @@ namespace VMAP
 
             ^ dy
             |
-          1 x---------x (1,1)
+          1 x---------x (1, 1)
             | (b)   / |
             |     /   |
             |   /     |
@@ -362,6 +362,7 @@ namespace VMAP
     {
         if (triangles.empty())
             return false;
+
         GModelRayCallback callback(triangles, vertices);
         meshTree.intersectRay(ray, callback, distance, stopAtFirstHit);
         return callback.hit;
@@ -442,7 +443,7 @@ namespace VMAP
             {
                 float group_Z;
                 //float pVol = prims[entry].GetBound().volume();
-                //if(pVol < minVol)
+                //if (pVol < minVol)
                 //{
                     /* if (prims[entry].iBound.contains(point)) */
                     if (prims[entry].IsInsideObject(point, zVec, group_Z))
@@ -470,6 +471,7 @@ namespace VMAP
     {
         if (groupModels.empty())
             return false;
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -488,6 +490,7 @@ namespace VMAP
     {
         if (groupModels.empty())
             return false;
+
         WModelAreaCallback callback(groupModels, down);
         groupTree.intersectPoint(p, callback);
         if (callback.hit != groupModels.end())
@@ -505,9 +508,8 @@ namespace VMAP
         if (!wf)
             return false;
 
-        bool result = true;
         uint32 chunkSize, count;
-        result = fwrite(VMAP_MAGIC, 1, 8, wf) == 8;
+        bool result = fwrite(VMAP_MAGIC, 1, 8, wf) == 8;
         if (result && fwrite("WMOD", 1, 4, wf) != 4) result = false;
         chunkSize = sizeof(uint32) + sizeof(uint32);
         if (result && fwrite(&chunkSize, sizeof(uint32), 1, wf) != 1) result = false;

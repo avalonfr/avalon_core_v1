@@ -39,38 +39,35 @@ class MapInstanced : public Map
         void UnloadAll();
         bool CanEnter(Player* player);
 
-        Map* CreateInstance(const uint32 mapId, Player* player);
-        Map* FindMap(uint32 InstanceId) const { return _FindMap(InstanceId); }
+        Map* CreateInstanceForPlayer(const uint32 mapId, Player* player);
+        Map* FindInstanceMap(uint32 instanceId) const
+        {
+            InstancedMaps::const_iterator i = m_InstancedMaps.find(instanceId);
+            return(i == m_InstancedMaps.end() ? NULL : i->second);
+        }
         bool DestroyInstance(InstancedMaps::iterator &itr);
 
-        void AddGridMapReference(const GridPair &p)
+        void AddGridMapReference(const GridCoord &p)
         {
             ++GridMapReference[p.x_coord][p.y_coord];
-            SetUnloadReferenceLock(GridPair(63-p.x_coord, 63-p.y_coord), true);
+            SetUnloadReferenceLock(GridCoord(63-p.x_coord, 63-p.y_coord), true);
         }
 
-        void RemoveGridMapReference(GridPair const& p)
+        void RemoveGridMapReference(GridCoord const& p)
         {
             --GridMapReference[p.x_coord][p.y_coord];
             if (!GridMapReference[p.x_coord][p.y_coord])
-                SetUnloadReferenceLock(GridPair(63-p.x_coord, 63-p.y_coord), false);
+                SetUnloadReferenceLock(GridCoord(63-p.x_coord, 63-p.y_coord), false);
         }
 
         InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
         virtual void InitVisibilityDistance();
 
     private:
-
         InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave* save, Difficulty difficulty);
         BattlegroundMap* CreateBattleground(uint32 InstanceId, Battleground* bg);
 
         InstancedMaps m_InstancedMaps;
-
-        Map* _FindMap(uint32 InstanceId) const
-        {
-            InstancedMaps::const_iterator i = m_InstancedMaps.find(InstanceId);
-            return(i == m_InstancedMaps.end() ? NULL : i->second);
-        }
 
         uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };
