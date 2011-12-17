@@ -1493,10 +1493,10 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer())
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
 
-			bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
+			/*bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
             m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask() , binary, m_spellInfo);
             if (m_resist >= 100)
-                return SPELL_MISS_RESIST;
+                return SPELL_MISS_RESIST;*/
 
         }
         else if (m_caster->IsFriendlyTo(unit))
@@ -1519,13 +1519,13 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
             }
         }
-		else if (!m_spellInfo->IsPositive())
+		/*else if (!m_spellInfo->IsPositive())
 		{
 			bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
 			m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask(), binary, m_spellInfo);
 			if (m_resist >= 100)
 				return SPELL_MISS_RESIST;
-		}
+		}*/
 	}
 
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add

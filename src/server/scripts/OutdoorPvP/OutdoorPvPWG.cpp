@@ -1157,7 +1157,7 @@ bool OutdoorPvPWG::UpdateQuestGiverPosition(uint32 guid, Creature *creature)
         }
         creature->SetHomePosition(pos);
         creature->DestroyForNearbyPlayers();
-        if (!creature->GetMap()->IsLoaded(pos.GetPositionX(), pos.GetPositionY()))
+        if (!creature->GetMap()->IsGridLoaded (pos.GetPositionX(), pos.GetPositionY()))
             creature->GetMap()->LoadGrid(pos.GetPositionX(), pos.GetPositionY());
         creature->GetMap()->CreatureRelocation(creature, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
         if (!creature->isAlive())

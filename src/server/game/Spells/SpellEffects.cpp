@@ -2004,7 +2004,7 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
     unitTarget->CastSpell(m_caster, spellInfo, true);
 }
 
-void Spell::EffectForceCastWithValue(SpellEffIndex effIndex)
+/*void Spell::EffectForceCastWithValue(SpellEffIndex effIndex)
 {
     if (!unitTarget)
         return;
@@ -2024,7 +2024,7 @@ void Spell::EffectForceCastWithValue(SpellEffIndex effIndex)
 
     unitTarget->CastSpell(targets, spellInfo, &values, TRIGGERED_FULL_MASK);
 }
-
+*/
 void Spell::EffectTriggerRitualOfSummoning(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT)
@@ -6205,11 +6205,11 @@ void Spell::EffectStuck(SpellEffIndex /*effIndex*/)
     if (!spellInfo)
         return;
 
-    Spell spell(pTarget, spellInfo, TRIGGERED_FULL_MASK);
+    Spell spell(target, spellInfo, TRIGGERED_FULL_MASK);
     // fix cooldown .st
     if (spell.getState() == SPELL_STATE_IDLE)
     {
-        pTarget->TeleportTo(pTarget->GetStartPosition(), unitTarget == m_caster ? TELE_TO_SPELL : 0);
+        target->TeleportTo(target->GetStartPosition(), unitTarget == m_caster ? TELE_TO_SPELL : 0);
         spell.SendSpellCooldown();
     }
     else spell.cast(true);

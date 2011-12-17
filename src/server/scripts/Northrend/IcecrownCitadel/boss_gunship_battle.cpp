@@ -493,7 +493,7 @@ class boss_muradin_bronzebeard : public CreatureScript
                                                                                 }
                                                                         }
 
-                                                                        me->SetPosition( tp, true);
+                                                                        me->UpdatePosition( tp, true);
                                                                         dialogID = 9;
                                                                         dialogTimer = 10000;
                                                                 }
@@ -750,7 +750,7 @@ class boss_high_overlord_varok_saurfang : public CreatureScript
                                                                                 }
                                                                         }
 
-                                                                        me->SetPosition( tp, true);
+                                                                        me->UpdatePosition( tp, true);
                                                                         dialogID = 6;
                                                                         dialogTimer = 10000;
                                                                 }

@@ -2068,8 +2068,8 @@ class Unit : public WorldObject
                                                             // redefined in Creature
         static bool IsDamageReducedByArmor(SpellSchoolMask damageSchoolMask, SpellInfo const *spellInfo = NULL, uint8 effIndex = MAX_SPELL_EFFECTS);
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage, SpellInfo const *spellInfo, WeaponAttackType attackType=MAX_ATTACK);
-		void CalcAbsorbResist(Unit * pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 * absorb, uint32 * resist, SpellInfo const * spellInfo = NULL, int32 calc_resist = -1);
-		uint32 CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, bool binary, SpellInfo const * spellInfo) const;
+		void CalcAbsorbResist(Unit * pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 * absorb, uint32 * resist, SpellInfo const * spellInfo = NULL);
+		//uint32 CalcSpellResistance(Unit * pVictim, SpellSchoolMask schoolMask, bool binary, SpellInfo const * spellInfo) const;
 		void CalcHealAbsorb(Unit *pVictim, const SpellInfo *spellInfo, uint32 &healAmount, uint32 &absorb);
 
         void  UpdateSpeed(UnitMoveType mtype, bool forced);

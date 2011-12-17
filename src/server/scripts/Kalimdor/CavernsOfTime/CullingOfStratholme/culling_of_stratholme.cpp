@@ -88,7 +88,7 @@ enum NPCs
     NPC_INFINITE_HUNTER                        = 27743,
     NPC_INFINITE_AGENT                         = 27744,
     NPC_TIME_RIFT                              = 28409,
-    NPC_ZOMBIE                                 = 27737,
+//    NPC_ZOMBIE                                 = 27737,
     NPC_GHOUL                                  = 28249,
     NPC_NECROMANCER                            = 28200,
     NPC_STALKER                                = 28199,
@@ -101,10 +101,10 @@ enum NPCs
 
     NPC_KNIGHT_ESCORT                          = 27745,
     NPC_PRIEST_ESCORT                          = 27747,
-    NPC_CITY_MAN                               = 28167,
-    NPC_CITY_MAN2                              = 28169,
-    NPC_CITY_MAN3                              = 31126,
-    NPC_CITY_MAN4                              = 31127,
+//    NPC_CITY_MAN                               = 28167,
+//    NPC_CITY_MAN2                              = 28169,
+//    NPC_CITY_MAN3                              = 31126,
+//    NPC_CITY_MAN4                              = 31127,
 };
 
 enum Spells

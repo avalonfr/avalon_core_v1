@@ -626,7 +626,7 @@ class boss_the_lich_king : public CreatureScript
                         Position pos;
                         summoned->GetPosition(&pos);
                         pos.m_positionZ += 0.75f;
-                        summoned->SetPosition(pos, true);
+                        summoned->UpdatePosition(pos, true);
                         summoned->SetInCombatWithZone();
                         break;
                     }
@@ -790,7 +790,7 @@ class boss_the_lich_king : public CreatureScript
                                 isAboutToDie = true;
                                 me->RemoveAurasDueToSpell(34873);
                                 me->GetMotionMaster()->MovePoint(0, me->GetPositionX(), me->GetPositionY(), tirion->GetPositionZ());
-                                me->SetPosition(me->GetPositionX(), me->GetPositionY(), tirion->GetPositionZ(), me->GetOrientation(), true);
+                                me->UpdatePosition(me->GetPositionX(), me->GetPositionY(), tirion->GetPositionZ(), me->GetOrientation(), true);
                             }
                         }
                         break;
@@ -1745,7 +1745,7 @@ class npc_valkyr_shadowguard : public CreatureScript
 
                             float x, y, z;
                             me->GetPosition(x, y, z);
-                            me->SetPosition(x, y, Z_FLY, 0.0f, true);
+                            me->UpdatePosition(x, y, Z_FLY, 0.0f, true);
 
                             me->SetReactState(REACT_PASSIVE);
                             me->AttackStop();
@@ -1783,7 +1783,7 @@ class npc_valkyr_shadowguard : public CreatureScript
                                 //Position edgePos;
                                 me->GetPosition(&m_pos);
                                 m_pos.m_positionZ = Z_FLY;
-                                me->SetPosition(m_pos, true);
+                                me->UpdatePosition(m_pos, true);
                                 float ex, ey, ez;
                                 nearestEdgeStalker->GetPosition(ex, ey, ez);
                                 float distanceToEdge = m_pos.GetExactDist2d(ex, ey);
@@ -2921,9 +2921,8 @@ class spell_lich_king_necrotic_plague : public SpellScriptLoader
                     if (InstanceScript *instance = target->GetInstanceScript())
                         instance->SetData(DATA_BEEN_WAITING_ACHIEVEMENT, DONE);
 
-                CellPair p(Trinity::ComputeCellPair(target->GetPositionX(), target->GetPositionY()));
+                CellCoord p(Trinity::ComputeCellCoord(target->GetPositionX(), target->GetPositionY()));
                 Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
                 Unit* anyPlayerOrCreatureInRange = NULL;
@@ -3039,9 +3038,8 @@ class spell_lich_king_defile : public SpellScriptLoader
                 Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck> searcher(caster, targets, checker);
                 TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
                 TypeContainerVisitor<Trinity::UnitListSearcher<Trinity::AnyUnfriendlyAttackableVisibleUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-                CellPair p(Trinity::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                CellCoord p(Trinity::ComputeCellCoord(caster->GetPositionX(), caster->GetPositionY()));
                 Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
                 cell.Visit(p, world_unit_searcher, *map, *caster, 100.0f);
                 cell.Visit(p, grid_unit_searcher, *map, *caster, 100.0f);
@@ -3459,7 +3457,7 @@ class spell_vile_spirit_distance_check : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_vile_spirit_distance_check_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_vile_spirit_distance_check_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -3494,7 +3492,7 @@ class spell_ice_burst_distance_check : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_ice_burst_distance_check_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_ice_burst_distance_check_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -3526,7 +3524,7 @@ class spell_valkyr_carry_can_cast : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_valkyr_carry_can_cast_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_valkyr_carry_can_cast_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -3570,7 +3568,7 @@ class spell_valkyr_target_search : public SpellScriptLoader
             void Register()
             {
                 OnUnitTargetSelect += SpellUnitTargetFn(spell_valkyr_target_search_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-                OnEffect += SpellEffectFn(spell_valkyr_target_search_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_valkyr_target_search_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -3601,7 +3599,7 @@ class spell_valkyr_eject_passenger : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_valkyr_eject_passenger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
+                OnEffectHitTarget += SpellEffectFn(spell_valkyr_eject_passenger_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_DUMMY);
             }
         };
 
@@ -3631,7 +3629,7 @@ class spell_vile_spirit_target_search : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_vile_spirit_target_search_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+                OnEffectHitTarget += SpellEffectFn(spell_vile_spirit_target_search_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
             }
         };
 
@@ -3787,7 +3785,7 @@ class spell_lich_king_fury_of_frostmourne : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_lich_king_fury_of_frostmourneSpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
+                OnEffectHitTarget += SpellEffectFn(spell_lich_king_fury_of_frostmourneSpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_APPLY_AURA);
             }
         };
 

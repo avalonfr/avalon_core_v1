@@ -767,7 +767,7 @@ public:
 
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_gen_shieldbreaker_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_gen_shieldbreaker_SpellScript::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
@@ -795,7 +795,7 @@ public:
 
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_gen_atcharge_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_gen_atcharge_SpellScript::HandleScript, EFFECT_2, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 
@@ -823,7 +823,7 @@ public:
 
         void Register()
         {
-            OnEffect += SpellEffectFn(spell_gen_npcshieldbreaker_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            OnEffectHitTarget += SpellEffectFn(spell_gen_npcshieldbreaker_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
         }
     };
 

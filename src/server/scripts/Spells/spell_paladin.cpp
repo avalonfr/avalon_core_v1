@@ -358,7 +358,7 @@ class spell_pal_righteous_defense : public SpellScriptLoader
 
             void Register()
             {
-                OnEffect += SpellEffectFn(spell_pal_righteous_defense_SpellScript::HandleSpellEffectTriggerSpell, EFFECT_1, SPELL_EFFECT_TRIGGER_SPELL);
+                OnEffectHit += SpellEffectFn(spell_pal_righteous_defense_SpellScript::HandleSpellEffectTriggerSpell, EFFECT_1, SPELL_EFFECT_TRIGGER_SPELL);
             }
         };
 

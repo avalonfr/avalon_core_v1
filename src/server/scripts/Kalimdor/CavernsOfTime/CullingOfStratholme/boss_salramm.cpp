@@ -148,7 +148,7 @@ public:
             if(!bTransformed)
                 if (uiRespawnZombiesTimer <= diff)
                 {
-                    pInstance->SetData(DATA_TRANSFORM_CITIZENS, SPECIAL);
+                    instance->SetData(DATA_TRANSFORM_CITIZENS, SPECIAL);
                     bTransformed = true;
                 }
                 else uiRespawnZombiesTimer -= diff;
