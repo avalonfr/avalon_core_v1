@@ -1501,6 +1501,76 @@ public:
     }
 };
 
+enum TheTurkinator
+{
+    SPELL_KILL_COUNTER_VISUAL = 62015,
+    SPELL_KILL_COUNTER_VISUAL_MAX = 62021,
+};
+
+class spell_gen_turkey_tracker : public SpellScriptLoader
+{
+    public:
+        spell_gen_turkey_tracker() : SpellScriptLoader("spell_gen_turkey_tracker") {}
+
+        class spell_gen_turkey_tracker_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_gen_turkey_tracker_SpellScript);
+
+            bool Validate(SpellInfo const* /*spellEntry*/)
+            {
+                if (!sSpellMgr->GetSpellInfo(SPELL_KILL_COUNTER_VISUAL))
+                    return false;
+                if (!sSpellMgr->GetSpellInfo(SPELL_KILL_COUNTER_VISUAL_MAX))
+                    return false;
+                return true;
+            }
+
+            void HandleScript(SpellEffIndex /*effIndex*/)
+            {
+                Player* target = GetHitPlayer();
+                if (!target)
+                    return;
+
+                if (Aura* aura = GetCaster()->ToPlayer()->GetAura(GetSpellInfo()->Id))
+                {
+                    switch (aura->GetStackAmount())
+                    {
+                        case 10:
+                            // To-Do: Missing Emote...
+                            GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+                            break;
+                        case 20:
+                            // To-Do: Missing Emote...
+                            GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+                            break;
+                        case 30:
+                            // To-Do: Missing Emote...
+                            GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+                            break;
+                        case 40:
+                            // To-Do: Missing Emote...
+                            GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL, true, NULL);
+                            GetCaster()->CastSpell(target, SPELL_KILL_COUNTER_VISUAL_MAX, true, NULL); // Achievement Credit
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            void Register()
+            {
+                OnEffect += SpellEffectFn(spell_gen_turkey_tracker_SpellScript::HandleScript, EFFECT_1, SPELL_EFFECT_SCRIPT_EFFECT);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_gen_turkey_tracker_SpellScript();
+        }
+};
+
+
 void AddSC_generic_spell_scripts()
 {
     new spell_gen_absorb0_hitlimit1();
@@ -1535,4 +1605,5 @@ void AddSC_generic_spell_scripts()
     new spell_gen_vehicle_scaling();
     new spell_gen_oracle_wolvar_reputation();
     new spell_gen_damage_reduction_aura();
+	new spell_gen_turkey_tracker();
 }
