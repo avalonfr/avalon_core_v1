@@ -3140,8 +3140,6 @@ enum Brewfest
     NPC_BOK_DROPCERTAIN          = 24527,
     NPC_RAM_MASTER_RAY           = 24497,
     NPC_NEILL_RAMSTEIN           = 23558,
-
-    ACHIEV_BREW_OF_THE_MONTH     = 2796
 };
 
 class npc_apple_trap_bunny : public CreatureScript
@@ -3288,12 +3286,13 @@ class npc_brew_vendor : public CreatureScript
     public:
         npc_brew_vendor() : CreatureScript("npc_brew_vendor") { }
 
-        bool OnGossipHello(Player* player, Creature* creature)
+        bool OnGossipHello(Player* pPayer, Creature* creature)
         {
-            if (player->HasAchieved(ACHIEV_BREW_OF_THE_MONTH))
-                player->GetSession()->SendListInventory(creature->GetGUID());
+			uint32 ACHIEV_BREW_OF_THE_MONTH     = 2796;
+            if (pPayer->GetAchievementMgr().HasAchieved(ACHIEV_BREW_OF_THE_MONTH))
+                pPayer->GetSession()->SendListInventory(creature->GetGUID());
             else
-                player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+                pPayer->SEND_GOSSIP_MENU(pPayer->GetGossipTextId(creature), creature->GetGUID());
 
             return true;
         }

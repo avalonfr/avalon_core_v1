@@ -210,7 +210,7 @@ SOURCE_GROUP(Northrend FILES
   Northrend/storm_peaks.cpp
   Northrend/wintergrasp.cpp
   Northrend/zuldrak.cpp)
-SOURCE_GROUP(Northrend\\AzjolNerub\\ahnkahet REGULAR_EXPRESSION .*/Northrend/AzjolNerub/ahnkahet/.*)
+SOURCE_GROUP(Northrend\\AzjolNerub\\Ahnkahet REGULAR_EXPRESSION .*/Northrend/AzjolNerub/Ahnkahet/.*)
 SOURCE_GROUP(Northrend\\AzjolNerub\\AzjolNerub REGULAR_EXPRESSION .*/Northrend/AzjolNerub/AzjolNerub/.*)
 SOURCE_GROUP(Northrend\\CrusadersColiseum\\TrialOfTheChampion REGULAR_EXPRESSION .*/Northrend/CrusadersColiseum/TrialOfTheChampion/.*)
 SOURCE_GROUP(Northrend\\CrusadersColiseum\\TrialOfTheCrusader REGULAR_EXPRESSION .*/Northrend/CrusadersColiseum/TrialOfTheCrusader/.*)
@@ -228,7 +228,7 @@ SOURCE_GROUP(Northrend\\ChamberOfAspects\\ObsidianSanctum REGULAR_EXPRESSION .*/
 SOURCE_GROUP(Northrend\\ChamberOfAspects\\RubySanctum REGULAR_EXPRESSION .*/Northrend/ChamberOfAspects/RubySanctum/.*)
 SOURCE_GROUP(Northrend\\Ulduar\\HallsOfLightning REGULAR_EXPRESSION .*/Northrend/Ulduar/HallsOfLightning/.*)
 SOURCE_GROUP(Northrend\\Ulduar\\HallsOfStone REGULAR_EXPRESSION .*/Northrend/Ulduar/HallsOfStone/.*)
-SOURCE_GROUP(Northrend\\Ulduar\\Ulduar REGULAR_EXPRESSION .*/Northrend/Ulduar/ulduar/.*)
+SOURCE_GROUP(Northrend\\Ulduar\\Ulduar REGULAR_EXPRESSION .*/Northrend/Ulduar/Ulduar/.*)
 SOURCE_GROUP(Northrend\\UtgardeKeep\\UtgardeKeep REGULAR_EXPRESSION .*/Northrend/UtgardeKeep/UtgardeKeep/.*)
 SOURCE_GROUP(Northrend\\UtgardeKeep\\UtgardePinnacle REGULAR_EXPRESSION .*/Northrend/UtgardeKeep/UtgardePinnacle/.*)
 SOURCE_GROUP(Northrend\\VaultOfArchavon REGULAR_EXPRESSION .*/Northrend/VaultOfArchavon/.*)
