@@ -1,24 +1,24 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "ScriptPCH.h"
 #include "utgarde_pinnacle.h"
 
-#define MAX_ENCOUNTER     4
+#define MAX_ENCOUNTER 4
 
 /* Utgarde Pinnacle encounters:
 0 - Svala Sorrowgrave
@@ -29,9 +29,9 @@
 
 enum GameObjects
 {
-    ENTRY_SKADI_THE_RUTHLESS_DOOR                 = 192173,
-    ENTRY_KING_YMIRON_DOOR                        = 192174,
-    ENTRY_GORK_PALEHOOF_SPHERE                    = 188593
+    ENTRY_SKADI_THE_RUTHLESS_DOOR = 192173,
+    ENTRY_KING_YMIRON_DOOR = 192174,
+    ENTRY_GORK_PALEHOOF_SPHERE = 188593
 };
 
 class instance_utgarde_pinnacle : public InstanceMapScript
@@ -51,7 +51,6 @@ public:
         uint64 uiSvalaSorrowgrave;
         uint64 uiGortokPalehoof;
         uint64 uiSkadiTheRuthless;
-        uint64 uiGrauf;
         uint64 uiKingYmiron;
 
         uint64 uiSkadiTheRuthlessDoor;
@@ -63,23 +62,36 @@ public:
         uint64 uiFerociousRhino;
         uint64 uiMassiveJormungar;
         uint64 uiPalehoofOrb;
-        uint64 uiRitualTarget;
 
         uint64 uiSvala;
-        uint64 uiFlameBrazier_1;
-        uint64 uiFlameBrazier_2;
+        uint64 uiSacrificedPlayer;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-
-        uint64 uiDoodad_Utgarde_Mirror_FX01;
 
         std::string str_data;
 
         void Initialize()
         {
-            uiFlameBrazier_1 = 0;
             for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
                m_auiEncounter[i] = NOT_STARTED;
+
+            uiSvalaSorrowgrave = 0;
+            uiGortokPalehoof = 0;
+            uiSkadiTheRuthless = 0;
+            uiKingYmiron = 0;
+
+            uiSkadiTheRuthlessDoor = 0;
+            uiKingYmironDoor = 0;
+            uiGortokPalehoofSphere = 0;
+
+            uiFrenziedWorgen = 0;
+            uiRavenousFurbolg = 0;
+            uiFerociousRhino = 0;
+            uiMassiveJormungar = 0;
+            uiPalehoofOrb = 0;
+
+            uiSvala = 0;
+            uiSacrificedPlayer = 0;
         }
 
         bool IsEncounterInProgress() const
@@ -90,50 +102,46 @@ public:
             return false;
         }
 
-        void OnCreatureCreate(Creature* pCreature)
+        void OnCreatureCreate(Creature* creature)
         {
-            switch(pCreature->GetEntry())
+            switch (creature->GetEntry())
             {
-                case 26668:    uiSvalaSorrowgrave = pCreature->GetGUID();               break;
-                case 26687:    uiGortokPalehoof = pCreature->GetGUID();                 break;
-                case 26693:    uiSkadiTheRuthless = pCreature->GetGUID();               break;
-                case 26893:    uiGrauf = pCreature->GetGUID();                          break;
-                case 26861:    uiKingYmiron = pCreature->GetGUID();                     break;
-                case 26683:    uiFrenziedWorgen = pCreature->GetGUID();                 break;
-                case 26684:    uiRavenousFurbolg = pCreature->GetGUID();                break;
-                case 26685:    uiMassiveJormungar = pCreature->GetGUID();               break;
-                case 26686:    uiFerociousRhino = pCreature->GetGUID();                 break;
-                case 29281:    uiSvala = pCreature->GetGUID();                          break;
-                case 26688:    uiPalehoofOrb = pCreature->GetGUID();                    break;
-                case 27273:
-                    (uiFlameBrazier_1 ? uiFlameBrazier_2 : uiFlameBrazier_1) =  pCreature->GetGUID();
-                                                                                        break;
-                case 27327:    uiRitualTarget = pCreature->GetGUID();                   break;
+                case BOSS_SVALA_SORROWGRAVE: uiSvalaSorrowgrave = creature->GetGUID(); break;
+                case BOSS_GORTOK_PALEHOOF: uiGortokPalehoof = creature->GetGUID(); break;
+                case BOSS_SKADI_RUTHLESS: uiSkadiTheRuthless = creature->GetGUID(); break;
+                case BOSS_KING_YMIRON:
+                    uiKingYmiron = creature->GetGUID();
+                    creature->SetReactState(REACT_PASSIVE);
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                    break;
+                case MOB_FRENZIED_WORGEN: uiFrenziedWorgen = creature->GetGUID(); break;
+                case MOB_RAVENOUS_FURBOLG: uiRavenousFurbolg = creature->GetGUID(); break;
+                case MOB_MASSIVE_JORMUNGAR: uiMassiveJormungar = creature->GetGUID(); break;
+                case MOB_FEROCIOUS_RHINO: uiFerociousRhino = creature->GetGUID(); break;
+                case MOB_SVALA: uiSvala = creature->GetGUID(); break;
+                case MOB_PALEHOOF_ORB: uiPalehoofOrb = creature->GetGUID(); break;
             }
         }
 
-        void OnGameObjectCreate(GameObject* pGo)
+        void OnGameObjectCreate(GameObject* go)
         {
-            switch(pGo->GetEntry())
+            switch (go->GetEntry())
             {
                 case ENTRY_SKADI_THE_RUTHLESS_DOOR:
-                    uiSkadiTheRuthlessDoor = pGo->GetGUID();
-                    if (m_auiEncounter[2] == DONE) HandleGameObject(NULL, true, pGo);
+                    uiSkadiTheRuthlessDoor = go->GetGUID();
+                    if (m_auiEncounter[2] == DONE) HandleGameObject(0, true, go);
                     break;
                 case ENTRY_KING_YMIRON_DOOR:
-                    uiKingYmironDoor = pGo->GetGUID();
-                    if (m_auiEncounter[3] == DONE) HandleGameObject(NULL, true, pGo);
+                    uiKingYmironDoor = go->GetGUID();
+                    if (m_auiEncounter[3] == DONE) HandleGameObject(0, true, go);
                     break;
                 case ENTRY_GORK_PALEHOOF_SPHERE:
-                    uiGortokPalehoofSphere = pGo->GetGUID();
+                    uiGortokPalehoofSphere = go->GetGUID();
                     if (m_auiEncounter[1] == DONE)
                     {
-                        HandleGameObject(NULL, true, pGo);
-                        pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
+                        HandleGameObject(0, true, go);
+                        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NOT_SELECTABLE);
                     }
-                    break;
-                case 191745:
-                    uiDoodad_Utgarde_Mirror_FX01 = pGo->GetGUID();
                     break;
             }
         }
@@ -164,14 +172,20 @@ public:
                 SaveToDB();
         }
 
+        void SetData64(uint32 type, uint64 data)
+        {
+            if (type == DATA_SACRIFICED_PLAYER)
+                uiSacrificedPlayer = data;
+        }
+
         uint32 GetData(uint32 type)
         {
             switch (type)
             {
-                case DATA_SVALA_SORROWGRAVE_EVENT:        return m_auiEncounter[0];
-                case DATA_GORTOK_PALEHOOF_EVENT:          return m_auiEncounter[1];
-                case DATA_SKADI_THE_RUTHLESS_EVENT:       return m_auiEncounter[2];
-                case DATA_KING_YMIRON_EVENT:              return m_auiEncounter[3];
+                case DATA_SVALA_SORROWGRAVE_EVENT: return m_auiEncounter[0];
+                case DATA_GORTOK_PALEHOOF_EVENT: return m_auiEncounter[1];
+                case DATA_SKADI_THE_RUTHLESS_EVENT: return m_auiEncounter[2];
+                case DATA_KING_YMIRON_EVENT: return m_auiEncounter[3];
             }
             return 0;
         }
@@ -180,22 +194,18 @@ public:
         {
             switch (identifier)
             {
-                case DATA_SVALA_SORROWGRAVE:           return uiSvalaSorrowgrave;
-                case DATA_GORTOK_PALEHOOF:             return uiGortokPalehoof;
-                case DATA_SKADI_THE_RUTHLESS:          return uiSkadiTheRuthless;
-                case DATA_GRAUF:                       return uiGrauf;
-                case DATA_KING_YMIRON:                 return uiKingYmiron;
-                case DATA_MOB_FRENZIED_WORGEN:         return uiFrenziedWorgen;
-                case DATA_MOB_RAVENOUS_FURBOLG:        return uiRavenousFurbolg;
-                case DATA_MOB_MASSIVE_JORMUNGAR:       return uiMassiveJormungar;
-                case DATA_MOB_FEROCIOUS_RHINO:         return uiFerociousRhino;
-                case DATA_MOB_ORB:                     return uiPalehoofOrb;
-                case DATA_SVALA:                       return uiSvala;
-                case DATA_GORTOK_PALEHOOF_SPHERE:      return uiGortokPalehoofSphere;
-                case DATA_FLAME_BRAZIER_1:             return uiFlameBrazier_1;
-                case DATA_FLAME_BRAZIER_2:             return uiFlameBrazier_2;
-                case DATA_DOODAD_UTGARDE_MIRROR_FX01:  return uiDoodad_Utgarde_Mirror_FX01;
-                case DATA_RITUAL_TARGET:               return uiRitualTarget;
+                case DATA_SVALA_SORROWGRAVE: return uiSvalaSorrowgrave;
+                case DATA_GORTOK_PALEHOOF: return uiGortokPalehoof;
+                case DATA_SKADI_THE_RUTHLESS: return uiSkadiTheRuthless;
+                case DATA_KING_YMIRON: return uiKingYmiron;
+                case DATA_MOB_FRENZIED_WORGEN: return uiFrenziedWorgen;
+                case DATA_MOB_RAVENOUS_FURBOLG: return uiRavenousFurbolg;
+                case DATA_MOB_MASSIVE_JORMUNGAR: return uiMassiveJormungar;
+                case DATA_MOB_FEROCIOUS_RHINO: return uiFerociousRhino;
+                case DATA_MOB_ORB: return uiPalehoofOrb;
+                case DATA_SVALA: return uiSvala;
+                case DATA_GORTOK_PALEHOOF_SPHERE: return uiGortokPalehoofSphere;
+                case DATA_SACRIFICED_PLAYER: return uiSacrificedPlayer;
             }
 
             return 0;
@@ -212,7 +222,7 @@ public:
             str_data = saveStream.str();
 
             OUT_SAVE_INST_DATA_COMPLETE;
-           return str_data;
+            return str_data;
         }
 
         void Load(const char* in)
@@ -231,7 +241,7 @@ public:
             std::istringstream loadStream(in);
             loadStream >> dataHead1 >> dataHead2 >> data0 >> data1 >> data2 >> data3;
 
-            if (dataHead1 == 'U' && dataHead2 == 'K')
+            if (dataHead1 == 'U' && dataHead2 == 'P')
             {
                 m_auiEncounter[0] = data0;
                 m_auiEncounter[1] = data1;
@@ -246,11 +256,24 @@ public:
 
             OUT_LOAD_INST_DATA_COMPLETE;
         }
-    };
+        void Update(uint32 diff){
 
+            if (!instance->HavePlayers())
+                return;
+
+            if ((GetData(DATA_SVALA_SORROWGRAVE_EVENT) == DONE) && (GetData(DATA_GORTOK_PALEHOOF_EVENT) == DONE) && (GetData(DATA_SKADI_THE_RUTHLESS_EVENT) == DONE)) {
+                if(Creature* pYmiron = instance->GetCreature(uiKingYmiron)){
+                    pYmiron->SetReactState(REACT_AGGRESSIVE);
+                    pYmiron->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_OOC_NOT_ATTACKABLE);
+                }
+            }
+        }
+
+    };
 };
 
 void AddSC_instance_utgarde_pinnacle()
 {
     new instance_utgarde_pinnacle();
 }
+

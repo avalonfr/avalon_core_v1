@@ -490,6 +490,7 @@ void AddSC_boss_valithria_dreamwalker();
 void AddSC_boss_sindragosa();
 void AddSC_boss_lichking();
 void AddSC_boss_gunship_battle();
+void AddSC_icc_trashmobs();
 void AddSC_icecrown_citadel_teleport();
 void AddSC_instance_icecrown_citadel();
 void AddSC_icecrown_citadel();
@@ -1203,6 +1204,7 @@ void AddNorthrendScripts()
     AddSC_boss_sindragosa();
 	AddSC_boss_lichking();
 	AddSC_boss_gunship_battle();
+	AddSC_icc_trashmobs();
     AddSC_icecrown_citadel_teleport();
     AddSC_instance_icecrown_citadel();
     AddSC_icecrown_citadel();

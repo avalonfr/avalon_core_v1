@@ -2986,6 +2986,12 @@ void SpellMgr::LoadDbcDataCorrections()
             case 23885: // Bloodthirst
                 spellInfo->EffectApplyAuraName[EFFECT_0] = SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE;
                 break;
+			case 48278:
+                spellInfo->Targets = 1;
+                spellInfo->StackAmount = 3;
+                spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_TARGET_ENEMY;
+                spellInfo->EffectImplicitTargetB[0] = TARGET_UNIT_NEARBY_ENEMY;
+                break;
             case 42835: // Spout
                 spellInfo->Effect[0] = 0; // remove damage effect, only anim is needed
                 break;

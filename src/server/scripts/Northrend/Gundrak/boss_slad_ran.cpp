@@ -1,19 +1,19 @@
-/*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+*
+* Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "ScriptPCH.h"
 #include "gundrak.h"
@@ -21,40 +21,40 @@
 //Spells
 enum Spells
 {
-    SPELL_POISON_NOVA                             = 55081,
-    H_SPELL_POISON_NOVA                           = 59842,
-    SPELL_POWERFULL_BITE                          = 48287,
-    H_SPELL_POWERFULL_BITE                        = 59840,
-    SPELL_VENOM_BOLT                              = 54970,
-    H_SPELL_VENOM_BOLT                            = 59839
+    SPELL_POISON_NOVA = 55081,
+    H_SPELL_POISON_NOVA = 59842,
+    SPELL_POWERFULL_BITE = 48287,
+    H_SPELL_POWERFULL_BITE = 59840,
+    SPELL_VENOM_BOLT = 54970,
+    H_SPELL_VENOM_BOLT = 59839
 };
 
 //Yell
 enum Yells
 {
-    SAY_AGGRO                                     = -1604017,
-    SAY_SLAY_1                                    = -1604018,
-    SAY_SLAY_2                                    = -1604019,
-    SAY_SLAY_3                                    = -1604020,
-    SAY_DEATH                                     = -1604021,
-    SAY_SUMMON_SNAKES                             = -1604022,
-    SAY_SUMMON_CONSTRICTORS                       = -1604023
+    SAY_AGGRO = -1604017,
+    SAY_SLAY_1 = -1604018,
+    SAY_SLAY_2 = -1604019,
+    SAY_SLAY_3 = -1604020,
+    SAY_DEATH = -1604021,
+    SAY_SUMMON_SNAKES = -1604022,
+    SAY_SUMMON_CONSTRICTORS = -1604023
 };
 
 //Creatures
 enum Creatures
 {
-    CREATURE_SNAKE                                = 29680,
-    CREATURE_CONSTRICTORS                         = 29713
+    CREATURE_SNAKE = 29680,
+    CREATURE_CONSTRICTORS = 29713
 };
 
 //Creatures' spells
 enum ConstrictorSpells
 {
-    SPELL_GRIP_OF_SLAD_RAN                        = 55093,
-    SPELL_SNAKE_WRAP                              = 55126,
-    SPELL_VENOMOUS_BITE                           = 54987,
-    H_SPELL_VENOMOUS_BITE                         = 58996
+    SPELL_GRIP_OF_SLAD_RAN = 55093,
+SPELL_SNAKE_WRAP = 55126,
+    SPELL_VENOMOUS_BITE = 54987,
+    H_SPELL_VENOMOUS_BITE = 58996
 };
 
 static Position SpawnLoc[]=
@@ -62,7 +62,7 @@ static Position SpawnLoc[]=
   {1783.81f, 646.637f, 133.948f, 3.71755f},
   {1775.03f, 606.586f, 134.165f, 1.43117f},
   {1717.39f, 630.041f, 129.282f, 5.96903f},
-  {1765.66f, 646.542f, 134.02f,  5.11381f},
+  {1765.66f, 646.542f, 134.02f, 5.11381f},
   {1716.76f, 635.159f, 129.282f, 0.191986f}
 };
 
@@ -82,7 +82,7 @@ public:
     {
         boss_slad_ranAI(Creature* c) : ScriptedAI(c), lSummons(me)
         {
-            instance = c->GetInstanceScript();
+            pInstance = c->GetInstanceScript();
         }
 
         uint32 uiPoisonNovaTimer;
@@ -92,10 +92,10 @@ public:
 
         uint8 uiPhase;
 
-        std::set<uint64> lWrappedPlayers;
+std::set<uint64> lWrappedPlayers;
         SummonList lSummons;
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
         void Reset()
         {
@@ -104,20 +104,20 @@ public:
             uiVenomBoltTimer = 15*IN_MILLISECONDS;
             uiSpawnTimer = 5*IN_MILLISECONDS;
             uiPhase = 0;
-            lWrappedPlayers.clear();
+lWrappedPlayers.clear();
 
             lSummons.DespawnAll();
 
-            if (instance)
-                instance->SetData(DATA_SLAD_RAN_EVENT, NOT_STARTED);
+            if (pInstance)
+                pInstance->SetData(DATA_SLAD_RAN_EVENT, NOT_STARTED);
         }
 
         void EnterCombat(Unit* /*who*/)
         {
             DoScriptText(SAY_AGGRO, me);
 
-            if (instance)
-                instance->SetData(DATA_SLAD_RAN_EVENT, IN_PROGRESS);
+            if (pInstance)
+                pInstance->SetData(DATA_SLAD_RAN_EVENT, IN_PROGRESS);
         }
 
         void UpdateAI(const uint32 diff)
@@ -176,10 +176,10 @@ public:
         void JustDied(Unit* /*killer*/)
         {
             DoScriptText(SAY_DEATH, me);
-            lSummons.DespawnAll();
+lSummons.DespawnAll();
 
-            if (instance)
-                instance->SetData(DATA_SLAD_RAN_EVENT, DONE);
+            if (pInstance)
+                pInstance->SetData(DATA_SLAD_RAN_EVENT, DONE);
         }
 
         void KilledUnit(Unit* /*victim*/)
@@ -255,7 +255,7 @@ public:
             } else uiGripOfSladRanTimer -= diff;
         }
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
     };
 
 };
@@ -276,7 +276,7 @@ public:
 
         uint32 uiVenomousBiteTimer;
 
-        InstanceScript* instance;
+        InstanceScript* pInstance;
 
         void Reset()
         {
@@ -321,5 +321,5 @@ void AddSC_boss_slad_ran()
     new boss_slad_ran();
     new mob_slad_ran_constrictor();
     new mob_slad_ran_viper();
-    new achievement_snakes_whyd_it_have_to_be_snakes();
+new achievement_snakes_whyd_it_have_to_be_snakes();
 }
