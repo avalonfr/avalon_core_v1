@@ -1,45 +1,45 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
- *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU General Public License as published by the
- * Free Software Foundation; either version 2 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+*
+* This program is free software; you can redistribute it and/or modify it
+* under the terms of the GNU General Public License as published by the
+* Free Software Foundation; either version 2 of the License, or (at your
+* option) any later version.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT
+* ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+* FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+* more details.
+*
+* You should have received a copy of the GNU General Public License along
+* with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #include "ScriptPCH.h"
 #include "naxxramas.h"
 
-#define EMOTE_BREATH            -1533082
-#define EMOTE_ENRAGE            -1533083
+#define EMOTE_BREATH -1533082
+#define EMOTE_ENRAGE -1533083
 
-#define SPELL_FROST_AURA        RAID_MODE(28531, 55799)
-#define SPELL_CLEAVE            19983
-#define SPELL_TAIL_SWEEP        RAID_MODE(55697, 55696)
-#define SPELL_SUMMON_BLIZZARD   28560
-#define SPELL_LIFE_DRAIN        RAID_MODE(28542, 55665)
-#define SPELL_ICEBOLT           28522
-#define SPELL_FROST_BREATH      29318
-#define SPELL_FROST_EXPLOSION   28524
-#define SPELL_FROST_MISSILE     30101
-#define SPELL_BERSERK           26662
-#define SPELL_DIES              29357
+#define SPELL_FROST_AURA RAID_MODE(28531, 55799)
+#define SPELL_CLEAVE 19983
+#define SPELL_TAIL_SWEEP RAID_MODE(55697, 55696)
+#define SPELL_SUMMON_BLIZZARD 28560
+#define SPELL_LIFE_DRAIN RAID_MODE(28542, 55665)
+#define SPELL_ICEBOLT 28522
+#define SPELL_FROST_BREATH 29318
+#define SPELL_FROST_EXPLOSION 28524
+#define SPELL_FROST_MISSILE 30101
+#define SPELL_BERSERK 26662
+#define SPELL_DIES 29357
 
-#define SPELL_CHILL             RAID_MODE(28547, 55699)
+#define SPELL_CHILL RAID_MODE(28547, 55699)
 
-#define MOB_BLIZZARD            16474
-#define GO_ICEBLOCK             181247
+#define MOB_BLIZZARD 16474
+#define GO_ICEBLOCK 181247
 
-#define ACHIEVEMENT_THE_HUNDRED_CLUB    RAID_MODE(2146, 2147)
-#define MAX_FROST_RESISTANCE            100
+#define ACHIEVEMENT_THE_HUNDRED_CLUB RAID_MODE(2146, 2147)
+#define MAX_FROST_RESISTANCE 100
 
 enum Phases
 {
@@ -84,7 +84,7 @@ public:
         boss_sapphironAI(Creature* c) : BossAI(c, BOSS_SAPPHIRON)
             , phase(PHASE_NULL)
         {
-            map = me->GetMap();
+            pMap = me->GetMap();
         }
 
         Phases phase;
@@ -93,7 +93,7 @@ public:
 
         bool CanTheHundredClub; // needed for achievement: The Hundred Club(2146, 2147)
         uint32 CheckFrostResistTimer;
-        Map* map;
+        Map* pMap;
 
         void InitializeAI()
         {
@@ -156,9 +156,9 @@ public:
                 AchievementEntry const* AchievTheHundredClub = GetAchievementStore()->LookupEntry(ACHIEVEMENT_THE_HUNDRED_CLUB);
                 if (AchievTheHundredClub)
                 {
-                    if (map && map->IsDungeon())
+                    if (pMap && pMap->IsDungeon())
                     {
-                        Map::PlayerList const &players = map->GetPlayers();
+                        Map::PlayerList const &players = pMap->GetPlayers();
                         for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                             itr->getSource()->CompletedAchievement(AchievTheHundredClub);
                     }
@@ -183,9 +183,9 @@ public:
 
         void CheckPlayersFrostResist()
         {
-            if (CanTheHundredClub && map && map->IsDungeon())
+            if (CanTheHundredClub && pMap && pMap->IsDungeon())
             {
-                Map::PlayerList const &players = map->GetPlayers();
+                Map::PlayerList const &players = pMap->GetPlayers();
                 for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
                     if (itr->getSource()->GetResistance(SPELL_SCHOOL_FROST) > MAX_FROST_RESISTANCE)
@@ -215,8 +215,8 @@ public:
             {
                 if (Player* player = Unit::GetPlayer(*me, itr->first))
                     player->RemoveAura(SPELL_ICEBOLT);
-                if (GameObject* go = GameObject::GetGameObject(*me, itr->second))
-                    go->Delete();
+                if (GameObject* pGo = GameObject::GetGameObject(*me, itr->second))
+                    pGo->Delete();
             }
             iceblocks.clear();
         }
@@ -244,7 +244,7 @@ public:
             {
                 while (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    switch(eventId)
                     {
                         case EVENT_BERSERK:
                             DoScriptText(EMOTE_ENRAGE, me);
@@ -292,7 +292,7 @@ public:
             {
                 if (uint32 eventId = events.ExecuteEvent())
                 {
-                    switch (eventId)
+                    switch(eventId)
                     {
                         case EVENT_LIFTOFF:
                             me->HandleEmoteCommand(EMOTE_ONESHOT_LIFTOFF);
@@ -377,10 +377,10 @@ public:
 
                 for (IceBlockMap::const_iterator itr = iceblocks.begin(); itr != iceblocks.end(); ++itr)
                 {
-                    if (GameObject* go = GameObject::GetGameObject(*me, itr->second))
+                    if (GameObject* pGo = GameObject::GetGameObject(*me, itr->second))
                     {
-                        if (go->IsInBetween(me, target, 2.0f)
-                            && me->GetExactDist2d(target->GetPositionX(), target->GetPositionY()) - me->GetExactDist2d(go->GetPositionX(), go->GetPositionY()) < 5.0f)
+                        if (pGo->IsInBetween(me, target, 2.0f)
+                            && me->GetExactDist2d(target->GetPositionX(), target->GetPositionY()) - me->GetExactDist2d(pGo->GetPositionX(), pGo->GetPositionY()) < 5.0f)
                         {
                             target->ApplySpellImmune(0, IMMUNITY_ID, SPELL_FROST_EXPLOSION, true);
                             targets.push_back(target);

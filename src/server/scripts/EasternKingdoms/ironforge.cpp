@@ -91,7 +91,152 @@ public:
 
 };
 
+/*######
+## boss_king_magni_bronzebeard
+######*/
+
+static Position IronforgeGuard[] =
+{
+{-4869.67f, -1037.57f, 502.30f, 0.347319f},
+{-4860.41f, -1051.07f, 502.30f, 1.490071f},
+{-4844.45f, -1048.32f, 502.30f, 2.299032f},
+{-4840.58f, -1033.14f, 502.30f, 3.265075f},
+{-4850.67f, -1018.92f, 502.30f, 4.482435f},
+{-4865.12f, -1024.41f, 505.90f, 5.428836f}
+};
+
+enum eMagni
+{
+    SPELL_AVATAR = 19135,
+    SPELL_KNOCK_AWAY = 20686,
+    SPELL_STORM_BOLT = 20685,
+    SPELL_CHARGE = 20508,
+    SPELL_LAY_ON_HANDS = 633,
+
+    ENTRY_IRONFORGE_GUARD = 5595,
+
+    SAY_AGGRO = 1
+};
+
+class boss_king_magni_bronzebeard : public CreatureScript
+{
+public:
+    boss_king_magni_bronzebeard() : CreatureScript("boss_king_magni_bronzebeard") {}
+
+    struct boss_king_magni_bronzebeardAI : public ScriptedAI
+    {
+        boss_king_magni_bronzebeardAI(Creature* pCreature) : ScriptedAI(pCreature) , summons(me) {}
+
+        void Reset()
+        {
+            summons.DespawnAll();
+
+            _avatarTimer = 15 *IN_MILLISECONDS;
+            _knockawayTimer = 15 *IN_MILLISECONDS;
+            _stormboltTimer = urand(5, 7) *IN_MILLISECONDS;
+            _chargeTimer = urand(13, 17) *IN_MILLISECONDS;
+            _summonTimer = urand(20, 40) *IN_MILLISECONDS;
+            _layonhandsTimer = 5 *MINUTE;
+        }
+        
+        void JustSummoned(Creature* pSummoned)
+        {
+            summons.Summon(pSummoned);
+        }
+
+        void JustDied (Unit* /*victim*/)
+        {
+            summons.DespawnAll();
+        }
+
+        void EnterCombat(Unit* /*who*/)
+        {
+            Talk(SAY_AGGRO);
+        }
+        
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if (_stormboltTimer <= diff)
+            {
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
+                if (target)
+                {
+                    DoCast(target, SPELL_STORM_BOLT);
+                    _stormboltTimer = urand(7, 9) *IN_MILLISECONDS;
+                }
+            }
+            else
+                _stormboltTimer -= diff;
+
+            if (_avatarTimer <= diff)
+            {
+                DoCast(me, SPELL_AVATAR);
+                _avatarTimer = 45 *IN_MILLISECONDS;
+            }
+            else
+                _avatarTimer -= diff;
+
+            if (_knockawayTimer <= diff)
+            {
+                DoResetThreat(); // Threat Reset
+                DoCastVictim(SPELL_KNOCK_AWAY);
+                _knockawayTimer = 15 *IN_MILLISECONDS;
+            }
+            else
+                _knockawayTimer -= diff;
+
+            if (_chargeTimer <= diff)
+            {
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1, 25.0f);
+                if (target)
+                {
+                    DoCast(target, SPELL_CHARGE);
+                    _chargeTimer = 15 *IN_MILLISECONDS;
+                }
+            }
+            else
+                _chargeTimer -= diff;
+
+            if (_summonTimer <= diff)
+            {
+                for (uint8 i = 0; i < 6; ++i)
+                    me->SummonCreature(ENTRY_IRONFORGE_GUARD, IronforgeGuard[i], TEMPSUMMON_CORPSE_DESPAWN , 0);
+                    _summonTimer = urand(20, 40) *IN_MILLISECONDS;
+            }
+            else
+                _summonTimer -= diff;
+
+            if (_layonhandsTimer <= diff)
+            {
+                DoCast(me, SPELL_LAY_ON_HANDS);
+                _layonhandsTimer = 5 *MINUTE;
+            }
+            else
+                _layonhandsTimer -=diff;
+
+            DoMeleeAttackIfReady();
+        }
+    
+    private:
+        SummonList summons;
+		uint32 _avatarTimer;
+        uint32 _knockawayTimer;
+        uint32 _stormboltTimer;
+		uint32 _chargeTimer;
+		uint32 _summonTimer;
+		uint32 _layonhandsTimer;
+    };
+    
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new boss_king_magni_bronzebeardAI (pCreature);
+    }
+};
 void AddSC_ironforge()
 {
     new npc_royal_historian_archesonus();
+	new boss_king_magni_bronzebeard();
 }

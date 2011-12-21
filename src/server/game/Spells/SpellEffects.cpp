@@ -1087,6 +1087,16 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     m_caster->CastSpell(m_caster, 42337, true, NULL);
                     return;
                 }
+				case 45980:                                 // Fix Quest Re Cursive 
+                {
+                    if (!unitTarget)
+                        return;
+                    Player* player = m_caster->ToPlayer();
+                    player->CastSpell(player, 46022, false);
+                    if (Creature* creature = player->FindNearestCreature(25773, 10.0f, true))
+                        player->KilledMonsterCredit(creature->GetEntry(), creature->GetGUID());
+                    unitTarget->DestroyForPlayer(player);
+                }
                 case 47170:                                 // Impale Leviroth
                 {
                     if (!unitTarget || (unitTarget->GetEntry() != 26452 && unitTarget->HealthAbovePct(95)))
@@ -1194,7 +1204,11 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                     return;
                 case 54171:                                   //Divine Storm
                 {
-                    m_caster->CastCustomSpell(unitTarget, 54172, &damage, 0, 0, true);
+                    if (m_UniqueTargetInfo.size())
+                    {
+                        int32 heal = damage / m_UniqueTargetInfo.size();
+                        m_caster->CastCustomSpell(unitTarget, 54172, &heal, NULL, NULL, true);
+                    }
                     return;
                 }
                 case 58418:                                 // Portal to Orgrimmar
@@ -1449,16 +1463,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_caster->CastSpell(m_caster, 70725, true);
             break;
         case SPELLFAMILY_PALADIN:
-            // Divine Storm
-            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_PALADIN_DIVINESTORM && effIndex == 1)
-            {
-                int32 dmg = CalculatePctN(m_damage, damage);
-                if (!unitTarget)
-                    unitTarget = m_caster;
-                m_caster->CastCustomSpell(unitTarget, 54171, &dmg, 0, 0, true);
-                return;
-            }
-
             switch (m_spellInfo->Id)
             {
                 case 31789:                                 // Righteous Defense (step 1)
@@ -5105,6 +5109,21 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     m_caster->CastSpell(unitTarget, 22682, true);
                     return;
                 }
+				// Mistletoe
+                case 26218:
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    switch(urand(0,2))
+                    {
+                        case 0: m_caster->CastSpell(unitTarget, 26207, true); break;
+                        case 1: m_caster->CastSpell(unitTarget, 26206, true); break;
+                        case 2: m_caster->CastSpell(unitTarget, 45036, true); break;
+                    }
+                    return;
+                }				
+			
                 // Piccolo of the Flaming Fire
                 case 17512:
                 {

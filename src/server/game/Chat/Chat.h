@@ -354,7 +354,7 @@ class ChatHandler
         //bool HandleSet32Bit(const char* args);
         bool HandleSaveAllCommand(const char* args);
 		
-		//Boutique
+		//Boutique Avalon
 		
 		char** split(const char* chaine,const char* delim,int vide, int* sizeTabRet);
         bool Levelup(int levelcount);
@@ -362,6 +362,7 @@ class ChatHandler
         bool Additem(int itemid, int count, int type, bool remplacement);
         int coutlevel(int level);
         bool BoutiqueLevel(const char* args);
+		bool BoutiqueInfos(const char* args);
         bool BoutiqueAdditem(const char* args);
         bool BoutiqueGold(const char* args);
 		bool BoutiqueSet(const char* args);

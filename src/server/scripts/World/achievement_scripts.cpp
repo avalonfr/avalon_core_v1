@@ -333,6 +333,27 @@ class achievement_terokkar_turkey_time : public AchievementCriteriaScript
         }
 };
 
+class achievement_food_fight : public AchievementCriteriaScript
+{
+    public:
+        achievement_food_fight() : AchievementCriteriaScript("achievement_food_fight") { }
+
+        bool OnCheck(Player* /*source*/, Unit* target)
+        {
+            if (!target)
+                return false;
+        
+            if (Player* victim = target->ToPlayer())
+            {
+                if (Vehicle* vehicle = victim->GetVehicle())
+                    if (vehicle->GetVehicleInfo()->m_ID == 321)
+                        return true;
+            }
+
+            return false;
+        }
+};
+
 void AddSC_achievement_scripts()
 {
     new achievement_resilient_victory();
@@ -352,4 +373,5 @@ void AddSC_achievement_scripts()
 	new achievement_torch_juggler();
     new achievement_bg_sa_defense_of_ancients();
 	new achievement_terokkar_turkey_time();
+	new achievement_food_fight();
 }

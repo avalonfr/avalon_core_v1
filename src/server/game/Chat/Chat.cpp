@@ -84,14 +84,16 @@ ChatCommand* ChatHandler::getCommandTable()
         { NULL,             0,                  false, NULL,                                           "", NULL }
     };
 
-	static ChatCommand boutiqueCommandTable[] =
+static ChatCommand boutiqueCommandTable[] =
     {
-        { "item",          SEC_PLAYER,			true,  OldHandler<&ChatHandler::BoutiqueAdditem>,					   "", NULL },
-		{ "custom",          SEC_PLAYER,			true,  OldHandler<&ChatHandler::BoutiqueCustomize>,					   "", NULL },
-        { "rename",         SEC_PLAYER,     true,  OldHandler<&ChatHandler::BoutiqueRename>,        "", NULL },
-		{ "race",         SEC_PLAYER,     true,  OldHandler<&ChatHandler::BoutiqueRace>,        "", NULL },
-		{ "faction",         SEC_PLAYER,     true,  OldHandler<&ChatHandler::BoutiqueFaction>,        "", NULL },
-		{ NULL,             0,                  false, NULL,                                               "", NULL }
+		{ "infos",		SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueInfos>, 					"", NULL },
+		{ "item", 		SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueAdditem>, 					"", NULL },
+		{ "level", 		SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueLevel>, 					"", NULL },
+		{ "rename", 	SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueRename>, 					"", NULL },
+		{ "custom", 	SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueCustomize>, 				"", NULL },
+		{ "race", 		SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueRace>, 					"", NULL },
+		{ "faction", 	SEC_PLAYER, 			true, 	OldHandler<&ChatHandler::BoutiqueFaction>, 					"", NULL },
+		{ NULL, 		0, 						false, 	NULL, 											"", NULL }
     };
 	
     static ChatCommand banlistCommandTable[] =

@@ -3038,6 +3038,14 @@ void SpellMgr::LoadDbcDataCorrections()
                 // because of bug in dbc
                 spellInfo->procChance = 0;
                 break;
+			 case 2825:  // Bloodlust
+                spellInfo->excludeCasterAuraSpell = 57724; // Sated
+                break;
+			case 32982: // Fire Elemental Totem
+			case 33663: // Earth Elemental Totem
+						// Earth and Fire Totem Transform spells were removed from dbc
+				spellInfo->Effect[1] = 0;
+            break;	
             case 20335: // Heart of the Crusader
             case 20336:
             case 20337:
@@ -3526,6 +3534,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 72405: // Broken Frostmourne
                 spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_200_YARDS;   // 200yd
+                break;
+			case 62012: // Turkey Caller
+                spellInfo->EffectRadiusIndex[0] = 36; //0yd
                 break;
             default:
                 break;

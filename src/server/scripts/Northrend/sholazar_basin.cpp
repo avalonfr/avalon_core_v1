@@ -36,17 +36,23 @@ EndContentData */
 ######*/
 
 #define GOSSIP_ITEM1 "I am ready to travel to your village now."
+#define GOSSIP_ITEM2 "<Reach down and pull the injured Rainspeaker Oracle to it's feet.>"
 
 enum eRainspeaker
 {
-    SAY_START_IRO                       = -1571000,
-    SAY_QUEST_ACCEPT_IRO                = -1571001,
-    SAY_END_IRO                         = -1571002,
+    SAY_START_IRO = -1571000,
+    SAY_QUEST_ACCEPT_IRO = -1571001,
+    SAY_END_IRO = -1571002,
 
-    QUEST_FORTUNATE_MISUNDERSTANDINGS   = 12570,
-    FACTION_ESCORTEE_A                  = 774,
-    FACTION_ESCORTEE_H                  = 775
+    QUEST_FORTUNATE_MISUNDERSTANDINGS = 12570,
+    QUEST_JUST_FOLLOWING_ORDERS = 12540,
+    ENTRY_RAVENOUS_MANGAL_CROCOLISK = 28325,
+    FACTION_ESCORTEE_A = 774,
+    FACTION_ESCORTEE_H = 775
 };
+
+#define FACTION_FRENZYHEART 1104
+#define FACTION_ORCLES 1105
 
 class npc_injured_rainspeaker_oracle : public CreatureScript
 {
@@ -55,7 +61,10 @@ public:
 
     struct npc_injured_rainspeaker_oracleAI : public npc_escortAI
     {
-        npc_injured_rainspeaker_oracleAI(Creature* c) : npc_escortAI(c) { c_guid = c->GetGUID(); }
+        npc_injured_rainspeaker_oracleAI(Creature* c) : npc_escortAI(c)
+        {
+            c_guid = c->GetGUID();
+        }
 
         uint64 c_guid;
 
@@ -77,7 +86,7 @@ public:
             if (!player)
                 return;
 
-            switch (i)
+            switch(i)
             {
             case 1: SetRun(); break;
             case 10:
@@ -99,7 +108,7 @@ public:
                 break;
             case 28:
                 player->GroupEventHappens(QUEST_FORTUNATE_MISUNDERSTANDINGS, me);
-              //  me->RestoreFaction();
+              // me->RestoreFaction();
                 DoScriptText(SAY_END_IRO, me);
                 SetRun(false);
                 break;
@@ -112,11 +121,9 @@ public:
                 return;
 
             if (Player* player = GetPlayerForEscort())
-            {
               if (player->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTANDINGS) != QUEST_STATUS_COMPLETE)
                 player->FailQuest(QUEST_FORTUNATE_MISUNDERSTANDINGS);
             }
-        }
     };
 
     bool OnGossipHello(Player* player, Creature* creature)
@@ -127,22 +134,26 @@ public:
         if (player->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTANDINGS) == QUEST_STATUS_INCOMPLETE)
             player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF+1);
 
-        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
+        if (player->GetQuestStatus(QUEST_JUST_FOLLOWING_ORDERS) == QUEST_STATUS_INCOMPLETE
+            && !creature->FindNearestCreature(ENTRY_RAVENOUS_MANGAL_CROCOLISK, 10.0f))
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
+        player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetGUID());
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
     {
         player->PlayerTalkClass->ClearMenus();
-        if (uiAction == GOSSIP_ACTION_INFO_DEF+1)
+        if (action == GOSSIP_ACTION_INFO_DEF + 1)
         {
             CAST_AI(npc_escortAI, (creature->AI()))->Start(true, false, player->GetGUID());
             CAST_AI(npc_escortAI, (creature->AI()))->SetMaxPlayerDistance(35.0f);
             creature->SetUnitMovementFlags(MOVEMENTFLAG_JUMPING);
             DoScriptText(SAY_START_IRO, creature);
 
-            switch (player->GetTeam()){
+            switch (player->GetTeam())
+            {
             case ALLIANCE:
                 creature->setFaction(FACTION_ESCORTEE_A);
                 break;
@@ -151,6 +162,12 @@ public:
                 break;
             }
         }
+        else if (action == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            player->SummonCreature(ENTRY_RAVENOUS_MANGAL_CROCOLISK, *creature, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);
+            player->CLOSE_GOSSIP_MENU();
+        }
+
         return true;
     }
 
@@ -158,6 +175,18 @@ public:
     {
         DoScriptText(SAY_QUEST_ACCEPT_IRO, creature);
         return false;
+    }
+
+    bool OnQuestReward(Player *player, Creature *_Creature, Quest const *_Quest, uint32 /*item*/)
+    {
+        switch(_Quest->GetQuestId())
+        {
+        case QUEST_JUST_FOLLOWING_ORDERS:
+            player->GetReputationMgr().SetReputation(sFactionStore.LookupEntry(FACTION_ORCLES),3000);
+            //player->GetReputationMgr().SetReputation(sFactionStore.LookupEntry(FACTION_FRENZYHEART),-600);
+            break;
+        }
+        return true;
     }
 
     CreatureAI* GetAI(Creature* creature) const

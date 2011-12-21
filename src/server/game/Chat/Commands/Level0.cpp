@@ -529,122 +529,151 @@ bool ChatHandler::AddGold(int gold)
 
 bool ChatHandler::BoutiqueLevel(const char* args)
 {
-	int asklvl = 0;
-	int points = 0;
-	int currentlevel = 0;
-	int prix = 0;
-	int i = 0;
-	int bilan = 0;
+int asklvl = 0;
+int points = 0;
+int currentlevel = 0;
+int prix_level = 0;
+int i = 0;
+int bilan = 0;
 
-	if (!*args)
-	       return false;
+if (!*args)
+return false;
 
-	char* px = strtok((char*)args, " ");
-	asklvl = atoi(px);
+char* px = strtok((char*)args, " ");
+asklvl = atoi(px);
 
-	if (asklvl < 0) return false;
+if (asklvl < 0) return false;
 
-	Player* character = m_session->GetPlayer();
-		Player* plTarget = NULL;
+Player* character = m_session->GetPlayer();
+Player* plTarget = NULL;
     if(!plTarget)
         plTarget = character;
 
-	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
-	if (!result) return false;
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+if (!result) return false;
 
-	Field* fields = result->Fetch();
-	if (!fields) return false;
+Field* fields = result->Fetch();
+if (!fields) return false;
 
-	points = fields[0].GetUInt32();
-	currentlevel = character->getLevel();
+points = fields[0].GetUInt32();
+currentlevel = character->getLevel();
 
-	if ((currentlevel == 80)||(currentlevel+asklvl > 80))
-	{
-		m_session->SendNotification("Erreur sur le level demande");
-		return false;
-	}
+if ((currentlevel == 80)||(currentlevel+asklvl > 80))
+{
+m_session->SendNotification("Erreur sur le level demande");
+return false;
+}
 
 
-	while (i<asklvl)
-	{
-	currentlevel = character->getLevel() + i;
-	if(coutlevel(currentlevel)==0) return true;
-	prix += coutlevel(currentlevel);
-	i++;
-	}
+while (i<asklvl)
+{
+currentlevel = character->getLevel() + i;
+if(coutlevel(currentlevel) == 0) return true;
+prix_level += coutlevel(currentlevel);
+i++;
+}
 
-	if (prix > points)
-	{
-	m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix);
-	return false;
-	}
-	bilan = points - prix;
-	CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
-	CharacterDatabase.PQuery("INSERT INTO `shop_log` (`id`,`acct`,`type`,`valeur1`,`valeur2`) VALUES ('','%u','level','%u','%u')",character->GetSession()->GetAccountId(),character->getLevel(),asklvl);
-	Levelup(asklvl);
-	m_session->SendNotification("Il vous reste %u points sur votre compte",bilan);
-	return true;
+if (prix_level > points)
+{
+m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix_level);
+return false;
+}
+bilan = points - prix_level;
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("INSERT INTO `shop_log` (`id`,`acct`,`type`,`valeur1`,`valeur2`) VALUES ('','%u','level','%u','%u')",character->GetSession()->GetAccountId(),character->getLevel(),asklvl);
+Levelup(asklvl);
+m_session->SendNotification("Il vous reste %u points sur votre compte",bilan);
+return true;
 
 }
 
+// Boutique Infos
+bool ChatHandler::BoutiqueInfos(const char* args)
+{
+int points = 0;
+int renommage = 50;
+int customisation = 100;
+int race = 125;
+int faction = 150;
+
+Player* character = m_session->GetPlayer();
+
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+if (!result) return false;
+
+Field* fields = result->Fetch();
+if (!fields) return false;
+
+points = fields[0].GetUInt32();
+
+PSendSysMessage("Vous avez %u points",points);
+PSendSysMessage("Renommage : %u points",renommage);
+PSendSysMessage("Customisation : %u points",customisation);
+PSendSysMessage("Changement de Race : %u points",race);
+PSendSysMessage("Changement de Faction : %u points",faction);
+
+return true;
+}
+
+//Boutique additem
 bool ChatHandler::BoutiqueAdditem(const char* args)
 {
-	int points;
-	int prix;
-	int bilan;
-	uint32 ItemId = 0;
+int points;
+int prix;
+int bilan;
+uint32 ItemId = 0;
 
     if (!*args)
         return false;
-	
-	char** tab;
-	int size = 0;
 
-	tab=split(args," ",0,&size);
-	
-	int32 count = size==2?atoi(tab[1]):1;
+char** tab;
+int size = 0;
 
-	int i = 0;
+tab=split(args," ",0,&size);
 
-	for(i=0;i<size;i++) {
-		free(tab[i]);
-	}
-	free(tab); 
-	
-	
+int32 count = size==2?atoi(tab[1]):1;
 
-	if(count < 0){
-		m_session->SendNotification("La quantité ne peut pas être négative");
-		return false;
-	}
+int i = 0;
+
+for(i=0;i<size;i++) {
+free(tab[i]);
+}
+free(tab);
+
+
+
+if(count < 0){
+m_session->SendNotification("La quantité ne peut pas être négative");
+return false;
+}
 
     if (count == 0)
         count = 1;
-		
-	
-	Player* character = m_session->GetPlayer();
 
-	ItemId = getItemId(args);
 
-	QueryResult result = CharacterDatabase.PQuery("SELECT `prix` FROM `shop_item` WHERE `entry` = '%u'",ItemId);
+Player* character = m_session->GetPlayer();
+
+ItemId = getItemId(args);
+
+QueryResult result = CharacterDatabase.PQuery("SELECT `prix` FROM `shop_item` WHERE `entry` = '%u'",ItemId);
 
     if(!result){
-		m_session->SendNotification("L'objet n'est pas disponible");
-		return false;
-	}
+m_session->SendNotification("L'objet n'est pas disponible");
+return false;
+}
 
-	Field* fields = result->Fetch();
+Field* fields = result->Fetch();
 
-	if(!fields)
+if(!fields)
     return false;
 
-	if (fields[0].GetUInt32() == 0)
-		return false;
+if (fields[0].GetUInt32() == 0)
+return false;
 
-	prix = count*(fields[0].GetUInt32());
+prix = count*(fields[0].GetUInt32());
 
 
-	result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
     if(!result)
        return false;
@@ -660,71 +689,71 @@ bool ChatHandler::BoutiqueAdditem(const char* args)
       if(points < prix)
       {
       m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix);
-	  return false;
+return false;
       }
 
-	  bilan = points - prix;
-	  if(!Additem(ItemId, count,1, false))
-	  {
-	    m_session->SendNotification("Vous n'avez pas assez de place dans vos sacs");
-		return false;
-	  }
-	  CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
-	  // On veut log, surtout au debut pour verifier les abus sur les prix pas tres juste :/
-	  CharacterDatabase.PQuery("INSERT INTO `shop_log` (`acct`,`type`,`valeur1`,`valeur2`) VALUES ('%u','item','%u','%u')",character->GetSession()->GetAccountId(),ItemId,count);
-	  return true;
+bilan = points - prix;
+if(!Additem(ItemId, count,1, false))
+{
+m_session->SendNotification("Vous n'avez pas assez de place dans vos sacs");
+return false;
+}
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+// On veut log, surtout au debut pour verifier les abus sur les prix pas tres juste :/
+CharacterDatabase.PQuery("INSERT INTO `shop_log` (`acct`,`type`,`valeur1`,`valeur2`) VALUES ('%u','item','%u','%u')",character->GetSession()->GetAccountId(),ItemId,count);
+return true;
 }
 
-bool ChatHandler::BoutiqueGold(const char* args) 
+bool ChatHandler::BoutiqueGold(const char* args)
 {
     if (!*args)
-	       return false;
+return false;
 
-	uint32 bilan = 0;
-	uint32 points = 0;
-	float prix = 0;
-	float Qt = 0;
-	float askgold2 = 0;
+uint32 bilan = 0;
+uint32 points = 0;
+float prix = 0;
+float Qt = 0;
+float askgold2 = 0;
 
-	
+
     Player* character = m_session->GetPlayer();
 
-	char* px = strtok((char*)args, " ");
+char* px = strtok((char*)args, " ");
 
-	int askgold = atoi(px);
-	askgold2 = askgold;
-	if ((askgold <= 0)||(askgold>10000))
-	{
-		m_session->SendNotification("Cette Valeur n'est pas autorise");
+int askgold = atoi(px);
+askgold2 = askgold;
+if ((askgold <= 0)||(askgold>10000))
+{
+m_session->SendNotification("Cette Valeur n'est pas autorise");
         return false;
-	}
+}
 
     QueryResult result = CharacterDatabase.PQuery("SELECT id FROM shop_gold WHERE minimum <= '%u' AND maximum >= '%u'",askgold,askgold);
     if (!result) return false;
     Field* fields = result->Fetch();
-	if (!fields) return false;
-	uint32 ui = fields[0].GetUInt32();
-	for(uint32 i = 1;i <= ui;i++)
-	{
-		result = CharacterDatabase.PQuery("SELECT maximum,prix_po,minimum FROM shop_gold WHERE id='%u'",i);
-		if (!result) return false;
-		Field* fields = result->Fetch();
-		if (!fields) return false;
-		if(fields[0].GetFloat() < askgold)  
-		{
-			askgold2 = askgold;
-			Qt = fields[0].GetFloat() - (fields[2].GetFloat() - 1);          
-			askgold2 -= fields[0].GetFloat();
-		}
-		else
-		{
-			Qt = askgold2;  
-			askgold2 = 0;
-		}
-		prix += Qt*(fields[1].GetFloat());
-	}
-	  
-	  result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+if (!fields) return false;
+uint32 ui = fields[0].GetUInt32();
+for(uint32 i = 1;i <= ui;i++)
+{
+result = CharacterDatabase.PQuery("SELECT maximum,prix_po,minimum FROM shop_gold WHERE id='%u'",i);
+if (!result) return false;
+Field* fields = result->Fetch();
+if (!fields) return false;
+if(fields[0].GetFloat() < askgold)
+{
+askgold2 = askgold;
+Qt = fields[0].GetFloat() - (fields[2].GetFloat() - 1);
+askgold2 -= fields[0].GetFloat();
+}
+else
+{
+Qt = askgold2;
+askgold2 = 0;
+}
+prix += Qt*(fields[1].GetFloat());
+}
+
+result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
        if(!result)
        return false;
@@ -735,22 +764,22 @@ bool ChatHandler::BoutiqueGold(const char* args)
        return false;
 
       points = fields[0].GetUInt32();
-	  uint32 prix2 = (int)prix;
+uint32 prix2 = (int)prix;
 
       if(points < prix2)
-	  {
-		m_session->SendNotification("Il vous manque %u points pour cet achat",prix2 - points);
+{
+m_session->SendNotification("Il vous manque %u points pour cet achat",prix2 - points);
         return false;
-	  }
+}
      
 
-	  bilan = points - prix2;
-	  CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
-	  CharacterDatabase.PQuery("INSERT INTO `shop_log` (`id`,`acct`,`type`,`valeur1`,`valeur2`) VALUES ('','%u','gold','%u','%u')",character->GetSession()->GetAccountId(),askgold,prix2);
-	  character->SetMoney(character->GetMoney() + askgold*10000);
-	  m_session->SendNotification("Il vous reste %u points sur votre compte",bilan);
+bilan = points - prix2;
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("INSERT INTO `shop_log` (`id`,`acct`,`type`,`valeur1`,`valeur2`) VALUES ('','%u','gold','%u','%u')",character->GetSession()->GetAccountId(),askgold,prix2);
+character->SetMoney(character->GetMoney() + askgold*10000);
+m_session->SendNotification("Il vous reste %u points sur votre compte",bilan);
 
-	  return true;
+return true;
 
 
 }
@@ -758,13 +787,13 @@ bool ChatHandler::BoutiqueGold(const char* args)
 // customize characters
 bool ChatHandler::BoutiqueCustomize(const char* args)
 {
-	int points = 0;
-	int prix_custom = 200;
-	int bilan = 0;
-	Player* character = m_session->GetPlayer();
+int points = 0;
+int prix_custom = 100;
+int bilan = 0;
+Player* character = m_session->GetPlayer();
 
-	//TODO : faire la requete voir si l'object à 1 prix
-	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+//TODO : faire la requete voir si l'object à 1 prix
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
     if(!result)
        return false;
@@ -779,17 +808,17 @@ bool ChatHandler::BoutiqueCustomize(const char* args)
 
       if(points < prix_custom)
       {
-      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 200 points pour votre demande.");
-	  return false;
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix_custom);
+return false;
       }
 
     Player* target = m_session->GetPlayer();
-	bilan = points - prix_custom;
+bilan = points - prix_custom;
     if(target)
     {
         PSendSysMessage(LANG_CUSTOMIZE_PLAYER, GetNameLink(target).c_str());
         target->SetAtLoginFlag(AT_LOGIN_CUSTOMIZE);
-		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '8' WHERE guid = '%u'", target->GetGUIDLow());
     }
     else
@@ -803,14 +832,14 @@ bool ChatHandler::BoutiqueCustomize(const char* args)
 // rename characters
 bool ChatHandler::BoutiqueRename(const char* args)
 {
-	int points = 0;
-	int prix_rename = 100;
-	int bilan = 0;
-	
-	Player* character = m_session->GetPlayer();
+int points = 0;
+int prix_rename = 50;
+int bilan = 0;
 
-	//TODO : faire la requete voir si l'object à 1 prix
-	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+Player* character = m_session->GetPlayer();
+
+//TODO : faire la requete voir si l'object à 1 prix
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
     if(!result)
        return false;
@@ -825,17 +854,17 @@ bool ChatHandler::BoutiqueRename(const char* args)
 
       if(points < prix_rename)
       {
-      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 100 points pour votre demande.");
-	  return false;
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix_rename);
+return false;
       }
 
     Player* target = m_session->GetPlayer();
-	bilan = points - prix_rename;
+bilan = points - prix_rename;
     if(target)
     {
         PSendSysMessage(LANG_RENAME_PLAYER, GetNameLink(target).c_str());
         target->SetAtLoginFlag(AT_LOGIN_RENAME);
-		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
         //CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '8' WHERE guid = '%u'", target->GetGUIDLow());
     }
     else
@@ -849,14 +878,14 @@ bool ChatHandler::BoutiqueRename(const char* args)
 // race characters
 bool ChatHandler::BoutiqueRace(const char* args)
 {
-	int points = 0;
-	int prix_race = 250;
-	int bilan = 0;
-	
-	Player* character = m_session->GetPlayer();
+int points = 0;
+int prix_race = 125;
+int bilan = 0;
 
-	//TODO : faire la requete voir si l'object à 1 prix
-	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+Player* character = m_session->GetPlayer();
+
+//TODO : faire la requete voir si l'object à 1 prix
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
     if(!result)
        return false;
@@ -871,18 +900,18 @@ bool ChatHandler::BoutiqueRace(const char* args)
 
       if(points < prix_race)
       {
-      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 250 points pour votre demande.");
-	  return false;
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix_race);
+return false;
       }
 
     Player* target = m_session->GetPlayer();
-	bilan = points - prix_race;
+bilan = points - prix_race;
     if(target)
     {
         PSendSysMessage(LANG_CUSTOMIZE_PLAYER, GetNameLink(target).c_str());
         target->SetAtLoginFlag(AT_LOGIN_CHANGE_RACE);
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '128' WHERE guid = %u", target->GetGUIDLow());
-		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
     }
     else
     {
@@ -895,14 +924,14 @@ bool ChatHandler::BoutiqueRace(const char* args)
 // faction characters
 bool ChatHandler::BoutiqueFaction(const char* args)
 {
-	int points = 0;
-	int prix_faction = 300;
-	int bilan = 0;
-	
-	Player* character = m_session->GetPlayer();
+int points = 0;
+int prix_faction = 150;
+int bilan = 0;
 
-	//TODO : faire la requete voir si l'object à 1 prix
-	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
+Player* character = m_session->GetPlayer();
+
+//TODO : faire la requete voir si l'object à 1 prix
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
     if(!result)
        return false;
@@ -917,18 +946,18 @@ bool ChatHandler::BoutiqueFaction(const char* args)
 
       if(points < prix_faction)
       {
-      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut 300 points pour votre demande.");
-	  return false;
+      m_session->SendNotification("Vous n'avez pas assez de points.Il vous faut %u points pour votre demande.",prix_faction);
+return false;
       }
 
     Player* target = m_session->GetPlayer();
-	bilan = points - prix_faction;
+bilan = points - prix_faction;
     if(target)
     {
         PSendSysMessage(LANG_CUSTOMIZE_PLAYER, GetNameLink(target).c_str());
         target->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '64' WHERE guid = %u", target->GetGUIDLow());
-		CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",bilan,character->GetSession()->GetAccountId());
     }
     else
     {
@@ -940,58 +969,58 @@ bool ChatHandler::BoutiqueFaction(const char* args)
 
 bool ChatHandler::BoutiqueSet(const char* args){
 
-	int points = 0;
-	int id = 0;
+int points = 0;
+int id = 0;
 
     if (!*args)
-	       return false;
+return false;
 
-	char* px = strtok((char*)args, " ");
+char* px = strtok((char*)args, " ");
 
-	id = atoi(px);
+id = atoi(px);
 
-	Player* character = m_session->GetPlayer();
+Player* character = m_session->GetPlayer();
 
-	QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
-	
-	if(!result) return false;
+QueryResult result = CharacterDatabase.PQuery("SELECT `points` FROM `compte` WHERE `acct` = '%u'",character->GetSession()->GetAccountId());
 
-	Field* fields = result->Fetch();
+if(!result) return false;
 
-	if (!fields) return false;
+Field* fields = result->Fetch();
 
-	points = fields[0].GetUInt32();
+if (!fields) return false;
 
-	result = CharacterDatabase.PQuery("SELECT `data`,`prix` FROM `shop_set` WHERE `set_id` = '%u'",id);
+points = fields[0].GetUInt32();
 
-	if(!result) return false;
+result = CharacterDatabase.PQuery("SELECT `data`,`prix` FROM `shop_set` WHERE `set_id` = '%u'",id);
 
-	fields = result->Fetch();
+if(!result) return false;
 
-	if (!fields) return false;
+fields = result->Fetch();
 
-	const char* data = fields[0].GetCString();
-	int prix = fields[1].GetUInt32();
+if (!fields) return false;
 
-	if(prix>points){
-		m_session->SendNotification("Il vous manque %u points pour cet achat",prix - points);
+const char* data = fields[0].GetCString();
+int prix = fields[1].GetUInt32();
+
+if(prix>points){
+m_session->SendNotification("Il vous manque %u points pour cet achat",prix - points);
         return false;
-	}
+}
 
-	CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",points-prix,character->GetSession()->GetAccountId());
+CharacterDatabase.PQuery("UPDATE `compte` SET `points` = '%u' WHERE acct='%u'",points-prix,character->GetSession()->GetAccountId());
 
-	char** tab;
-	int size = 0;
+char** tab;
+int size = 0;
 
-	tab=split(data," ",0,&size);
+tab=split(data," ",0,&size);
 
-	int i = 0;
+int i = 0;
 
-	for(i=0;i<size;i++) {
-		Additem(atoi(tab[i]),1,1,false);
-		free(tab[i]);
-	}
-	free(tab); 
+for(i=0;i<size;i++) {
+Additem(atoi(tab[i]),1,1,false);
+free(tab[i]);
+}
+free(tab);
 
-	return true;
+return true;
 }

@@ -217,6 +217,8 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry, uint32 petnumber, bool c
             SetPower(POWER_HAPPINESS, fields[12].GetUInt32());
             setPowerType(POWER_FOCUS);
             break;
+		case CLASS_MAGE:
+            return GetCreatureInfo()->type == CREATURE_TYPE_ELEMENTAL;
         default:
             if (!IsPetGhoul())
                 sLog->outError("Pet have incorrect type (%u) for pet loading.", getPetType());
@@ -857,7 +859,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             uint32 val  = (fire > shadow) ? fire : shadow;
             SetBonusDamage(int32 (val * 0.15f));
             //bonusAP += val * 0.57;
-
+			SetBonusDamage(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.5f);
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
 
