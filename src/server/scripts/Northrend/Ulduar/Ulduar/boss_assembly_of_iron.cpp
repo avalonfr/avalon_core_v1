@@ -33,17 +33,24 @@ enum AssemblySpells
     // General
     SPELL_SUPERCHARGE                            = 61920,
     SPELL_BERSERK                                = 47008, // Hard enrage, don't know the correct ID.
+	SPELL_IRON_BOOT_FLASK               		 = 58501,
 
     // Steelbreaker
     SPELL_HIGH_VOLTAGE                           = 61890,
+    SPELL_HIGH_VOLTAGE_H                		 = 63498,
     SPELL_FUSION_PUNCH                           = 61903,
+    SPELL_FUSION_PUNCH_H                		 = 63493,
     SPELL_STATIC_DISRUPTION                      = 44008,
+    SPELL_STATIC_DISRUPTION_H           		 = 63495,
     SPELL_OVERWHELMING_POWER                     = 64637,
+    SPELL_OVERWHELMING_POWER_H          		 = 61888,
     SPELL_ELECTRICAL_CHARGE                      = 61902,
 
     // Runemaster Molgeim
     SPELL_SHIELD_OF_RUNES                        = 62274,
     SPELL_SHIELD_OF_RUNES_BUFF                   = 62277,
+    SPELL_SHIELD_OF_RUNES_H 					 = 63489,
+    SPELL_SHIELD_OF_RUNES_H_BUFF 				 = 63967,
     SPELL_SUMMON_RUNE_OF_POWER                   = 63513,
     SPELL_RUNE_OF_POWER                          = 61974,
     SPELL_RUNE_OF_DEATH                          = 62269,
@@ -54,8 +61,13 @@ enum AssemblySpells
 
     // Stormcaller Brundir
     SPELL_CHAIN_LIGHTNING                        = 61879,
+	SPELL_CHAIN_LIGHTNING_H						 = 63479,
     SPELL_OVERLOAD                               = 61869,
+    SPELL_OVERLOAD_H                    		 = 63481,
     SPELL_LIGHTNING_WHIRL                        = 61915,
+    SPELL_LIGHTNING_WHIRL_H             		 = 63483,
+    SPELL_LIGHTNING_WHIRL_DMG           		 = 61916,
+    SPELL_LIGHTNING_WHIRL_DMG_H         		 = 63482,
     SPELL_LIGHTNING_TENDRILS_10M                 = 61887,
     SPELL_LIGHTNING_TENDRILS_25M                 = 63486,
     SPELL_LIGHTNING_TENDRILS_VISUAL              = 61883,
@@ -131,6 +143,12 @@ enum AssemblyYells
 enum AssemblyNPCs
 {
     NPC_WORLD_TRIGGER                            = 22515,
+};
+
+enum Data
+{
+    DATA_I_CHOOSE_YOU = 1,
+    DATA_CANT_DO_THAT
 };
 
 #define EMOTE_OVERLOAD                           "Stormcaller Brundir begins to Overload!" // Move it to DB
@@ -211,6 +229,7 @@ class boss_steelbreaker : public CreatureScript
 
             InstanceScript* instance;
             uint32 phase;
+			bool _couldNotDoThat;
 
             void Reset()
             {
@@ -225,10 +244,18 @@ class boss_steelbreaker : public CreatureScript
                 StartEncounter(instance, me, who);
                 DoScriptText(SAY_STEELBREAKER_AGGRO, me);
                 DoZoneInCombat();
-                DoCast(me, SPELL_HIGH_VOLTAGE);
+                DoCast(me, RAID_MODE(SPELL_HIGH_VOLTAGE, SPELL_HIGH_VOLTAGE_H));
                 events.SetPhase(++phase);
                 events.ScheduleEvent(EVENT_BERSERK, 900000);
                 events.ScheduleEvent(EVENT_FUSION_PUNCH, 15000);
+            }
+			
+			uint32 GetData(uint32 type)
+            {
+                if (type == DATA_I_CHOOSE_YOU)
+                    return (phase >= 3) ? 1 : 0;
+
+                return 0;
             }
 
             void DoAction(int32 const action)
@@ -297,17 +324,20 @@ class boss_steelbreaker : public CreatureScript
                             break;
                         case EVENT_FUSION_PUNCH:
                             if (me->IsWithinMeleeRange(me->getVictim()))
-                                DoCastVictim(SPELL_FUSION_PUNCH);
+                                DoCastVictim(RAID_MODE<uint32>(SPELL_FUSION_PUNCH, SPELL_FUSION_PUNCH_H));
                             events.ScheduleEvent(EVENT_FUSION_PUNCH, urand(13000, 22000));
                             break;
                         case EVENT_STATIC_DISRUPTION:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                DoCast(target, SPELL_STATIC_DISRUPTION);
+                                DoCast(target, RAID_MODE<uint32>(SPELL_STATIC_DISRUPTION, SPELL_STATIC_DISRUPTION_H));
                             events.ScheduleEvent(EVENT_STATIC_DISRUPTION, urand(20000, 40000));
                             break;
                         case EVENT_OVERWHELMING_POWER:
-                            DoScriptText(SAY_STEELBREAKER_POWER, me);
-                            DoCastVictim(SPELL_OVERWHELMING_POWER);
+                           if (me->getVictim() && !me->getVictim()->HasAura(RAID_MODE<uint32>(SPELL_OVERWHELMING_POWER, SPELL_OVERWHELMING_POWER_H)))
+                            {
+                                DoScriptText(SAY_STEELBREAKER_POWER, me);
+                                DoCastVictim(RAID_MODE<uint32>(SPELL_OVERWHELMING_POWER, SPELL_OVERWHELMING_POWER_H));
+                            }
                             events.ScheduleEvent(EVENT_OVERWHELMING_POWER, RAID_MODE(60000, 35000));
                             break;
                     }
@@ -337,6 +367,7 @@ class boss_runemaster_molgeim : public CreatureScript
 
             InstanceScript* instance;
             uint32 phase;
+			bool _couldNotDoThat;
 
             void Reset()
             {
@@ -355,6 +386,14 @@ class boss_runemaster_molgeim : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 900000);
                 events.ScheduleEvent(EVENT_SHIELD_OF_RUNES, 30000);
                 events.ScheduleEvent(EVENT_RUNE_OF_POWER, 20000);
+            }
+			
+			uint32 GetData(uint32 type)
+            {
+                if (type == DATA_I_CHOOSE_YOU)
+                    return (phase >= 3) ? 1 : 0;
+
+                return 0;
             }
 
             void DoAction(int32 const action)
@@ -440,7 +479,7 @@ class boss_runemaster_molgeim : public CreatureScript
                             break;
                         }
                         case EVENT_SHIELD_OF_RUNES:
-                            DoCast(me, SPELL_SHIELD_OF_RUNES);
+                            DoCast(me, RAID_MODE(SPELL_SHIELD_OF_RUNES, SPELL_SHIELD_OF_RUNES_H));
                             events.ScheduleEvent(EVENT_SHIELD_OF_RUNES, urand(27000, 34000));
                             break;
                         case EVENT_RUNE_OF_DEATH:
@@ -569,11 +608,13 @@ class boss_stormcaller_brundir : public CreatureScript
 
             InstanceScript* instance;
             uint32 phase;
+			bool _couldNotDoThat;
 
             void Reset()
             {
                 _Reset();
                 phase = 0;
+				_couldNotDoThat = true;
                 me->RemoveAllAuras();
                 me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
                 me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, false);  // Should be interruptable unless overridden by spell (Overload)
@@ -591,6 +632,32 @@ class boss_stormcaller_brundir : public CreatureScript
                 events.ScheduleEvent(EVENT_BERSERK, 900000);
                 events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, 4000);
                 events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
+            }
+			
+			uint32 GetData(uint32 type)
+            {
+                switch (type)
+                {
+                    case DATA_I_CHOOSE_YOU:
+                        return (phase >= 3) ? 1 : 0;
+                    case DATA_CANT_DO_THAT:
+                        return _couldNotDoThat ? 1 : 0;
+                }
+
+                return 0;
+            }
+			
+            void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell)
+            {
+                switch (spell->Id)
+                {
+                    case SPELL_CHAIN_LIGHTNING:
+                    case SPELL_CHAIN_LIGHTNING_H:
+                    case SPELL_LIGHTNING_WHIRL_DMG:
+                    case SPELL_LIGHTNING_WHIRL_DMG_H:
+                        _couldNotDoThat = false;
+                        break;
+                }
             }
 
             void DoAction(int32 const action)
@@ -663,17 +730,18 @@ class boss_stormcaller_brundir : public CreatureScript
                             break;
                         case EVENT_CHAIN_LIGHTNING:
                             if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                                DoCast(target, SPELL_CHAIN_LIGHTNING);
+                                DoCast(target, RAID_MODE(SPELL_CHAIN_LIGHTNING, SPELL_CHAIN_LIGHTNING_H));
                             events.ScheduleEvent(EVENT_CHAIN_LIGHTNING, urand(7000, 10000));
                             break;
                         case EVENT_OVERLOAD:
-                            me->MonsterTextEmote(EMOTE_OVERLOAD, 0, true);
+                            if (!me->HasUnitState(UNIT_STAT_STUNNED))
+                                me->MonsterTextEmote(EMOTE_OVERLOAD, 0, true);
                             DoScriptText(SAY_BRUNDIR_SPECIAL, me);
-                            DoCast(SPELL_OVERLOAD);
+                            DoCast(RAID_MODE(SPELL_OVERLOAD, SPELL_OVERLOAD_H));
                             events.ScheduleEvent(EVENT_OVERLOAD, urand(60000, 120000));
                             break;
                         case EVENT_LIGHTNING_WHIRL:
-                            DoCast(SPELL_LIGHTNING_WHIRL);
+                            DoCast(RAID_MODE(SPELL_LIGHTNING_WHIRL, SPELL_LIGHTNING_WHIRL_H));
                             events.ScheduleEvent(EVENT_LIGHTNING_WHIRL, urand(15000, 20000));
                             break;
                         case EVENT_LIGHTNING_TENDRILS:
@@ -799,6 +867,67 @@ class spell_assembly_meltdown : public SpellScriptLoader
         }
 };
 
+class achievement_i_choose_you : public AchievementCriteriaScript
+{
+    public:
+        achievement_i_choose_you() : AchievementCriteriaScript("achievement_i_choose_you")
+        {
+        }
+
+        bool OnCheck(Player* /*player*/, Unit* target)
+        {
+            if (!target)
+                return false;
+
+            if (Creature* boss = target->ToCreature())
+                if (boss->AI()->GetData(DATA_I_CHOOSE_YOU))
+                    return true;
+
+            return false;
+        }
+};
+
+class achievement_but_i_am_on_your_side : public AchievementCriteriaScript
+{
+    public:
+        achievement_but_i_am_on_your_side() : AchievementCriteriaScript("achievement_but_i_am_on_your_side")
+        {
+        }
+
+        bool OnCheck(Player* player, Unit* target)
+        {
+            if (!target || !player)
+                return false;
+
+            if (Creature* boss = target->ToCreature())
+                if (boss->AI()->GetData(DATA_I_CHOOSE_YOU) && player->HasAura(SPELL_IRON_BOOT_FLASK))
+                    return true;
+
+            return false;
+        }
+};
+
+class achievement_cant_do_that_while_stunned : public AchievementCriteriaScript
+{
+    public:
+        achievement_cant_do_that_while_stunned() : AchievementCriteriaScript("achievement_cant_do_that_while_stunned")
+        {
+        }
+
+        bool OnCheck(Player* player, Unit* /*target*/)
+        {
+            if (!player)
+                return false;
+
+            if (InstanceScript* instance = player->GetInstanceScript())
+                if (Creature* brundir = ObjectAccessor::GetCreature(*player, instance->GetData64(BOSS_BRUNDIR)))
+                    if (brundir->AI()->GetData(DATA_CANT_DO_THAT))
+                        return true;
+ 
+            return false;
+        }
+};
+
 void AddSC_boss_assembly_of_iron()
 {
     new boss_steelbreaker();
@@ -809,4 +938,7 @@ void AddSC_boss_assembly_of_iron()
     new mob_rune_of_power();
     new spell_shield_of_runes();
     new spell_assembly_meltdown();
+    new achievement_i_choose_you();
+    new achievement_but_i_am_on_your_side();
+    new achievement_cant_do_that_while_stunned();
 }
