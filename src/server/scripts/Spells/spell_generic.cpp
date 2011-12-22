@@ -1242,7 +1242,7 @@ public:
                     if (caster->GetOwner()->IsMounted())
                         caster->Mount(29736);
                     else if (caster->IsMounted())
-                        caster->Unmount();
+                        caster->Dismount();
                 }
             }
         }

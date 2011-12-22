@@ -222,7 +222,7 @@ public:
         void JustReachedHome()
         {
             me->SetFlying(false);
-            me->Unmount();
+            me->Dismount();
             me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             me->RemoveUnitMovementFlag(MOVEMENTFLAG_LEVITATING);
             if (Unit::GetCreature((*me), m_uiGraufGUID) == NULL)
@@ -301,7 +301,7 @@ public:
                     m_uiLoopCounter[2] = m_uiLoopCounter[0];
                     Phase = SKADI;
                     me->SetFlying(false);
-                    me->Unmount();
+                    me->Dismount();
                     if (Creature* pGrauf = me->SummonCreature(CREATURE_GRAUF, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 3*IN_MILLISECONDS))
                     {
                         pGrauf->GetMotionMaster()->MoveFall(0);

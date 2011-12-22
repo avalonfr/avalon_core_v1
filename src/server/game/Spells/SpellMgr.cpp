@@ -3206,9 +3206,6 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->SpellFamilyFlags[2] = 0x10;
                 spellInfo->EffectApplyAuraName[1] = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
                 break;
-			case 63163: // Apply Enchanted Bridle (Argent Tournament)
-				spellInfo->EffectDieSides[0] = 0;
-				break;
             case 41013: // Parasitic Shadowfiend Passive
             case 41913: // Parasitic Shadowfiend Passive
                 spellInfo->EffectApplyAuraName[0] = SPELL_AURA_DUMMY; // proc debuff, and summon infinite fiends
