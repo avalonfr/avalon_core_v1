@@ -760,7 +760,7 @@ class npc_high_overlord_saurfang_icc : public CreatureScript
             InstanceScript* instance = creature->GetInstanceScript();
             if (instance && instance->GetBossState(DATA_DEATHBRINGER_SAURFANG) != DONE)
             {
-                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous sommes prêts à aller, Haute Overlord. Le Roi-Liche doit tomber! Et Eze est notre DIEU !!!", 631, -ACTION_START_EVENT);
+                player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Nous sommes prets a attaquer. Le Roi-Liche doit tomber ! TKT Eze est notre DIEU !!!", 631, -ACTION_START_EVENT);
                 player->SEND_GOSSIP_MENU(DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
             }
 

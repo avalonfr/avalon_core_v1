@@ -30,20 +30,20 @@ class icecrown_citadel_teleport : public GameObjectScript
 
         bool OnGossipHello(Player* player, GameObject* go)
         {
-            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Téléportation à Hammer Lumière", GOSSIP_SENDER_ICC_PORT, LIGHT_S_HAMMER_TELEPORT);
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "TÃ©lÃ©portation vers Marteau de Lumiere", GOSSIP_SENDER_ICC_PORT, LIGHT_S_HAMMER_TELEPORT);
             if (InstanceScript* instance = go->GetInstanceScript())
             {
                 if (instance->GetBossState(DATA_LORD_MARROWGAR) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Téléportation à l'Oratoire des Damnés.", GOSSIP_SENDER_ICC_PORT, ORATORY_OF_THE_DAMNED_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "TÃ©lÃ©portation vers Oratoire des DamnÃ©s.", GOSSIP_SENDER_ICC_PORT, ORATORY_OF_THE_DAMNED_TELEPORT);
                 if (instance->GetBossState(DATA_LADY_DEATHWHISPER) == DONE)
-				    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Téléportation vers le rempart des Crânes.", GOSSIP_SENDER_ICC_PORT, RAMPART_OF_SKULLS_TELEPORT);
+				    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "TÃ©lÃ©portation vers le rempart des Cranes.", GOSSIP_SENDER_ICC_PORT, RAMPART_OF_SKULLS_TELEPORT);
 				if (instance->GetBossState(DATA_GUNSHIP_BATTLE_EVENT) == DONE)
-					player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Téléportation à la hausse du porte-mort.", GOSSIP_SENDER_ICC_PORT, DEATHBRINGER_S_RISE_TELEPORT);
+					player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "TÃ©lÃ©portation vers la hausse du porte-mort.", GOSSIP_SENDER_ICC_PORT, DEATHBRINGER_S_RISE_TELEPORT);
                 if (instance->GetData(DATA_COLDFLAME_JETS) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Téléportation à la Flèche Haut.", GOSSIP_SENDER_ICC_PORT, UPPER_SPIRE_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "TÃ©lÃ©portation vers la Fleche Haut.", GOSSIP_SENDER_ICC_PORT, UPPER_SPIRE_TELEPORT);
                 // TODO: Gauntlet event before Sindragosa
                 if (instance->GetBossState(DATA_VALITHRIA_DREAMWALKER) == DONE)
-                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "Téléportation au repaire de Sindragosa", GOSSIP_SENDER_ICC_PORT, SINDRAGOSA_S_LAIR_TELEPORT);
+                    player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "TÃ©lÃ©portation au repaire de Sindragosa", GOSSIP_SENDER_ICC_PORT, SINDRAGOSA_S_LAIR_TELEPORT);
             }
 
             player->SEND_GOSSIP_MENU(player->GetGossipTextId(go), go->GetGUID());
