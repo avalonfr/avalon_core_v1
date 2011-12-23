@@ -97,7 +97,7 @@ enum Spells
     SPELL_SUMMON_BLOOD_BEAST_25_MAN     = 72356, // Additional cast, does not replace
     SPELL_FRENZY                        = 72737,
     SPELL_BLOOD_NOVA_TRIGGER            = 72378,
-    SPELL_BLOOD_NOVA                    = 73058,
+    SPELL_BLOOD_NOVA                    = 72380,
     SPELL_BLOOD_POWER                   = 72371,
     SPELL_BLOOD_LINK_POWER              = 72195,
     SPELL_BLOOD_LINK_DUMMY              = 72202,
