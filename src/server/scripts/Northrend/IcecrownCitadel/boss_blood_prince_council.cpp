@@ -411,6 +411,19 @@ class boss_prince_keleseth_icc : public CreatureScript
                 Talk(SAY_KELESETH_DEATH);
                 instance->SendEncounterUnit(ENCOUNTER_FRAME_REMOVE, me);
             }
+			
+            void AttackStart(Unit* who)
+            {
+                if (!who)
+                    return;
+                if (me->Attack(who, true))                    
+                {
+                    me->SetInCombatWith(who);
+                    who->SetInCombatWith(me);
+                    DoStartMovement(who, 20.0f);
+                    SetCombatMovement(true);
+                }
+            }			
 
             void JustReachedHome()
             {
