@@ -193,18 +193,18 @@ public:
 	
     bool OnExpire(Player* player, ItemTemplate const* /*pItemProto*/)
     {
-		uint32 IdItem = 39883;
-		uint8 count = 1;
+		/*uint32 IdItem = 39883;
+		uint8 count = 1;*/
         ItemPosCountVec dest;
-        /*uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
+        uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
         if (msg == EQUIP_ERR_OK)
-            player->StoreNewItem(dest, 39883, true, Item::GenerateItemRandomPropertyId(39883));*/
+            player->StoreNewItem(dest, 39883, true, Item::GenerateItemRandomPropertyId(39883));
 			
-        if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, IdItem, count) == EQUIP_ERR_OK)
+        /*if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, IdItem, count) == EQUIP_ERR_OK)
         {
             Item* item = player->StoreNewItem(dest, IdItem, true, Item::GenerateItemRandomPropertyId(IdItem));
              player->SendNewItem(item, count, true, false);
-        }
+        }*/
         return true;
     }
 };
