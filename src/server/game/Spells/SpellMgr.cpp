@@ -3058,6 +3058,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 spellInfo->EffectImplicitTargetA[0] = TARGET_UNIT_CASTER_AREA_PARTY;
                 spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_10_YARDS_2;
                 break;
+			case 69782: case 69796:                 // Ooze Flood
+			case 69798: case 69801:                 // Ooze Flood
+			case 69538: case 69553: case 69610:     // Ooze Combine
             case 44978: // Wild Magic
             case 45001:
             case 45002:
