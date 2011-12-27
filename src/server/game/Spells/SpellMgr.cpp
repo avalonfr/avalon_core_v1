@@ -105,8 +105,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             if (spellproto->SpellFamilyFlags[0] & 0x2)
                 return DIMINISHING_LIMITONLY;
             // Improved Hamstring
-            else if  (spellproto->AttributesEx3 & 0x80000 && spellproto->SpellIconID == 23)
-
+            else if (spellproto->AttributesEx3 & 0x80000 && spellproto->SpellIconID == 23)
                 return DIMINISHING_ROOT;
             // Charge Stun (own diminishing)
             else if (spellproto->SpellFamilyFlags[0] & 0x01000000)
@@ -118,7 +117,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Death Coil
             if (spellproto->SpellFamilyFlags[0] & 0x80000)
                 return DIMINISHING_HORROR;
-			// Curses/etc
+            // Curses/etc
             else if ((spellproto->SpellFamilyFlags[0] & 0x80000000) || (spellproto->SpellFamilyFlags[1] & 0x200))
                 return DIMINISHING_LIMITONLY;
             // Seduction
@@ -131,6 +130,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             // Psychic Horror
             if (spellproto->SpellFamilyFlags[2] & 0x2000)
                 return DIMINISHING_HORROR;
+
 			 // Shackle Undead
             else if (spellproto->SpellIconID == 27)
                 return DIMINISHING_DISORIENT;
@@ -175,7 +175,7 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellInfo const* spellproto,
             if ((spellproto->SpellFamilyFlags[0] & 0x400) && spellproto->SpellIconID == 538)
                 return DIMINISHING_LIMITONLY;
             // Scatter Shot (own diminishing)
-            else if  ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
+            else if ((spellproto->SpellFamilyFlags[0] & 0x40000) && spellproto->SpellIconID == 132)
                 return DIMINISHING_SCATTER_SHOT;
             // Entrapment (own diminishing)
             else if (spellproto->SpellVisual[0] == 7484 && spellproto->SpellIconID == 20)
@@ -277,7 +277,6 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {
-
         case SPELLFAMILY_DRUID:
         {
             // Faerie Fire - limit to 40 seconds in PvP (3.1)
@@ -2203,6 +2202,7 @@ void SpellMgr::LoadSpellLinked()
         sLog->outString();
         return;
     }
+
     uint32 count = 0;
 
     do
@@ -2749,7 +2749,6 @@ void SpellMgr::LoadSpellCustomAttr()
                                 continue;
 
                             procInfo->AttributesCu |= SPELL_ATTR0_CU_ENCHANT_PROC;
-
                         }
                     }
                     break;
@@ -2918,12 +2917,11 @@ void SpellMgr::LoadSpellCustomAttr()
                 if (spellInfo->SpellFamilyFlags[0] & 0x20000 || spellInfo->SpellFamilyFlags[1] & 0x20)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
-			case SPELLFAMILY_DRUID:
+            case SPELLFAMILY_DRUID:
                 // Roar
                 if (spellInfo->SpellFamilyFlags[0] & 0x8)
                     spellInfo->AttributesCu |= SPELL_ATTR0_CU_AURA_CC;
                 break;
-
             default:
                 break;
         }
@@ -3191,6 +3189,9 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 64904: // Hymn of Hope
                 spellInfo->EffectApplyAuraName[EFFECT_1] = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT;
+                break;
+            case 19465: // Improved Stings (Rank 2)
+                spellInfo->EffectImplicitTargetA[EFFECT_2] = TARGET_UNIT_CASTER;
                 break;
             case 30421: // Nether Portal - Perseverence
                 spellInfo->EffectBasePoints[2] += 30000;

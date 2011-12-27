@@ -118,7 +118,6 @@ enum CharacterFlags
     CHARACTER_FLAG_UNK22                = 0x00200000,
     CHARACTER_FLAG_UNK23                = 0x00400000,
     CHARACTER_FLAG_UNK24                = 0x00800000,
-
     CHARACTER_FLAG_LOCKED_BY_BILLING    = 0x01000000,
     CHARACTER_FLAG_DECLINED             = 0x02000000,
     CHARACTER_FLAG_UNK27                = 0x04000000,
@@ -734,7 +733,6 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
     {
         m_bgBattlegroundQueueID[j].bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;
         m_bgBattlegroundQueueID[j].invitedToInstance = 0;
-
     }
 
     m_logintime = time(NULL);
@@ -1511,7 +1509,7 @@ void Player::Update(uint32 p_time)
         return;
 
 	//sAnticheatMgr->HandleHackDetectionTimer(this, p_time);
-		
+
     // undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
@@ -2059,7 +2057,6 @@ void Player::SendTeleportAckPacket()
 
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
-	//sAnticheatMgr->DisableAnticheatDetection(this,true);
     if (!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
     {
         sLog->outError("TeleportTo: invalid map (%d) or invalid coordinates (X: %f, Y: %f, Z: %f, O: %f) given when teleporting player (GUID: %u, name: %s, map: %d, X: %f, Y: %f, Z: %f, O: %f).",
@@ -9060,10 +9057,6 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
 		data << uint32(0xEC5) << sWorld->GetWintergrapsTimer();
 		// ---
 		
-			
-	
-	
-	
     if (mapid == 530)                                       // Outland
     {
         data << uint32(0x9bf) << uint32(0x0);               // 7
@@ -10265,7 +10258,6 @@ bool Player::HasItemCount(uint32 item, uint32 count, bool inBankAlso) const
     for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if (Bag* pBag = GetBagByPos(i))
-
         {
             for (uint32 j = 0; j < pBag->GetBagSize(); j++)
             {
@@ -18296,7 +18288,6 @@ void Player::SaveToDB(bool create /*=false*/)
         stmt->setFloat(index++, finiteAlways(GetPositionY()));
         stmt->setFloat(index++, finiteAlways(GetPositionZ()));
         stmt->setFloat(index++, finiteAlways(GetOrientation()));
-
 		/** World of Warcraft Armory **/
 		std::ostringstream ps;
 		ps << "REPLACE INTO armory_character_stats (guid,data) VALUES ('" << GetGUIDLow() << "', '";
@@ -18307,8 +18298,6 @@ void Player::SaveToDB(bool create /*=false*/)
 		ps << "')";
 		CharacterDatabase.Execute( ps.str().c_str() );
 		/** World of Warcraft Armory **/
-		
-		
         std::ostringstream ss;
         ss << m_taxi;
         stmt->setString(index++, ss.str());
@@ -18537,7 +18526,7 @@ void Player::SaveToDB(bool create /*=false*/)
 
     // in this way we prevent to spam the db by each report made!
     // sAnticheatMgr->SavePlayerData(this);
-	
+
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
@@ -19126,6 +19115,7 @@ void Player::SendAutoRepeatCancel(Unit* target)
     data.append(target->GetPackGUID());                     // may be it's target guid
     GetSession()->SendPacket(&data);
 }
+
 /** World of Warcraft Armory **/
 void Player::WriteWowArmoryDatabaseLog(uint32 type, uint32 data)
 {

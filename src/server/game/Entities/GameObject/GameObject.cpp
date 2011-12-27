@@ -1385,20 +1385,20 @@ void GameObject::Use(Unit* user)
                         if (Player* target = ObjectAccessor::GetPlayer(*this, SelectRandomContainerElement(m_unique_users)))
                             spellCaster->CastSpell(target, info->summoningRitual.casterTargetSpell, true);
 
-					// finish owners spell
-					if (owner)
-					    owner->FinishSpell(CURRENT_CHANNELED_SPELL);
+                // finish owners spell
+                if (owner)
+                    owner->FinishSpell(CURRENT_CHANNELED_SPELL);
 
-					// can be deleted now, if
-					if (!info->summoningRitual.ritualPersistent)
-					    SetLootState(GO_JUST_DEACTIVATED);
-					else
-					{
-					    // reset ritual for this GO
-					    m_ritualOwner = NULL;
-					    m_unique_users.clear();
-					    m_usetimes = 0;
-					}
+                // can be deleted now, if
+                if (!info->summoningRitual.ritualPersistent)
+                    SetLootState(GO_JUST_DEACTIVATED);
+                else
+                {
+                    // reset ritual for this GO
+                    m_ritualOwner = NULL;
+                    m_unique_users.clear();
+                    m_usetimes = 0;
+                }
             }
             else
                 return;

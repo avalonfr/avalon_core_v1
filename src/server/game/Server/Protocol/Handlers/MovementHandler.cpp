@@ -340,7 +340,6 @@ void WorldSession::HandleMovementOpcodes(WorldPacket & recv_data)
 	
 	if (plMover)
         sAnticheatMgr->StartHackDetection(plMover, movementInfo, opcode);
-		
     /*----------------------*/
 
     /* process position-change */

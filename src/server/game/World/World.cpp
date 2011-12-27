@@ -137,7 +137,6 @@ World::~World()
 
     VMAP::VMapFactory::clear();
 	MMAP::MMapFactory::clear();
-	
     //TODO free addSessQueue
 }
 
@@ -1136,8 +1135,9 @@ void World::LoadConfigSettings(bool reload)
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
     VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
-    sLog->outString("WORLD: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i, PetLOS:%i", enableLOS, enableHeight, enableIndoor, enablePetLOS);
-	sLog->outString("WORLD: VMap data directory is: %svmaps", m_dataPath.c_str());
+
+    sLog->outString("WORLD: VMap support included. LineOfSight:%i, getHeight:%i, indoorCheck:%i PetLOS:%i", enableLOS, enableHeight, enableIndoor, enablePetLOS);
+    sLog->outString("WORLD: VMap data directory is: %svmaps", m_dataPath.c_str());
 
 	// Pathfinding related.
 	m_bool_configs[CONFIG_ENABLE_PATHFINDING] = ConfigMgr::GetBoolDefault("pathing.enable", true);
@@ -1223,7 +1223,7 @@ void World::LoadConfigSettings(bool reload)
 	m_bool_configs[CONFIG_CONFIG_OUTDOORPVP_WINTERGRASP_ANTIFARM_ENABLE] = ConfigMgr::GetBoolDefault("OutdoorPvP.Wintergrasp.Antifarm.Enable", false);
 	m_int_configs[CONFIG_CONFIG_OUTDOORPVP_WINTERGRASP_ANTIFARM_ATK] = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.Antifarm.Atk", 5);
 	m_int_configs[CONFIG_CONFIG_OUTDOORPVP_WINTERGRASP_ANTIFARM_DEF] = ConfigMgr::GetIntDefault("OutdoorPvP.Wintergrasp.Antifarm.Def", 5);
-			
+
     sScriptMgr->OnConfigLoad(reload);
 }
 
@@ -1238,7 +1238,7 @@ void World::SetInitialWorldSettings()
 
 	///- Initialize detour memory management
 	dtAllocSetCustom(dtCustomAlloc, dtCustomFree);
-	
+
     ///- Initialize config settings
     LoadConfigSettings();
 
@@ -2725,7 +2725,10 @@ void World::InitRandomBGResetTime()
 void World::ResetDailyQuests()
 {
     sLog->outDetail("Daily quests reset for all characters.");
-    CharacterDatabase.Execute("DELETE FROM character_queststatus_daily");
+
+    PreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_QUEST_STATUS_DAILY);
+    CharacterDatabase.Execute(stmt);
+
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetDailyQuestStatus();
@@ -2911,6 +2914,7 @@ void World::SendWintergraspState()
 	}
 
 }
+
 void World::LoadCharacterNameData()
 {
     sLog->outString("Loading character name data");

@@ -199,12 +199,6 @@ public:
         uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, 39883, 1); // Cracked Egg
         if (msg == EQUIP_ERR_OK)
             player->StoreNewItem(dest, 39883, true, Item::GenerateItemRandomPropertyId(39883));
-			
-        /*if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, IdItem, count) == EQUIP_ERR_OK)
-        {
-            Item* item = player->StoreNewItem(dest, IdItem, true, Item::GenerateItemRandomPropertyId(IdItem));
-             player->SendNewItem(item, count, true, false);
-        }*/
         return true;
     }
 };

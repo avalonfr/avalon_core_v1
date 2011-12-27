@@ -72,6 +72,12 @@ public:
 /*######
 ## npc_fallen_hero_of_horde
 ######*/
+enum HeroesOfOld
+{
+    QUEST_HEROES_OF_OLD = 2702,
+    NPC_THUND_SPLITHOOF = 7750,
+};
+
 #define GOSSIP_H_F1 "Why are you here?"
 #define GOSSIP_H_F2 "Continue story..."
 
@@ -159,6 +165,13 @@ public:
         return true;
     }
 
+    bool OnQuestAccept(Player* /*player*/, Creature* creature, Quest const* quest)
+    {
+        if (quest->GetQuestId() == QUEST_HEROES_OF_OLD)
+            creature->SummonCreature(NPC_THUND_SPLITHOOF, -10630.3f, -2987.05f, 28.96f, 4.54f, TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 9000000);
+
+        return true;
+    }
 };
 
 void AddSC_blasted_lands()

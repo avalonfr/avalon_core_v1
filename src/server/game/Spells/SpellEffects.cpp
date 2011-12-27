@@ -67,7 +67,6 @@
 #include "OutdoorPvPWG.h"
 #include "InstanceScript.h"
 
-
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
     &Spell::EffectNULL,                                     //  0
@@ -463,7 +462,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage = (m_caster->getLevel() - 60) * 4 + 60;
                         break;
                     }
-
 					// Lightning Nova
 					case 65279:
 					{
@@ -1277,7 +1275,6 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
 					m_caster->CastSpell(m_caster, spell_id, true, NULL);
 					return;
 				}
-			//{
                 case 53808:                                 // Pygmy Oil
                 {
                     Aura* pAura = m_caster->GetAura(53806);
@@ -1463,6 +1460,15 @@ void Spell::EffectDummy(SpellEffIndex effIndex)
                 m_caster->CastSpell(m_caster, 70725, true);
             break;
         case SPELLFAMILY_PALADIN:
+            // Divine Storm
+            if (m_spellInfo->SpellFamilyFlags[1] & SPELLFAMILYFLAG1_PALADIN_DIVINESTORM && effIndex == 1)
+            {
+                int32 dmg = CalculatePctN(m_damage, damage);
+                if (!unitTarget)
+                    unitTarget = m_caster;
+                m_caster->CastCustomSpell(unitTarget, 54171, &dmg, 0, 0, true);
+                return;
+            }
             switch (m_spellInfo->Id)
             {
                 case 31789:                                 // Righteous Defense (step 1)
@@ -1975,7 +1981,6 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
     {
         switch (m_spellInfo->Id)
         {
-
 		case 66218: //Catapulte
                 if (Vehicle *vehicle = m_caster->GetVehicleKit())
                     if (Unit *passenger = vehicle->GetPassenger(0))
@@ -2001,7 +2006,6 @@ void Spell::EffectForceCast(SpellEffIndex effIndex)
                 break;
         }
     }
-	
     switch (triggered_spell_id)
     {
         case 62056: case 63985:         // Stone Grip Forcecast (10m, 25m)
@@ -2051,7 +2055,6 @@ void Spell::EffectTriggerRitualOfSummoning(SpellEffIndex effIndex)
             sLog->outError("Spell::EffectTriggerSpell (Spell: %u): Unsupported non-unit case!", m_spellInfo->Id);
         return;
     }
-
     uint32 triggered_spell_id = m_spellInfo->Effects[effIndex].TriggerSpell;
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(triggered_spell_id);
 
@@ -2527,9 +2530,15 @@ void Spell::EffectSendEvent(SpellEffIndex effIndex)
         else if (gameObjTarget)
             target = gameObjTarget;
     }
-    // call event with no target or focus target when no targets could be found due to no dbc entry
-    else if (!m_spellInfo->Effects[effIndex].GetProvidedTargetMask())
+    else // if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT)
     {
+        // let's prevent executing effect handler twice in case when spell effect is capable of targeting an object
+        // this check was requested by scripters, but it has some downsides:
+        // now it's impossible to script (using sEventScripts) a cast which misses all targets
+        // or to have an ability to script the moment spell hits dest (in a case when there are object targets present)
+        if (m_spellInfo->Effects[effIndex].GetProvidedTargetMask() & (TARGET_FLAG_UNIT_MASK | TARGET_FLAG_GAMEOBJECT_MASK))
+            return;
+        // some spells have no target entries in dbc and they use focus target
         if (focusObject)
             target = focusObject;
         // TODO: there should be a possibility to pass dest target to event script
@@ -4511,6 +4520,13 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 					spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()));
 				}
 				break;
+            // Seal of Command Unleashed
+            if (m_spellInfo->Id == 20467)
+            {
+                spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
+                spell_bonus += int32(0.13f * m_caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()));
+            }
+            break;
         }
         case SPELLFAMILY_SHAMAN:
         {
@@ -5123,7 +5139,6 @@ void Spell::EffectScriptEffect(SpellEffIndex effIndex)
                     }
                     return;
                 }				
-			
                 // Piccolo of the Flaming Fire
                 case 17512:
                 {
@@ -6889,7 +6904,6 @@ void Spell::EffectKnockBack(SpellEffIndex effIndex)
 
 void Spell::EffectLeapBack(SpellEffIndex effIndex)
 {
-
     //if (m_caster->ToPlayer())
     //    sAnticheatMgr->DisableAnticheatDetection(m_caster->ToPlayer());
 

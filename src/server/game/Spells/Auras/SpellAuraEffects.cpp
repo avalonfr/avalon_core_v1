@@ -39,7 +39,6 @@
 
 #include "Vehicle.h"
 
-
 class Aura;
 //
 // EFFECT HANDLER NOTES
@@ -614,7 +613,6 @@ int32 AuraEffect::CalculateAmount(Unit* caster)
                 // 3.3% from sp bonus
                 DoneActualBenefit = caster->SpellBaseDamageBonus(m_spellInfo->GetSchoolMask()) * 0.033f;
             break;
-
         case SPELL_AURA_PERIODIC_DAMAGE:
             if (!caster)
                 break;
@@ -2493,7 +2491,6 @@ void AuraEffect::HandleFeignDeath(AuraApplication const* aurApp, uint8 mode, boo
     }
 }
 
-
 void AuraEffect::HandleModUnattackable(AuraApplication const* aurApp, uint8 mode, bool apply) const
 {
     if (!(mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK))
@@ -2568,10 +2565,8 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const* aurApp, uint8 mode, 
             if (attacktype < MAX_ATTACK)
             {
                 target->ToPlayer()->_ApplyWeaponDamage(slot, pItem->GetTemplate(), NULL, !apply);
-
                 target->ToPlayer()->_ApplyWeaponDependentAuraMods(pItem, WeaponAttackType(attacktype), !apply);
             }
-
         }
     }
 
@@ -3503,7 +3498,6 @@ void AuraEffect::HandleAuraModSchoolImmunity(AuraApplication const* aurApp, uint
                     banishFound = true;
                     break;
                 }
-
             if (!banishFound)
                 target->ClearUnitState(UNIT_STAT_ISOLATED);
         }
@@ -5121,7 +5115,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                     caster->ToPlayer()->SetChampioningFaction(FactionID);
                     break;
                 }
-
 				case 57806: // Sprinkle Holy Water - Quest 13110
 
                      if(target->GetTypeId() == TYPEID_UNIT)
@@ -5136,8 +5129,6 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
 						}
                      }
                     break;
-  
-
                 // LK Intro VO (1)
                 case 58204:
                     if (target->GetTypeId() == TYPEID_PLAYER)
@@ -5805,7 +5796,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
 				    target->CastCustomSpell(target,62188,&damage,0,0,true);
 				    break;
 				}
-
                 case 62292: // Blaze (Pool of Tar)
                     // should we use custom damage?
                     target->CastSpell((Unit*)NULL, m_spellInfo->Effects[m_effIndex].TriggerSpell, true);
@@ -5825,7 +5815,6 @@ void AuraEffect::HandlePeriodicDummyAuraTick(Unit* target, Unit* caster) const
                         target->RemoveAura(64821);
                     }
                     break;
-
 				case 63802: // Brain Link
 					if (caster)
 					{
@@ -6127,7 +6116,6 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                         target->Kill(target);
                         return;
                     }
-
                     // Spellcloth
                     case 31373:
                     {
@@ -6135,7 +6123,6 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                         target->SummonCreature(17870, 0, 0, 0, target->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
                         return;
                     }
-
                     // Flame Quills
                     case 34229:
                     {

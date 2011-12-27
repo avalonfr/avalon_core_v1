@@ -1958,7 +1958,6 @@ bool Aura::CanStackWith(Aura const* existingAura) const
         return true;        // Empty seat available (skip rest)
     }
 
-
     // spell of same spell rank chain
     if (m_spellInfo->IsRankOf(existingSpellInfo))
     {

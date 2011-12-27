@@ -1083,7 +1083,7 @@ class Player : public Unit, public GridObject<Player>
         ~Player ();
 
 		//AnticheatData anticheatData;
-		 
+
         void CleanupsBeforeDelete(bool finalCleanup = true);
 
         static UpdateMask updateVisualBits;
@@ -2330,6 +2330,7 @@ class Player : public Unit, public GridObject<Player>
         float m_homebindZ;
 
         WorldLocation GetStartPosition() const;
+
         /** World of Warcraft Armory **/
         void WriteWowArmoryDatabaseLog(uint32 type, uint32 data);
 
@@ -2477,7 +2478,6 @@ class Player : public Unit, public GridObject<Player>
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscValue1 = 0, uint32 miscValue2 = 0, Unit* unit = NULL);
         void CompletedAchievement(AchievementEntry const* entry);
-		//bool HasAchieved(uint32 entry);
 
         bool HasTitle(uint32 bitIndex);
         bool HasTitle(CharTitlesEntry const* title) { return HasTitle(title->bit_index); }

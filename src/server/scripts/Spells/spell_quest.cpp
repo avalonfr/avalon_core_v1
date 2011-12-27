@@ -1029,6 +1029,7 @@ public:
     }
 };
 
+
 enum FlightOfTheWintergardeDefender
 {
     NPC_HELPLESS_VILLAGER_A = 27315,
@@ -1172,6 +1173,53 @@ class spell_q12237_drop_off_villager: public SpellScriptLoader
             return new spell_q12237_drop_off_villager_SpellScript();
         }
 };
+// http://old01.wowhead.com/quest=9452 - Red Snapper - Very Tasty!
+enum RedSnapperVeryTasty
+{
+    SPELL_CAST_NET      = 29866,
+    ITEM_RED_SNAPPER    = 23614,
+    NPC_ANGRY_MURLOC    = 17102,
+};
+
+class spell_q9452_cast_net: public SpellScriptLoader
+{
+    public:
+        spell_q9452_cast_net() : SpellScriptLoader("spell_q9452_cast_net") { }
+
+        class spell_q9452_cast_net_SpellScript : public SpellScript
+        {
+            PrepareSpellScript(spell_q9452_cast_net_SpellScript)
+
+            void HandleDummy(SpellEffIndex /*effIndex*/)
+            {
+                Player* caster = GetCaster()->ToPlayer();
+
+                if (!caster)
+                    return;
+
+                switch (urand(0, 2))
+                {
+                    case 0: case 1:
+                        caster->AddItem(ITEM_RED_SNAPPER, 1);
+                        break;
+                    case 2:
+                        if (Creature* murloc = caster->SummonCreature(NPC_ANGRY_MURLOC, caster->GetPositionX()+5, caster->GetPositionY(), caster->GetPositionZ(), 0.0f, TEMPSUMMON_MANUAL_DESPAWN, 120000))
+                            murloc->AI()->AttackStart(caster);
+                        break;
+                }
+            }
+
+            void Register()
+            {
+                OnEffectHit += SpellEffectFn(spell_q9452_cast_net_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+            }
+        };
+
+        SpellScript* GetSpellScript() const
+        {
+            return new spell_q9452_cast_net_SpellScript();
+        }
+};
 
 void AddSC_quest_spell_scripts()
 {
@@ -1199,4 +1247,5 @@ void AddSC_quest_spell_scripts()
     new spell_q14112_14145_chum_the_water();
 	new spell_q12237_rescue_villager();
     new spell_q12237_drop_off_villager();
+    new spell_q9452_cast_net();
 }

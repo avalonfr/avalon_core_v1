@@ -56,7 +56,6 @@
 #include "OutdoorPvPMgr.h"
 #include "SpellInfo.h"
 
-
 extern pEffect SpellEffects[TOTAL_SPELL_EFFECTS];
 
 SpellCastTargets::SpellCastTargets() : m_elevation(0), m_speed(0)
@@ -969,7 +968,6 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
         if (target->IsImmunedToSpellEffect(m_spellInfo, effIndex))
             effectMask &= ~(1 << effIndex);
 
-
     uint64 targetGUID = target->GetGUID();
 
     // Lookup target in already in list
@@ -1016,7 +1014,6 @@ void Spell::AddUnitTarget(Unit* target, uint32 effectMask, bool checkIfValid /*=
     }
     else
         targetInfo.missCondition = SPELL_MISS_EVADE; //SPELL_MISS_NONE;
-
 
     // Spell have speed - need calculate incoming time
     // Incoming time is zero for self casts. At least I think so.
@@ -1372,14 +1369,12 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 }
             }
         }
-		
         // Haunt
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags[1] & 0x40000 && m_spellAura && m_spellAura->GetEffect(1))
         {
             AuraEffect* aurEff = m_spellAura->GetEffect(1);
             aurEff->SetAmount(CalculatePctU(aurEff->GetAmount(), damageInfo.damage));
         }
-		
 		
 	// Cobra Strikes (can't find any other way that may work)
 		if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags[1] & 0x10000000)
@@ -1388,7 +1383,6 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 					pAura->DropCharge();
 
         m_damage = damageInfo.damage;
-
     }
     // Passive spell hits/misses or active spells only misses (only triggers)
     else
@@ -1492,12 +1486,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
             //TODO: This is a hack. But we do not know what types of stealth should be interrupted by CC
             if ((m_spellInfo->AttributesCu & SPELL_ATTR0_CU_AURA_CC) && unit->IsControlledByPlayer())
                 unit->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
-
-			/*bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
-            m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask() , binary, m_spellInfo);
-            if (m_resist >= 100)
-                return SPELL_MISS_RESIST;*/
-
         }
         else if (m_caster->IsFriendlyTo(unit))
         {
@@ -1519,13 +1507,6 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
                 unit->getHostileRefManager().threatAssist(m_caster, 0.0f);
             }
         }
-		/*else if (!m_spellInfo->IsPositive())
-		{
-			bool binary = (uint32(m_spellInfo->AttributesCu & SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) > 0);
-			m_resist = m_caster->CalcSpellResistance(unit, m_spellInfo->GetSchoolMask(), binary, m_spellInfo);
-			if (m_resist >= 100)
-				return SPELL_MISS_RESIST;
-		}*/
 	}
 
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
@@ -1635,25 +1616,24 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, const uint32 effectMask, bool 
                         duration += int32(durationadd);
                     }
                 }
-				
 
-                    // Haste modifies duration of channeled spells
-                    if (m_spellInfo->IsChanneled())
-                    {
-                        if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                            m_originalCaster->ModSpellCastTime(aurSpellInfo, duration, this);
-                    }
-                    // and duration of auras affected by SPELL_AURA_PERIODIC_HASTE
-                    else if (m_originalCaster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, aurSpellInfo) || m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
-                        duration = int32(duration * m_originalCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+				// Haste modifies duration of channeled spells
+				if (m_spellInfo->IsChanneled())
+				{
+					if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+						m_originalCaster->ModSpellCastTime(aurSpellInfo, duration, this);
+				}
+				// and duration of auras affected by SPELL_AURA_PERIODIC_HASTE
+				else if (m_originalCaster->HasAuraTypeWithAffectMask(SPELL_AURA_PERIODIC_HASTE, aurSpellInfo) || m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+					duration = int32(duration * m_originalCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
 
-                    if (duration != m_spellAura->GetMaxDuration())
-                    {
-                        m_spellAura->SetMaxDuration(duration);
-                        m_spellAura->SetDuration(duration);
-                    }
-                    m_spellAura->_RegisterForTargets();
-                }
+				if (duration != m_spellAura->GetMaxDuration())
+				{
+					m_spellAura->SetMaxDuration(duration);
+					m_spellAura->SetDuration(duration);
+				}
+				m_spellAura->_RegisterForTargets();
+                
             }
         }
     }
@@ -3376,8 +3356,15 @@ void Spell::handle_immediate()
             if (Player* modOwner = m_caster->GetSpellModOwner())
                 modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
             // Apply haste mods
-            m_caster->ModSpellCastTime(m_spellInfo, duration, this);
+            if (m_spellInfo->AttributesEx5 & SPELL_ATTR5_HASTE_AFFECT_DURATION)
+                m_caster->ModSpellCastTime(m_spellInfo, duration, this);
 
+            m_spellState = SPELL_STATE_CASTING;
+            m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
+            SendChannelStart(duration);
+        }
+        else if (duration == -1)
+        {
             m_spellState = SPELL_STATE_CASTING;
             m_caster->AddInterruptMask(m_spellInfo->ChannelInterruptFlags);
             SendChannelStart(duration);
@@ -3406,8 +3393,6 @@ void Spell::handle_immediate()
     // handle ammo consumption for Hunter's volley spell
     if (m_spellInfo->IsRangedWeaponSpell() && m_spellInfo->IsChanneled())
         TakeAmmo();
-
-
     if (m_spellState != SPELL_STATE_CASTING)
         finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
 }
@@ -3606,9 +3591,9 @@ void Spell::update(uint32 difftime)
     {
         case SPELL_STATE_PREPARING:
         {
-            if (m_timer)
+            if (m_timer > 0)
             {
-                if (difftime >= m_timer)
+                if (difftime >= (uint32)m_timer)
                     m_timer = 0;
                 else
                     m_timer -= difftime;
@@ -3617,10 +3602,11 @@ void Spell::update(uint32 difftime)
             if (m_timer == 0 && !IsNextMeleeSwingSpell() && !IsAutoRepeat())
                 // don't CheckCast for instant spells - done in spell::prepare, skip duplicate checks, needed for range checks for example
                 cast(!m_casttime);
-        } break;
+            break;
+        }
         case SPELL_STATE_CASTING:
         {
-            if (m_timer > 0)
+            if (m_timer)
             {
                 // check if there are alive targets left
                 if (!UpdateChanneledTargetList())
@@ -3630,10 +3616,13 @@ void Spell::update(uint32 difftime)
                     finish();
                 }
 
-                if (difftime >= m_timer)
-                    m_timer = 0;
-                else
-                    m_timer -= difftime;
+                if (m_timer > 0)
+                {
+                    if (difftime >= (uint32)m_timer)
+                        m_timer = 0;
+                    else
+                        m_timer -= difftime;
+                }
             }
 
             if (m_timer == 0)
@@ -3675,10 +3664,10 @@ void Spell::update(uint32 difftime)
 
                 finish();
             }
-        } break;
+            break;
+        }
         default:
-        {
-        }break;
+            break;
     }
 }
 
@@ -3794,9 +3783,9 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
     switch (result)
     {
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
-            data << uint32(spellInfo->RequiresSpellFocus);
+            data << uint32(spellInfo->RequiresSpellFocus);  // SpellFocusObject.dbc id
             break;
-        case SPELL_FAILED_REQUIRES_AREA:
+        case SPELL_FAILED_REQUIRES_AREA:                    // AreaTable.dbc id
             // hardcode areas limitation case
             switch (spellInfo->Id)
             {
@@ -3829,14 +3818,15 @@ void Spell::SendCastResult(Player* caster, SpellInfo const* spellInfo, uint8 cas
                 data << uint32(spellInfo->TotemCategory[1]);
             break;
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
+        case SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND:
+        case SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND:
             data << uint32(spellInfo->EquippedItemClass);
             data << uint32(spellInfo->EquippedItemSubClassMask);
-            //data << uint32(spellInfo->EquippedItemInventoryTypeMask);
             break;
         case SPELL_FAILED_TOO_MANY_OF_ITEM:
         {
              uint32 item = 0;
-             for (int8 x = 0;x < 3; x++)
+             for (int8 x = 0; x < 3; x++)
                  if (spellInfo->Effects[x].ItemType)
                      item = spellInfo->Effects[x].ItemType;
              ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
@@ -3885,7 +3875,7 @@ void Spell::SendSpellStart()
     data << uint8(m_cast_count);                            // pending spell cast?
     data << uint32(m_spellInfo->Id);                        // spellId
     data << uint32(castFlags);                              // cast flags
-    data << uint32(m_timer);                                // delay?
+    data << int32(m_timer);                                 // delay?
 
     m_targets.Write(data);
 
@@ -3984,7 +3974,7 @@ void Spell::SendSpellGo()
         }
     }
 
-    if (castFlags & CAST_FLAG_UNKNOWN_18)                   // unknown wotlk
+    if (castFlags & CAST_FLAG_UNKNOWN_18)
     {
         data << float(0);
         data << uint32(0);
@@ -3993,7 +3983,7 @@ void Spell::SendSpellGo()
     if (castFlags & CAST_FLAG_AMMO)
         WriteAmmoToPacket(&data);
 
-    if (castFlags & CAST_FLAG_UNKNOWN_20)                   // unknown wotlk
+    if (castFlags & CAST_FLAG_UNKNOWN_20)
     {
         data << uint32(0);
         data << uint32(0);
@@ -5516,7 +5506,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 						}
 					}
 				}
-
                 break;
             }
             case SPELL_AURA_PERIODIC_MANA_LEECH:
@@ -5785,7 +5774,8 @@ SpellCastResult Spell::CheckRange(bool strict)
 
     if (m_spellInfo->RangeEntry)
     {
-        // self cast is used for triggered spells, no range checking needed
+        // check needed by 68766 51693 - both spells are cast on enemies and have 0 max range
+        // these are triggered by other spells - possibly we should omit range check in that case?
         if (m_spellInfo->RangeEntry->ID == 1)
             return SPELL_CAST_OK;
 

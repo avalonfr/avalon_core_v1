@@ -1537,7 +1537,6 @@ bool Position::HasInArc(float arc, const Position* obj) const
     return ((angle >= lborder) && (angle <= rborder));
 }
 
-
 bool Position::HasInArc(const float arcangle, const float x, const float y) const
 {
  // always have self in arc
@@ -1568,10 +1567,7 @@ float WorldObject::GetDistanceSqr(float x, float y, float z) const
  return d > 0.0f ? d : 0.0f;
 }
 
-
-
-
-bool WorldObject::IsInBetween(const WorldObject *obj1, const WorldObject *obj2, float size) const
+bool WorldObject::IsInBetween(const WorldObject* obj1, const WorldObject* obj2, float size) const
 {
     if (!obj1 || !obj2)
         return false;

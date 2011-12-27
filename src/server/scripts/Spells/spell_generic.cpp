@@ -610,6 +610,9 @@ class spell_creature_permanent_feign_death : public SpellScriptLoader
                 Unit* target = GetTarget();
                 target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
                 target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
+
+                if (target->GetTypeId() == TYPEID_UNIT)
+                    target->ToCreature()->SetReactState(REACT_PASSIVE);
             }
 
             void Register()
@@ -1125,8 +1128,8 @@ class spell_gen_turkey_tracker : public SpellScriptLoader
 
             void HandleScript(SpellEffIndex /*effIndex*/)
             {
-if (GetCaster()->GetAura(SPELL_KILL_COUNTER_VISUAL_MAX))
-                return;
+				if (GetCaster()->GetAura(SPELL_KILL_COUNTER_VISUAL_MAX))
+					return;
                 Player* target = GetHitPlayer();
                 if (!target)
                     return;
@@ -1172,7 +1175,7 @@ if (GetCaster()->GetAura(SPELL_KILL_COUNTER_VISUAL_MAX))
 
 enum FriendOrFowl
 {
-    SPELL_TURKEY_VENGEANCE = 25285,
+    SPELL_TURKEY_VENGEANCE  = 25285,
 };
 
 class spell_gen_turkey_marker : public SpellScriptLoader
@@ -1218,7 +1221,6 @@ class spell_gen_turkey_marker : public SpellScriptLoader
             return new spell_gen_turkey_marker_AuraScript();
         }
 };
-
 
 // 67039 Argent Squire/Gruntling - Mounting Check - Aura
 class spell_gen_mounting_check : public SpellScriptLoader
@@ -2406,7 +2408,6 @@ void AddSC_generic_spell_scripts()
     new spell_gen_remove_flight_auras();
     new spell_gen_trick();
     new spell_gen_trick_or_treat();
-	new spell_gen_tricky_treat();
     new spell_creature_permanent_feign_death();
     new spell_pvp_trinket_wotf_shared_cd();
     new spell_gen_animal_blood();

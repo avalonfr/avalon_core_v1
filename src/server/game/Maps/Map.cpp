@@ -33,7 +33,6 @@
 #include "PathFactory.h"
 #include "LFGMgr.h"
 
-
 union u_map_magic
 {
     char asChar[4];
@@ -74,7 +73,6 @@ Map::~Map()
 	 MMAP::MMapFactory::createOrGetMMapManager()->unloadMapInstance(m_parentMap->GetId(), GetInstanceId());
 
 	 MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(GetId());
-
 }
 
 bool Map::ExistMap(uint32 mapid, int gx, int gy)

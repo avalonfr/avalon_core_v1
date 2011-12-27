@@ -858,6 +858,7 @@ bool Guardian::InitStatsForLevel(uint8 petlevel)
             SetBonusDamage(int32 (val * 0.15f));
             //bonusAP += val * 0.57;
 			SetBonusDamage(m_owner->SpellBaseDamageBonus(SPELL_SCHOOL_MASK_FIRE) * 0.5f);
+
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)));
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)));
 
