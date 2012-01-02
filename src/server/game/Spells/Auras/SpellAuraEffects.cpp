@@ -6252,8 +6252,10 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
             case 66882:
                 target->CastCustomSpell(triggerSpellId, SPELLVALUE_RADIUS_MOD, (int32)((((float)m_tickNumber / 60) * 0.9f + 0.1f) * 10000 * 2 / 3), NULL, true, NULL, this);
                 return;
+            case 56432:
+                target->CastCustomSpell(triggerSpellId, SPELLVALUE_RADIUS_MOD, (100 - (m_tickNumber + 5) * 2) * 100, NULL, true, NULL, this);
+                return;			
 			// Rod of Purification - for quest 10839 (Veil Skith: Darkstone of Terokk)
-
             case 38736:
             {
                 if(Unit* caster = GetCaster())
