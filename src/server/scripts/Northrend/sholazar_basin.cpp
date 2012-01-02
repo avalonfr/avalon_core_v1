@@ -1229,6 +1229,89 @@ private:
     uint64 tartekGUID;
 };
 
+/*######
+## npc_artruis_the_heartless
+######*/
+
+#define SPELL_ARTRUIS_FROST_NOVA 11831
+#define SPELL_ARTRUIS_FROST_BOLT 15530
+#define SPELL_ARTRUIS_ICY_VEINS 54792
+#define SPELL_ARTRUIS_ICE_LANCE 54261
+
+#define ENTRY_ARTRUIS_URN 190777
+
+class npc_artruis_the_heartless : public CreatureScript
+{
+public:
+    npc_artruis_the_heartless() : CreatureScript("npc_artruis_the_heartless") { }
+
+    struct npc_artruis_the_heartlessAI: public ScriptedAI
+    {
+        npc_artruis_the_heartlessAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+        uint32 shoot_Timer;
+        uint32 nova_Timer;
+        uint32 veins_Timer;
+
+        void Reset()
+        {
+            shoot_Timer = 2000;
+            nova_Timer = urand(20000,40000);
+            veins_Timer = urand(20000,40000);
+        }
+
+        bool TryDoCast(Unit *victim, uint32 spellId, bool triggered = false)
+        {
+            if(me->IsNonMeleeSpellCasted(false)) return false;
+
+            DoCast(victim,spellId,triggered);
+            return true;
+        }
+
+        void Aggro()
+        {
+
+        }
+
+        void JustDied(Unit *killer)
+        {
+            GameObject* object = me->SummonGameObject(ENTRY_ARTRUIS_URN,me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),0,0,0,0,0,600);
+        }
+
+        void UpdateAI(const uint32 diff)
+        {
+            if (!UpdateVictim())
+                return;
+
+            if(nova_Timer <= diff)
+            {
+                if(TryDoCast(me,SPELL_ARTRUIS_FROST_NOVA))
+                    nova_Timer = urand(20000,40000);
+            }else nova_Timer -= diff;
+
+            if(veins_Timer <= diff)
+            {
+                if(TryDoCast(me->getVictim(),SPELL_ARTRUIS_ICY_VEINS))
+                    veins_Timer = urand(20000,40000);
+            }else veins_Timer -= diff;
+
+            if(shoot_Timer <= diff)
+            {
+                if(TryDoCast(me->getVictim(),RAND(SPELL_ARTRUIS_FROST_BOLT,SPELL_ARTRUIS_ICE_LANCE)))
+                    shoot_Timer = 2000;
+            }else shoot_Timer -= diff;
+
+            DoMeleeAttackIfReady();
+        }
+    };
+
+    CreatureAI* GetAI(Creature* pCreature) const
+    {
+        return new npc_artruis_the_heartlessAI(pCreature);
+    }
+
+};
+
 void AddSC_sholazar_basin()
 {
     new npc_injured_rainspeaker_oracle();
@@ -1245,4 +1328,5 @@ void AddSC_sholazar_basin()
     new npc_rejek_first_blood();
 	new vehicle_haiphoon();
 	new go_mistwhisper_treasure();
+	new npc_artruis_the_heartless();
 }
