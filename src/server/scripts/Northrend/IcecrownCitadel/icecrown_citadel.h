@@ -31,6 +31,10 @@ uint32 const MaxHeroicAttempts = 50;
 extern Position const ValithriaSpawnPos;
 // Defined in boss_sindragosa.cpp
 extern Position const SindragosaSpawnPos;
+// Defined in boss_the_lich_king.cpp
+extern Position const TerenasSpawn;
+extern Position const TerenasSpawnHeroic;
+extern Position const SpiritWardenSpawn;
 
 // Shared spells used by more than one script
 enum SharedSpells
@@ -44,6 +48,10 @@ enum SharedSpells
     // Residue Rendezvous
     SPELL_ORANGE_BLIGHT_RESIDUE = 72144,
     SPELL_GREEN_BLIGHT_RESIDUE  = 72145,
+
+
+	// The Lich King
+	SPELL_FROSTMOURNE_TELEPORT_VISUAL   = 73078,
 };
 
 enum TeleporterSpells
@@ -101,7 +109,7 @@ enum DataTypes
     DATA_VALITHRIA_LICH_KING        = 36,
 
     // Lich King Data
-    DATA_TIRION                     = 37,
+    DATA_HIGHLORD_TIRION_FORDRING   = 37,
     DATA_TERENAS_FIGHTER            = 38,
     DATA_SPIRIT_WARDEN              = 39,
     DATA_BEEN_WAITING_ACHIEVEMENT   = 40,
@@ -117,11 +125,12 @@ enum DataTypes
     DATA_EDGE_DESTROY_WARNING       = 48,
     DATA_FROZEN_LAVAMAN             = 49,
     DATA_LAVAMAN_PILLARS            = 50,
-
+	DATA_ARTHAS_PLATFORM            = 51,
+	DATA_TERENAS_MENETHIL			= 52,
 
 	//GUNSHIP
-	DATA_GUNSHIP_EVENT              = 52,
-	DATA_NPC_MAURADIN				= 53,		
+	DATA_GUNSHIP_EVENT              = 53,
+	DATA_NPC_MAURADIN				= 54,		
 	
 };
 
@@ -286,17 +295,23 @@ enum CreaturesIds
     NPC_ICE_SPHERE                              = 36633,
     NPC_DRUDGE_GHOUL                            = 37695,
     NPC_SHAMBLING_HORROR                        = 37698,
-    NPC_VALKYR                                  = 36609,
     NPC_DEFILE                                  = 38757,
     NPC_RAGING_SPIRIT                           = 36701,
     NPC_TRIGGER                                 = 38667,
-    NPC_VILE_SPIRIT                             = 37799,
-    NPC_FROSTMOURNE_TRIGGER                     = 38584,
+     NPC_FROSTMOURNE_TRIGGER                    = 38584,
     NPC_TERENAS_MENETHIL                        = 38579,
-    NPC_TERENAS_FIGHTER                         = 36823,
     NPC_SPIRIT_WARDEN                           = 36824,
     NPC_PLATFORM_DESTRUCTIBLE_EDGE_STALKER      = 22515,
+	NPC_STRANGULATE_VEHICLE                     = 36598,
     NPC_WORLD_TRIGGER                           = 22515,
+	NPC_TERENAS_MENETHIL_FROSTMOURNE			= 36823,
+    NPC_TERENAS_MENETHIL_FROSTMOURNE_H			= 39217,
+	NPC_WORLD_TRIGGER_INFINITE_AOI              = 36171,
+	NPC_VALKYR_SHADOWGUARD						= 36609,
+    NPC_VILE_SPIRIT								= 37799,
+    NPC_WICKED_SPIRIT							= 39190,
+	NPC_SPIRIT_BOMB                             = 39189,
+
 
 	//GUNSHIP BATTLE
 	NPC_SAUFRANG_G								= 36939,
@@ -391,11 +406,20 @@ enum GameObjectsIds
     GO_ICE_SHARD_2                          = 202142,
     GO_ICE_SHARD_3                          = 202143,
     GO_ICE_SHARD_4                          = 202144,
-    GO_FROSTY_EDGE_OUTER                    = 202188,
-    GO_FROSTY_EDGE_INNER                    = 202189,
-    GO_EDGE_DESTROY_WARNING                 = 202190,
-    GO_FROZEN_LAVAMAN                       = 202436,
-    GO_LAVAMAN_PILLARS                      = 202437,
+
+	// The Lich King bis
+    GO_ARTHAS_PLATFORM						= 202161,
+    GO_ARTHAS_PRECIPICE = 202078,
+    GO_DOODAD_ICECROWN_THRONEFROSTYWIND01	= 202188,
+    GO_DOODAD_ICECROWN_THRONEFROSTYEDGE01	= 202189,
+    GO_DOODAD_ICESHARD_STANDING02			= 202141,
+    GO_DOODAD_ICESHARD_STANDING01			= 202142,
+    GO_DOODAD_ICESHARD_STANDING03			= 202143,
+    GO_DOODAD_ICESHARD_STANDING04			= 202144,
+    GO_DOODAD_ICECROWN_SNOWEDGEWARNING01	= 202190,
+    GO_FROZEN_LAVAMAN						= 202436,
+    GO_LAVAMAN_PILLARS_CHAINED				= 202437,
+    GO_LAVAMAN_PILLARS_UNCHAINED			= 202438,
 };
 
 enum AchievementCriteriaIds
@@ -459,6 +483,15 @@ enum SharedActions
     ACTION_START_FROSTWYRM      = -368530,
     ACTION_TRIGGER_ASPHYXIATION = -368531,
     ACTION_BOMB_LANDED          = -368532,
+
+	// The Lich King
+    ACTION_RESTORE_LIGHT		= -72262,
+    ACTION_FROSTMOURNE_INTRO	= -36823,
+};
+
+enum AreaIds
+{
+    AREA_THE_FROZEN_THRONE = 4859,
 };
 
 enum WeekliesICC

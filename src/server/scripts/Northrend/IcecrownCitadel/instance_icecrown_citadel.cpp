@@ -24,6 +24,21 @@
 #include "icecrown_citadel.h"
 
 #define MAX_ENCOUNTER      12
+
+
+enum EventIds
+{
+    EVENT_QUAKE = 23437,
+    EVENT_SECOND_REMORSELESS_WINTER = 23507,
+    EVENT_TELEPORT_TO_FROSMOURNE = 23617,
+};
+
+enum TimedEvents
+{
+    EVENT_UPDATE_EXECUTION_TIME = 1,
+    EVENT_QUAKE_SHATTER = 2,
+    EVENT_REBUILD_PLATFORM = 3,
+};
 DoorData const doorData[] =
 {
     {GO_LORD_MARROWGAR_S_ENTRANCE,           DATA_LORD_MARROWGAR,        DOOR_TYPE_ROOM,       BOUNDARY_N   },
@@ -124,6 +139,12 @@ class instance_icecrown_citadel : public InstanceMapScript
                 RimefangGUID = 0;
                 DreamwalkerCache = 0;
                 TheLichKingGUID = 0;
+				TerenasMenethilGUID = 0;
+				ArthasPlatformGUID = 0;
+				ArthasPrecipiceGUID = 0;
+				FrozenThroneWindGUID = 0;
+				FrozenThroneWarningGUID = 0;
+				FrozenThroneEdgeGUID = 0;
 				npc_muradin_bronzebeardGUID = 0;
 				hordeGSGuid = 0;
 				alliGSGuid = 0; 
@@ -319,8 +340,9 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case NPC_TIRION:
                         Tirion = creature->GetGUID();
                         break;
-                    case NPC_TERENAS_FIGHTER:
-                        TerenasFighter = creature->GetGUID();
+                    case NPC_TERENAS_MENETHIL_FROSTMOURNE:
+                    case NPC_TERENAS_MENETHIL_FROSTMOURNE_H:
+                        TerenasMenethilGUID = creature->GetGUID();
                         break;
                     case NPC_SPIRIT_WARDEN:
                         SpiritWarden = creature->GetGUID();
@@ -488,11 +510,10 @@ class instance_icecrown_citadel : public InstanceMapScript
                     case GO_DREAMWALKER_CACHE_25H:
                         DreamwalkerCache = go->GetGUID();
                         break;
-                    case GO_FROZEN_LAVAMAN:
-                        FrozenLavaman = go->GetGUID();
-                        break;
-                    case GO_LAVAMAN_PILLARS:
-                        LavamanPillars = go->GetGUID();
+                    case GO_LAVAMAN_PILLARS_CHAINED:
+                        PillarsChainedGUID = go->GetGUID();
+                        if (GetBossState(DATA_THE_LICH_KING) == DONE)
+                            go->SetRespawnTime(7 * DAY);
                         break;
                     case GO_ICE_SHARD_1:
                         IceShard1 = go->GetGUID();
@@ -510,17 +531,33 @@ class instance_icecrown_citadel : public InstanceMapScript
                         IceShard4 = go->GetGUID();
                         go->SetGoState(GetBossState(DATA_THE_LICH_KING) == DONE ? GO_STATE_ACTIVE : GO_STATE_READY);
                         break;
-                    case GO_FROSTY_EDGE_OUTER:
-                        FrostyEdgeOuter = go->GetGUID();
-                        go->SetGoState(GO_STATE_ACTIVE);
+                    case GO_ARTHAS_PLATFORM:
+                        // this enables movement at The Frozen Throne, when printed this value is 0.000000f
+                        // however, when represented as integer client will accept only this value
+                        go->SetUInt32Value(GAMEOBJECT_PARENTROTATION, 5535469);
+                        ArthasPlatformGUID = go->GetGUID();
+                    case GO_ARTHAS_PRECIPICE:
+                        go->SetUInt32Value(GAMEOBJECT_PARENTROTATION, 4178312);
+                        ArthasPrecipiceGUID = go->GetGUID();
                         break;
-                    case GO_FROSTY_EDGE_INNER:
-                        FrostyEdgeInner = go->GetGUID();
-                        go->SetGoState(GO_STATE_READY);
+                    case GO_DOODAD_ICECROWN_THRONEFROSTYEDGE01:
+                        FrozenThroneEdgeGUID = go->GetGUID();
                         break;
-                    case GO_EDGE_DESTROY_WARNING:
-                        EdgeDestroyWarning = go->GetGUID();
-                        go->SetGoState(GO_STATE_READY);
+                    case GO_FROZEN_LAVAMAN:
+                        FrozenBolvarGUID = go->GetGUID();
+                        if (GetBossState(DATA_THE_LICH_KING) == DONE)
+                            go->SetRespawnTime(7 * DAY);
+                        break;
+                    case GO_LAVAMAN_PILLARS_UNCHAINED:
+                        PillarsUnchainedGUID = go->GetGUID();
+                        if (GetBossState(DATA_THE_LICH_KING) == DONE)
+                            go->SetRespawnTime(7 * DAY);
+                        break;
+                    case GO_DOODAD_ICECROWN_THRONEFROSTYWIND01:
+                        FrozenThroneWindGUID = go->GetGUID();
+                        break;
+                    case GO_DOODAD_ICECROWN_SNOWEDGEWARNING01:
+                        FrozenThroneWarningGUID = go->GetGUID();
                         break;
 					case GO_HORDE_GUNSHIP:
 						hordeGSGuid = go->GetGUID();
@@ -661,8 +698,12 @@ class instance_icecrown_citadel : public InstanceMapScript
                         return RimefangGUID;
                     case DATA_THE_LICH_KING:
                         return TheLichKingGUID;
-                    case DATA_TIRION:
+                    case DATA_HIGHLORD_TIRION_FORDRING:
                         return Tirion;
+					case DATA_ARTHAS_PLATFORM:
+                        return ArthasPlatformGUID;
+					 case DATA_TERENAS_MENETHIL:
+                        return TerenasMenethilGUID;
                     case DATA_TERENAS_FIGHTER:
                         return TerenasFighter;
                     case DATA_SPIRIT_WARDEN:
@@ -839,18 +880,13 @@ class instance_icecrown_citadel : public InstanceMapScript
                         }
                         break;
                     case DATA_THE_LICH_KING:
-                        if (state == NOT_STARTED)
-                            if (GameObject* go = instance->GetGameObject(FrozenLavaman))
-                                go->SetPhaseMask(2, true);
-
-                        if (state == DONE)
-                        {
-                            if (GameObject* go = instance->GetGameObject(FrozenLavaman))
-                                go->SetPhaseMask(1, true);
-
-                            if (GameObject* go = instance->GetGameObject(LavamanPillars))
-                                go->SetPhaseMask(2, true);
-                        }
+                    {
+                        // set the platform as active object to dramatically increase visibility range
+                        // note: "active" gameobjects do not block grid unloading
+                        if (GameObject* precipice = instance->GetGameObject(ArthasPrecipiceGUID))
+                            precipice->setActive(state == IN_PROGRESS);
+                        if (GameObject* platform = instance->GetGameObject(ArthasPlatformGUID))
+                            platform->setActive(state == IN_PROGRESS);
 
                         if (instance->IsHeroic())
                         {
@@ -863,8 +899,18 @@ class instance_icecrown_citadel : public InstanceMapScript
                                         theLichKing->DespawnOrUnsummon();
                             }
                         }
+
+                        if (state == DONE)
+                        {
+                            if (GameObject* bolvar = instance->GetGameObject(FrozenBolvarGUID))
+                                bolvar->SetRespawnTime(7 * DAY);
+                            if (GameObject* pillars = instance->GetGameObject(PillarsChainedGUID))
+                                pillars->SetRespawnTime(7 * DAY);
+                            if (GameObject* pillars = instance->GetGameObject(PillarsUnchainedGUID))
+                                pillars->SetRespawnTime(7 * DAY);
+                        }
                         break;
-                    default:
+                    }                    default:
                         break;
                  }
 
@@ -1135,75 +1181,160 @@ class instance_icecrown_citadel : public InstanceMapScript
                     else
                         BloodQuickeningTimer -= diff;
                 }
+
+                Events.Update(diff);
+
+                while (uint32 eventId = Events.ExecuteEvent())
+                {
+                    switch (eventId)
+                    {
+                        case EVENT_QUAKE_SHATTER:
+                        {
+                            if (GameObject* platform = instance->GetGameObject(ArthasPlatformGUID))
+                                platform->SetDestructibleState(GO_DESTRUCTIBLE_DAMAGED);
+                            if (GameObject* edge = instance->GetGameObject(FrozenThroneEdgeGUID))
+                                edge->SetGoState(GO_STATE_ACTIVE);
+                            if (GameObject* wind = instance->GetGameObject(FrozenThroneWindGUID))
+                                wind->SetGoState(GO_STATE_READY);
+                            if (GameObject* warning = instance->GetGameObject(FrozenThroneWarningGUID))
+                                warning->SetGoState(GO_STATE_READY);
+                            if (Creature* theLichKing = instance->GetCreature(TheLichKingGUID))
+                                theLichKing->AI()->DoAction(ACTION_RESTORE_LIGHT);
+                            break;
+                        }
+                        case EVENT_REBUILD_PLATFORM:
+                            if (GameObject* platform = instance->GetGameObject(ArthasPlatformGUID))
+                                platform->SetDestructibleState(GO_DESTRUCTIBLE_REBUILDING);
+                            if (GameObject* edge = instance->GetGameObject(FrozenThroneEdgeGUID))
+                                edge->SetGoState(GO_STATE_READY);
+                            if (GameObject* wind = instance->GetGameObject(FrozenThroneWindGUID))
+                                wind->SetGoState(GO_STATE_ACTIVE);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
-        protected:
-            uint64 LadyDeathwisperElevatorGUID;
-            uint64 DeathbringerSaurfangGUID;
-            uint64 DeathbringerSaurfangDoorGUID;
-            uint64 DeathbringerSaurfangEventGUID;   // Muradin Bronzebeard or High Overlord Saurfang
-            uint64 DeathbringersCacheGUID;
-            uint64 SaurfangTeleportGUID;
-            uint64 PlagueSigilGUID;
-            uint64 BloodwingSigilGUID;
-            uint64 FrostwingSigilGUID;
-            uint64 PutricidePipeGUIDs[2];
-            uint64 PutricideGateGUIDs[2];
-            uint64 PutricideCollisionGUID;
-            uint64 FestergutGUID;
-            uint64 RotfaceGUID;
-            uint64 ProfessorPutricideGUID;
-            uint64 PutricideTableGUID;
-            uint64 BloodCouncilGUIDs[3];
-            uint64 BloodCouncilControllerGUID;
-            uint64 BloodQueenLanaThelGUID;
-            uint64 CrokScourgebaneGUID;
-            uint64 CrokCaptainGUIDs[4];
-            uint64 SisterSvalnaGUID;
-            uint64 ValithriaDreamwalkerGUID;
-            uint64 ValithriaLichKingGUID;
-            uint64 ValithriaTriggerGUID;
-            uint64 SindragosaGUID;
-            uint64 SpinestalkerGUID;
-            uint64 RimefangGUID;
-            uint64 DreamwalkerCache;
-            uint64 TheLichKingGUID;
-			uint64 npc_muradin_bronzebeardGUID;
-            uint64 Tirion;
-            uint64 TerenasFighter;
-            uint64 SpiritWarden;
-            uint64 IceShard1;
-            uint64 IceShard2;
-            uint64 IceShard3;
-            uint64 IceShard4;
-            uint64 FrostyEdgeInner;
-            uint64 FrostyEdgeOuter;
-            uint64 EdgeDestroyWarning;
-            uint64 FrozenLavaman;
-            uint64 LavamanPillars;
-			uint64 hordeGSGuid;
-			uint64 alliGSGuid; 
-			uint64 hordeGS2Guid;
-			uint64 alliGS2Guid ;
-			uint64 hordeGSBattleGuid;
-			uint64 alliGSBattleGuid;
-            uint32 TeamInInstance;
-            uint32 BloodQuickeningTimer;
-            uint32 ColdflameJetsState;
-            uint32 FrostwyrmCount;
-            uint32 SpinestalkerTrashCount;
-            uint32 RimefangTrashCount;
-            uint32 BloodQuickeningState;
-            uint32 HeroicAttempts;
-            uint32 uiEncounter[MAX_ENCOUNTER];
-			uint16 BloodQuickeningMinutes;
-            uint8 BeenWaiting;
-            uint8 NeckDeep;
-            uint8 NecroticStack;
-            uint8 IsPortalJockeyEligible;
-            bool IsBonedEligible;
-            bool IsOozeDanceEligible;
-            bool IsNauseaEligible;
-            bool IsOrbWhispererEligible;
+
+			void ProcessEvent(WorldObject* /*source*/, uint32 eventId)
+            {
+                switch (eventId)
+                {
+                    case EVENT_QUAKE:
+                        if (GameObject* warning = instance->GetGameObject(FrozenThroneWarningGUID))
+                            warning->SetGoState(GO_STATE_ACTIVE);
+                        Events.ScheduleEvent(EVENT_QUAKE_SHATTER, 5000);
+                        break;
+                    case EVENT_SECOND_REMORSELESS_WINTER:
+                        if (GameObject* platform = instance->GetGameObject(ArthasPlatformGUID))
+                        {
+                            platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED);
+                            Events.ScheduleEvent(EVENT_REBUILD_PLATFORM, 1500);
+                        }
+                        break;
+                    case EVENT_TELEPORT_TO_FROSMOURNE: // Harvest Soul (normal mode)
+                        if (Creature* terenas = instance->SummonCreature(NPC_TERENAS_MENETHIL_FROSTMOURNE, TerenasSpawn, NULL, 63000))
+                        {
+                            terenas->AI()->DoAction(ACTION_FROSTMOURNE_INTRO);
+                            std::list<Creature*> triggers;
+                            GetCreatureListWithEntryInGrid(triggers, terenas, NPC_WORLD_TRIGGER_INFINITE_AOI, 100.0f);
+                            if (!triggers.empty())
+                            {
+                                triggers.sort(Trinity::ObjectDistanceOrderPred(terenas, false));
+                                Unit* visual = triggers.front();
+                                visual->CastSpell(visual, SPELL_FROSTMOURNE_TELEPORT_VISUAL, true);
+                            }
+
+                            if (Creature* warden = instance->SummonCreature(NPC_SPIRIT_WARDEN, SpiritWardenSpawn, NULL, 63000))
+                            {
+                                terenas->AI()->AttackStart(warden);
+                                warden->AddThreat(terenas, 300000.0f);
+                            }
+                        }
+                        break;
+                }
+			}
+
+
+
+            protected:
+				  EventMap Events;
+				  uint64 LadyDeathwisperElevatorGUID;
+				  uint64 DeathbringerSaurfangGUID;
+				  uint64 DeathbringerSaurfangDoorGUID;
+				  uint64 DeathbringerSaurfangEventGUID;   // Muradin Bronzebeard or High Overlord Saurfang
+				  uint64 DeathbringersCacheGUID;
+				  uint64 SaurfangTeleportGUID;
+				  uint64 PlagueSigilGUID;
+				  uint64 BloodwingSigilGUID;
+				  uint64 FrostwingSigilGUID;
+				  uint64 PutricidePipeGUIDs[2];
+				  uint64 PutricideGateGUIDs[2];
+				  uint64 PutricideCollisionGUID;
+				  uint64 FestergutGUID;
+				  uint64 RotfaceGUID;
+				  uint64 ProfessorPutricideGUID;
+				  uint64 PutricideTableGUID;
+				  uint64 BloodCouncilGUIDs[3];
+				  uint64 BloodCouncilControllerGUID;
+				  uint64 BloodQueenLanaThelGUID;
+				  uint64 CrokScourgebaneGUID;
+				  uint64 CrokCaptainGUIDs[4];
+				  uint64 SisterSvalnaGUID;
+				  uint64 ValithriaDreamwalkerGUID;
+				  uint64 ValithriaLichKingGUID;
+				  uint64 ValithriaTriggerGUID;
+				  uint64 SindragosaGUID;
+				  uint64 SpinestalkerGUID;
+				  uint64 RimefangGUID;
+				  uint64 DreamwalkerCache;
+				  uint64 TheLichKingGUID;
+				  uint64 ArthasPlatformGUID;
+				  uint64 ArthasPrecipiceGUID;
+				  uint64 FrozenBolvarGUID;
+				  uint64 FrozenThroneWindGUID;
+				  uint64 FrozenThroneWarningGUID;
+				  uint64 FrozenThroneEdgeGUID;
+				  uint64 npc_muradin_bronzebeardGUID;
+				  uint64 Tirion;
+				  uint64 TerenasFighter;
+				  uint64 SpiritWarden;
+				  uint64 IceShard1;
+				  uint64 IceShard2;
+				  uint64 IceShard3;
+				  uint64 IceShard4;
+				  uint64 FrostyEdgeInner;
+				  uint64 FrostyEdgeOuter;
+				  uint64 EdgeDestroyWarning;
+				  uint64 FrozenLavaman;
+				  uint64 LavamanPillars;
+				  uint64 PillarsChainedGUID;
+				  uint64 PillarsUnchainedGUID;
+				  uint64 TerenasMenethilGUID;
+				  uint64 hordeGSGuid;
+				  uint64 alliGSGuid; 
+				  uint64 hordeGS2Guid;
+				  uint64 alliGS2Guid ;
+				  uint64 hordeGSBattleGuid;
+				  uint64 alliGSBattleGuid;
+				  uint32 TeamInInstance;
+				  uint32 BloodQuickeningTimer;
+				  uint32 ColdflameJetsState;
+				  uint32 FrostwyrmCount;
+				  uint32 SpinestalkerTrashCount;
+				  uint32 RimefangTrashCount;
+				  uint32 BloodQuickeningState;
+				  uint32 HeroicAttempts;
+				  uint32 uiEncounter[MAX_ENCOUNTER];
+				  uint16 BloodQuickeningMinutes;
+				  uint8 BeenWaiting;
+				  uint8 NeckDeep;
+				  uint8 NecroticStack;
+				  uint8 IsPortalJockeyEligible;
+				  bool IsBonedEligible;
+				  bool IsOozeDanceEligible;
+				  bool IsNauseaEligible;
+				  bool IsOrbWhispererEligible;
         };
 
 };
