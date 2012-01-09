@@ -258,7 +258,7 @@ class boss_professor_putricide : public CreatureScript
                     case NPC_GAS_CLOUD:
                         // no possible aura seen in sniff adding the aurastate
 						summon->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
-                        summon->ModifyAuraState(AURA_STATE_UNKNOWN22, true);
+                        summon->SetFlag(UNIT_FIELD_AURASTATE, 1 << (AURA_STATE_UNKNOWN22 - 1));
                         summon->CastSpell(summon, SPELL_GASEOUS_BLOAT_PROC, true);
                         summon->CastCustomSpell(SPELL_GASEOUS_BLOAT, SPELLVALUE_AURA_STACK, 10, summon, false);
                         summon->SetReactState(REACT_PASSIVE);
@@ -731,22 +731,6 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
     public:
         spell_putricide_gaseous_bloat() : SpellScriptLoader("spell_putricide_gaseous_bloat") { }
 
-        class spell_putricide_gaseous_bloat_SpellScript : public SpellScript
-        {
-            PrepareSpellScript(spell_putricide_gaseous_bloat_SpellScript);
-
-            void ModAuraStack()
-            {
-                if (Aura* aur = GetHitAura())
-                    aur->SetStackAmount(10);
-            }
-
-            void Register()
-            {
-                AfterHit += SpellHitFn(spell_putricide_gaseous_bloat_SpellScript::ModAuraStack);
-            }
-        };
-
         class spell_putricide_gaseous_bloat_AuraScript : public AuraScript
         {
             PrepareAuraScript(spell_putricide_gaseous_bloat_AuraScript);
@@ -767,11 +751,6 @@ class spell_putricide_gaseous_bloat : public SpellScriptLoader
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_putricide_gaseous_bloat_AuraScript::HandleExtraEffect, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
             }
         };
-
-        SpellScript* GetSpellScript() const
-        {
-            return new spell_putricide_gaseous_bloat_SpellScript();
-        }
 
         AuraScript* GetAuraScript() const
         {
@@ -810,7 +789,7 @@ class spell_putricide_ooze_channel : public SpellScriptLoader
                 if (targetList.empty())
                 {
                     FinishCast(SPELL_FAILED_NO_VALID_TARGETS);
-                    GetCaster()->ToCreature()->DespawnOrUnsummon(1);    // despawn next update
+                    GetCaster()->ToCreature()->DespawnOrUnsummon(1); // despawn next update
                     return;
                 }
 

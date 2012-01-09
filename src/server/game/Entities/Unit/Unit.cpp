@@ -8076,6 +8076,7 @@ bool Unit::HandleAuraProc(Unit* victim, uint32 damage, Aura* triggeredByAura, Sp
                     *handled = true;
                     break;
                 // Gaseous Bloat
+
                 case 70672:
                 case 72455:
                 case 72832:
