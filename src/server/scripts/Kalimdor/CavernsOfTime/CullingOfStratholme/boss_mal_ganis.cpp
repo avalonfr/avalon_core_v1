@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -205,7 +205,7 @@ public:
                                 uiOutroTimer = 8000;
                                 break;
                             case 2:
-                                me->SetTarget(instance ? instance->GetData64(DATA_ARTHAS) : 0);
+                                me->SetUInt64Value(UNIT_FIELD_TARGET, instance ? instance->GetData64(DATA_ARTHAS) : 0);
                                 me->HandleEmoteCommand(29);
                                 DoScriptText(SAY_ESCAPE_SPEECH_2, me);
                                 ++uiOutroStep;
