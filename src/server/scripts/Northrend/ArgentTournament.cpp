@@ -1436,7 +1436,7 @@ public:
             pCreature->setFaction(14);
             pCreature->SetReactState(REACT_AGGRESSIVE);
             pCreature->MonsterSay(urand(0,1) ? SAY_START_1 : SAY_START_2, LANG_UNIVERSAL, 0);
-            pCreature->AI()->AttackStart(pPlayer);
+            pCreature->AI()->AttackStart(pPlayer->GetVehicleCreatureBase());
             pCreature->AddThreat(pPlayer, 0.0f);
             pCreature->SetInCombatWith(pPlayer);
             pPlayer->SetInCombatWith(pCreature);
@@ -1822,7 +1822,7 @@ public:
             pCreature->setFaction(14);
             pCreature->SetReactState(REACT_AGGRESSIVE);
             pCreature->MonsterSay(urand(0,1) ? SAY_START_1_GRAND : SAY_START_2_GRAND, LANG_UNIVERSAL, 0);
-            pCreature->AI()->AttackStart(pPlayer);
+            pCreature->AI()->AttackStart(pPlayer->GetVehicleCreatureBase());
             pCreature->AddThreat(pPlayer, 0.0f);
             pCreature->SetInCombatWith(pPlayer);
             pPlayer->SetInCombatWith(pCreature);
