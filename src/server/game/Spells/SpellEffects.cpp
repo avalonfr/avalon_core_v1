@@ -6965,6 +6965,13 @@ void Spell::EffectSendTaxi(SpellEffIndex effIndex)
         return;
 
     unitTarget->ToPlayer()->ActivateTaxiPathTo(m_spellInfo->Effects[effIndex].MiscValue, m_spellInfo->Id);
+	
+    switch(m_spellInfo->Id)
+    {
+        case 31606: //Quest support: As the Crow Flies (9718)
+            unitTarget->Mount(17447);
+            break;
+    }
 }
 
 void Spell::EffectPullTowards(SpellEffIndex effIndex)
