@@ -488,7 +488,7 @@ void AddSC_boss_blood_prince_council();
 void AddSC_boss_blood_queen_lana_thel();
 void AddSC_boss_valithria_dreamwalker();
 void AddSC_boss_sindragosa();
-void AddSC_boss_the_lich_king();
+void AddSC_boss_lichking();
 void AddSC_boss_gunship_battle();
 void AddSC_icc_trashmobs();
 void AddSC_icecrown_citadel_teleport();
@@ -1202,7 +1202,7 @@ void AddNorthrendScripts()
     AddSC_boss_blood_queen_lana_thel();
     AddSC_boss_valithria_dreamwalker();
     AddSC_boss_sindragosa();
-	AddSC_boss_the_lich_king();
+	AddSC_boss_lichking();
 	AddSC_boss_gunship_battle();
 	AddSC_icc_trashmobs();
     AddSC_icecrown_citadel_teleport();
