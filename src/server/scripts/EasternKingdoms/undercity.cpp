@@ -32,10 +32,10 @@ EndContentData */
 #include "ScriptPCH.h"
 
 /*######
-## npc_lady_sylvanas_windrunner
+## boss_lady_sylvanas_windrunner
 ######*/
 
-enum Sylvanas
+enum SylvanasMisc
 {
     QUEST_JOURNEY_TO_UNDERCITY  = 9180,
     SAY_LAMENT_END              = -1000196,
@@ -48,6 +48,18 @@ enum Sylvanas
     SPELL_HIGHBORNE_AURA        = 37090,
     SPELL_SYLVANAS_CAST         = 36568,
     SPELL_RIBBON_OF_SOULS       = 34432,                   //the real one to use might be 37099
+    
+    // abilities
+    SPELL_FADE              = 20672,
+    SPELL_BLACK_ARROW       = 59712,
+    SPELL_MULTI_SHOT        = 59713,
+    SPELL_SHOOT             = 59710,
+    SPELL_SUMMON_SKELETON   = 59711,
+    
+    NPC_SKELETON            = 6412,
+
+    SAY_AGGRO               = 1,
+    SAY_DEATH               = 2
 };
 
 float HighborneLoc[4][3]=
@@ -61,17 +73,17 @@ float HighborneLoc[4][3]=
 #define HIGHBORNE_LOC_Y             -61.00f
 #define HIGHBORNE_LOC_Y_NEW         -55.50f
 
-class npc_lady_sylvanas_windrunner : public CreatureScript
+class boss_lady_sylvanas_windrunner : public CreatureScript
 {
 public:
-    npc_lady_sylvanas_windrunner() : CreatureScript("npc_lady_sylvanas_windrunner") { }
+    boss_lady_sylvanas_windrunner() : CreatureScript("boss_lady_sylvanas_windrunner") { }
 
     bool OnQuestReward(Player* /*player*/, Creature* creature, const Quest *_Quest, uint32 /*slot*/)
     {
         if (_Quest->GetQuestId() == QUEST_JOURNEY_TO_UNDERCITY)
         {
-            CAST_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->LamentEvent = true;
-            CAST_AI(npc_lady_sylvanas_windrunner::npc_lady_sylvanas_windrunnerAI, creature->AI())->DoPlaySoundToSet(creature, SOUND_CREDIT);
+            CAST_AI(boss_lady_sylvanas_windrunner::boss_lady_sylvanas_windrunnerAI, creature->AI())->LamentEvent = true;
+            CAST_AI(boss_lady_sylvanas_windrunner::boss_lady_sylvanas_windrunnerAI, creature->AI())->DoPlaySoundToSet(creature, SOUND_CREDIT);
             creature->CastSpell(creature, SPELL_SYLVANAS_CAST, false);
 
             for (uint8 i = 0; i < 4; ++i)
@@ -81,36 +93,44 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const
+    struct boss_lady_sylvanas_windrunnerAI : public ScriptedAI
     {
-        return new npc_lady_sylvanas_windrunnerAI (creature);
-    }
+        boss_lady_sylvanas_windrunnerAI(Creature* creature) : ScriptedAI(creature) , summons(me) {}
 
-    struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
-    {
-        npc_lady_sylvanas_windrunnerAI(Creature* c) : ScriptedAI(c) {}
-
-        uint32 LamentEvent_Timer;
-        bool LamentEvent;
-        uint64 targetGUID;
-
+        uint32  LamentEvent_Timer;
+        bool    LamentEvent;
+        uint64  targetGUID;
+        
         void Reset()
         {
             LamentEvent_Timer = 5000;
             LamentEvent = false;
             targetGUID = 0;
+
+            _fadeTimer = 10 *IN_MILLISECONDS;
+            _blackarrowTimer = urand(6, 8) *IN_MILLISECONDS;
+            _multishotTimer = urand(4, 6) *IN_MILLISECONDS;
+            _shootTimer = urand(2, 4) *IN_MILLISECONDS;
+            _summonskeletonTimer = 0;
+
+            summons.DespawnAll();
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) 
+        {
+            Talk(SAY_AGGRO);
+        }
 
         void JustSummoned(Creature* summoned)
         {
             if (summoned->GetEntry() == ENTRY_HIGHBORNE_BUNNY)
             {
+                summons.Summon(summoned);
+
                 if (Creature* target = Unit::GetCreature(*summoned, targetGUID))
                 {
                     target->SendMonsterMove(target->GetPositionX(), target->GetPositionY(), me->GetPositionZ()+15.0f, 0);
-                    target->SetPosition(target->GetPositionX(), target->GetPositionY(), me->GetPositionZ()+15.0f, 0.0f);
+                    // target->SetPosition(target->GetPositionX(), target->GetPositionY(), me->GetPositionZ()+15.0f, 0.0f);
                     summoned->CastSpell(target, SPELL_RIBBON_OF_SOULS, false);
                 }
 
@@ -134,15 +154,93 @@ public:
                         DoScriptText(EMOTE_LAMENT_END, me);
                         LamentEvent = false;
                     }
-                } else LamentEvent_Timer -= diff;
+                } 
+                else 
+                    LamentEvent_Timer -= diff;
             }
 
             if (!UpdateVictim())
                 return;
 
+            if (_fadeTimer <= diff)
+            {
+                DoCast(SPELL_FADE);
+                _fadeTimer = 10 *IN_MILLISECONDS;
+            }
+            else
+                _fadeTimer -= diff;
+
+            if (_blackarrowTimer <= diff)
+            {
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
+                if (target)
+                {
+                    DoCast(target, SPELL_BLACK_ARROW);
+                    _blackarrowTimer = urand(12, 15) *IN_MILLISECONDS;
+                }
+            }
+            else
+                _blackarrowTimer -= diff;
+
+            if (_multishotTimer <= diff)
+            {
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
+                if (target)
+                {
+                    DoCast(target, SPELL_MULTI_SHOT);
+                    _multishotTimer = urand(8, 10) *IN_MILLISECONDS;
+                }
+            }
+            else
+                _multishotTimer -= diff;
+
+            if (_shootTimer <= diff)
+            {
+                Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 1);
+                if (target)
+                {
+                    DoCast(target, SPELL_SHOOT);
+                    _shootTimer = urand(2, 4) *IN_MILLISECONDS;
+                }
+            }
+            else
+                _shootTimer -= diff;
+
+            if (_summonskeletonTimer <= diff)
+            {
+                DoCast(SPELL_SUMMON_SKELETON);
+                _summonskeletonTimer = 10 *IN_MILLISECONDS;
+            }
+            else
+                _summonskeletonTimer -= diff;
+
             DoMeleeAttackIfReady();
         }
+
+        void KilledUnit (Unit* victim)
+        {
+            me->SummonCreature(NPC_SKELETON, victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ(), 0, TEMPSUMMON_CORPSE_DESPAWN, 0);
+        }
+
+        void JustDied (Unit* /*victim*/)
+        {
+            summons.DespawnAll();
+            Talk(SAY_DEATH);
+        }
+
+    private:
+        SummonList summons;
+        uint32  _fadeTimer;
+        uint32  _blackarrowTimer;
+        uint32  _multishotTimer;
+        uint32  _shootTimer;
+        uint32  _summonskeletonTimer;
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_lady_sylvanas_windrunnerAI (creature);
+    }
 
 };
 
@@ -261,7 +359,7 @@ public:
 
 void AddSC_undercity()
 {
-    new npc_lady_sylvanas_windrunner();
+    new boss_lady_sylvanas_windrunner();
     new npc_highborne_lamenter();
     new npc_parqual_fintallas();
 }

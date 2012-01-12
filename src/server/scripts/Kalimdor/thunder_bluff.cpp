@@ -26,21 +26,26 @@ EndScriptData */
 #include "ScriptPCH.h"
 
 /*#####
-# npc_cairne_bloodhoof
+# boss_cairne_bloodhoof
 ######*/
 
-#define SPELL_BERSERKER_CHARGE  16636
-#define SPELL_CLEAVE            16044
-#define SPELL_MORTAL_STRIKE     16856
-#define SPELL_THUNDERCLAP       23931
-#define SPELL_UPPERCUT          22916
+enum Cairne
+{
+    SPELL_CLEAVE        = 15284,
+    SPELL_MORTAL_STRIKE = 16856,
+    SPELL_THUNDERCLAP   = 23931,
+    SPELL_UPPERCUT      = 22916,
+    SPELL_WARSTOMP      = 59705,
+
+    SAY_AGGRO           = 1
+};
 
 #define GOSSIP_HCB "I know this is rather silly but a young ward who is a bit shy would like your hoofprint."
-//TODO: verify abilities/timers
-class npc_cairne_bloodhoof : public CreatureScript
+
+class boss_cairne_bloodhoof : public CreatureScript
 {
 public:
-    npc_cairne_bloodhoof() : CreatureScript("npc_cairne_bloodhoof") { }
+    boss_cairne_bloodhoof() : CreatureScript("boss_cairne_bloodhoof") { }
 
     bool OnGossipSelect(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
     {
@@ -66,76 +71,91 @@ public:
         return true;
     }
 
-    CreatureAI* GetAI(Creature* creature) const
+    struct boss_cairne_bloodhoofAI : public ScriptedAI
     {
-        return new npc_cairne_bloodhoofAI (creature);
-    }
-
-    struct npc_cairne_bloodhoofAI : public ScriptedAI
-    {
-        npc_cairne_bloodhoofAI(Creature* c) : ScriptedAI(c) {}
-
-        uint32 BerserkerCharge_Timer;
-        uint32 Cleave_Timer;
-        uint32 MortalStrike_Timer;
-        uint32 Thunderclap_Timer;
-        uint32 Uppercut_Timer;
+        boss_cairne_bloodhoofAI(Creature* creature) : ScriptedAI(creature) {}
 
         void Reset()
         {
-            BerserkerCharge_Timer = 30000;
-            Cleave_Timer = 5000;
-            MortalStrike_Timer = 10000;
-            Thunderclap_Timer = 15000;
-            Uppercut_Timer = 10000;
+            _warstompTimer = urand(15, 20) *IN_MILLISECONDS;
+            _cleaveTimer = urand(5, 7) *IN_MILLISECONDS;
+            _mortalstrikeTimer = urand(10, 12) *IN_MILLISECONDS;
+            _thunderclapTimer = urand(13, 15) *IN_MILLISECONDS;
+            _uppercutTimer = urand(8, 10) *IN_MILLISECONDS;
         }
 
-        void EnterCombat(Unit* /*who*/) {}
+        void EnterCombat(Unit* /*who*/) 
+        {
+            Talk(SAY_AGGRO);
+        }
 
         void UpdateAI(const uint32 diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if (BerserkerCharge_Timer <= diff)
+            if (_warstompTimer <= diff)
             {
                 Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0);
                 if (target)
-                    DoCast(target, SPELL_BERSERKER_CHARGE);
-                BerserkerCharge_Timer = 25000;
-            } else BerserkerCharge_Timer -= diff;
+                    DoCast(target, SPELL_WARSTOMP);
+                _warstompTimer = urand(25, 30) *IN_MILLISECONDS;
+            } 
+            else
+                _warstompTimer -= diff;
 
-            if (Uppercut_Timer <= diff)
+            if (_uppercutTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_UPPERCUT);
-                Uppercut_Timer = 20000;
-            } else Uppercut_Timer -= diff;
+                DoCastVictim(SPELL_UPPERCUT);
+                _uppercutTimer = urand(10, 12) *IN_MILLISECONDS;;
+            } 
+            else
+                _uppercutTimer -= diff;
 
-            if (Thunderclap_Timer <= diff)
+            if (_thunderclapTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_THUNDERCLAP);
-                Thunderclap_Timer = 15000;
-            } else Thunderclap_Timer -= diff;
+                DoCast(SPELL_THUNDERCLAP);
+                _thunderclapTimer = urand(13, 15) *IN_MILLISECONDS;
+            } 
+            else 
+                _thunderclapTimer -= diff;
 
-            if (MortalStrike_Timer <= diff)
+            if (_mortalstrikeTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_MORTAL_STRIKE);
-                MortalStrike_Timer = 15000;
-            } else MortalStrike_Timer -= diff;
+                DoCastVictim(SPELL_MORTAL_STRIKE);
+                _mortalstrikeTimer = urand(12, 14) *IN_MILLISECONDS;
+            } 
+            else
+                _mortalstrikeTimer -= diff;
 
-            if (Cleave_Timer <= diff)
+            if (_cleaveTimer <= diff)
             {
-                DoCast(me->getVictim(), SPELL_CLEAVE);
-                Cleave_Timer = 7000;
-            } else Cleave_Timer -= diff;
+                DoCastVictim(SPELL_CLEAVE);
+                _cleaveTimer = urand (5, 7) *IN_MILLISECONDS;
+            } 
+            else
+                _cleaveTimer -= diff;
 
             DoMeleeAttackIfReady();
         }
+
+    private:
+        uint32 _warstompTimer;
+        uint32 _cleaveTimer;
+        uint32 _mortalstrikeTimer;
+        uint32 _thunderclapTimer;
+        uint32 _uppercutTimer;
+
     };
+
+    CreatureAI* GetAI(Creature* creature) const
+    {
+        return new boss_cairne_bloodhoofAI (creature);
+    }
 
 };
 
 void AddSC_thunder_bluff()
 {
-    new npc_cairne_bloodhoof();
+    new boss_cairne_bloodhoof();
 }

@@ -240,6 +240,10 @@ public:
 
                 // give achievement credit and LFG rewards to players. criteria use spell 58630 which doesn't exist, but it was created in spell_dbc
                 DoCast(me, SPELL_KILL_CREDIT);
+				
+                float x, y, z;
+                me->GetPosition(x, y, z);
+                me->SummonCreature(30997, x, y, z, 0, TEMPSUMMON_CORPSE_DESPAWN, 0);// Summon Npc Chromie
             }
         }
 
