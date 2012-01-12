@@ -279,6 +279,16 @@ void Spell::EffectInstaKill(SpellEffIndex /*effIndex*/)
 
     if (!unitTarget || !unitTarget->isAlive())
         return;
+		
+	// Death pact should only affet his ghoul
+    if (m_spellInfo->Id == 48743)
+    {
+        if (unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->GetEntry() != 26125)
+            return;
+        //Do not harm other ghouls
+        if (unitTarget->GetOwnerGUID() != m_caster->GetGUID())
+            return;
+    }
 
     if (m_caster == unitTarget)                              // prevent interrupt message
         finish();
