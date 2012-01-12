@@ -2540,10 +2540,18 @@ void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float abs
     Trinity::NormalizeMapCoord(y);
 }
 
-void WorldObject::GetNearPoint(WorldObject const* /*searcher*/, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const
+void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle) const
 {
     GetNearPoint2D(x, y, distance2d+searcher_size, absAngle);
     z = GetPositionZ();
+	
+    if (searcher && searcher->GetTypeId() == TYPEID_UNIT)
+    {
+        if (searcher->ToCreature()->IsFlying() || searcher->ToCreature()->canFly() ||
+            (searcher->ToCreature()->canSwim() && searcher->ToCreature()->IsInWater()))
+            return;
+    }
+	
     UpdateGroundPositionZ(x, y, z);
 
     /*
