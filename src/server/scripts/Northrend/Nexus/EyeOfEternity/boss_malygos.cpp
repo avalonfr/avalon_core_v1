@@ -20,7 +20,7 @@
 #include "WorldPacket.h"
 #include "ObjectAccessor.h"
 
-enum
+enum variable
 {
     /* Phase 0 */
     SPELL_PORTAL_BEAM = 56046,

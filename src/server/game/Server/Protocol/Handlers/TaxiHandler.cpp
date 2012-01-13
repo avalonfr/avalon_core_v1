@@ -217,6 +217,10 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
     if (!curDest)
         return;
 
+	// TaxiNodes: 96 -> Zangarmarsh - Quest - As the Crow Flies - End | Quest Support: As the Crow Flies
+    if (curDest == 96 && GetPlayer()->GetQuestStatus(9718) == QUEST_STATUS_INCOMPLETE)
+        GetPlayer()->CompleteQuest(9718);	
+		
     TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
 
     // far teleport case

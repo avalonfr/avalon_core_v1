@@ -37,7 +37,7 @@ class ZoneScript
         virtual void OnGameObjectCreate(GameObject* /*go*/) {}
         virtual void OnGameObjectRemove(GameObject* /*go*/) {}
 
-        virtual void OnUnitDeath(Unit* /*unit*/) {}
+        virtual void OnCreatureDeath(Creature* /*creature*/) {}
 
         //All-purpose data storage 64 bit
         virtual uint64 GetData64(uint32 /*DataId*/) { return 0; }
