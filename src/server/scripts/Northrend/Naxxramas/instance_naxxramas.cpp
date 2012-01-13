@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 TrinityCore <http://www.trinitycore.org/>
+ * Copyright (C) 2008-2012 TrinityCore <http://www.trinitycore.org/>
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -166,8 +166,8 @@ public:
             kelthuzadGUID             = 0;
             kelthuzadTriggerGUID      = 0;
 
-            playerDied        = 0;
-            gothikDoorState   = GO_STATE_ACTIVE;
+            playerDied                = 0;
+            gothikDoorState           = GO_STATE_ACTIVE;
 
             memset(portalsGUID, 0, sizeof(portalsGUID));
         }
