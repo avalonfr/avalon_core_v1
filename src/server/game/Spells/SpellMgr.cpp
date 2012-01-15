@@ -2964,8 +2964,13 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+            case 57934: // Tricks of the Trade - [Rogue]
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;			
 			case 1543: // Flare - llega al lugar donde se lanza instantaneamente
-                spellInfo->speed = 100;
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; //10 yardas de diametro                
+				spellInfo->speed = 100;
                 break;
             case 24259: // Spell Lock
                 spellInfo->speed = 80;
