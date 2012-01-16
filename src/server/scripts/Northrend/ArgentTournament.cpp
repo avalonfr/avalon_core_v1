@@ -323,7 +323,7 @@ public:
 
 enum eDameEnvikiKapsalis
 {
-    TITLE_CRUSADER    = 123
+    TITLE_CRUSADER    = 156
 };
 
 class npc_dame_evniki_kapsalis : public CreatureScript
