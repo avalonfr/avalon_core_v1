@@ -2545,13 +2545,13 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     GetNearPoint2D(x, y, distance2d+searcher_size, absAngle);
     z = GetPositionZ();
 	
-    if (searcher && searcher->GetTypeId() == TYPEID_UNIT)
+ /*   if (searcher && searcher->GetTypeId() == TYPEID_UNIT)
     {
         if (searcher->ToCreature()->IsFlying() || searcher->ToCreature()->canFly() ||
             (searcher->ToCreature()->canSwim() && searcher->ToCreature()->IsInWater()))
             return;
     }
-	
+*/	
     UpdateGroundPositionZ(x, y, z);
 
     /*

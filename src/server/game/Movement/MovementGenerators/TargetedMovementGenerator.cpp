@@ -239,7 +239,14 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 time_diff)
 
     if (!i_destinationHolder.HasDestination())
         _setTargetLocation(owner);
-    if (i_destinationHolder.UpdateTraveller(traveller, time_diff, i_recalculateTravel || owner.IsStopped()))
+	else if (owner.IsStopped() && !i_destinationHolder.HasArrived())
+    {
+        owner.AddUnitState(UNIT_STAT_CHASE);
+        i_destinationHolder.StartTravel(traveller);
+        return true;
+    }
+
+    if (i_destinationHolder.UpdateTraveller(traveller, time_diff, i_recalculateTravel))
     {
         // put targeted movement generators on a higher priority
 
