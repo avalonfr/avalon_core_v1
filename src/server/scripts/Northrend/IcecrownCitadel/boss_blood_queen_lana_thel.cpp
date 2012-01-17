@@ -136,6 +136,8 @@ class boss_blood_queen_lana_thel : public CreatureScript
         {
             boss_blood_queen_lana_thelAI(Creature* creature) : BossAI(creature, DATA_BLOOD_QUEEN_LANA_THEL)
             {
+                me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
+                me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_GRIP, true);
             }
 
             void Reset()
@@ -159,6 +161,14 @@ class boss_blood_queen_lana_thel : public CreatureScript
 
             void EnterCombat(Unit* who)
             {
+			
+			    if (!instance->CheckRequiredBosses(DATA_BLOOD_QUEEN_LANA_THEL, who->ToPlayer()))
+                {
+                    EnterEvadeMode();
+                    instance->DoCastSpellOnPlayers(LIGHT_S_HAMMER_TELEPORT);
+                    return;
+                }
+				
                 me->setActive(true);
                 DoZoneInCombat();
                 Talk(SAY_AGGRO);

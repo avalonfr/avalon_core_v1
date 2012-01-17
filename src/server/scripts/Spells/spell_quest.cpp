@@ -1221,6 +1221,65 @@ class spell_q9452_cast_net: public SpellScriptLoader
         }
 };
 
+// http://www.wowhead.com/quest=12277 Leave Nothing to Chance
+// 48742 Wintergarde Mine Explosion
+enum LeaveNothingToChance
+{
+    NPC_UPPER_MINE_SHAFT            = 27436,
+    NPC_LOWER_MINE_SHAFT            = 27437,
+    SPELL_UPPER_MINE_SHAFT_CREDIT   = 48744,
+    SPELL_LOWER_MINE_SHAFT_CREDIT   = 48745,
+};
+
+class spell_q12277_wintergarde_mine_explosion : public SpellScriptLoader
+{
+public:
+    spell_q12277_wintergarde_mine_explosion() : SpellScriptLoader("spell_q12277_wintergarde_mine_explosion") { }
+ 
+    class spell_q12277_wintergarde_mine_explosion_SpellScript : public SpellScript
+    {
+    public:
+        PrepareSpellScript(spell_q12277_wintergarde_mine_explosion_SpellScript)
+        bool Validate(SpellEntry const * /*spellEntry*/)
+        {
+            if (!sSpellStore.LookupEntry(SPELL_UPPER_MINE_SHAFT_CREDIT))
+                return false;
+            if (!sSpellStore.LookupEntry(SPELL_LOWER_MINE_SHAFT_CREDIT))
+                return false;
+            return true;
+        }
+ 
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Creature* unitTarget = GetHitCreature())
+                if (Unit* caster = GetCaster())
+                    if (caster->GetTypeId() == TYPEID_UNIT)
+                        if (Unit* owner = caster->GetOwner())
+                        {
+                            switch (unitTarget->GetEntry())
+                            {
+                            case NPC_UPPER_MINE_SHAFT:
+                                caster->CastSpell(owner, SPELL_UPPER_MINE_SHAFT_CREDIT, true);
+                                break;
+                            case NPC_LOWER_MINE_SHAFT:
+                                caster->CastSpell(owner, SPELL_LOWER_MINE_SHAFT_CREDIT, true);
+                                break;
+                            }
+                        }
+        }
+ 
+        void Register()
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_q12277_wintergarde_mine_explosion_SpellScript::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+        }
+    };
+ 
+    SpellScript* GetSpellScript() const
+    {
+        return new spell_q12277_wintergarde_mine_explosion_SpellScript();
+    }
+};
+
 void AddSC_quest_spell_scripts()
 {
     new spell_q55_sacred_cleansing();
@@ -1248,4 +1307,5 @@ void AddSC_quest_spell_scripts()
 	new spell_q12237_rescue_villager();
     new spell_q12237_drop_off_villager();
     new spell_q9452_cast_net();
+	new spell_q12277_wintergarde_mine_explosion();
 }

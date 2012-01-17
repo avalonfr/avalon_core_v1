@@ -2964,8 +2964,13 @@ void SpellMgr::LoadDbcDataCorrections()
 
         switch (spellInfo->Id)
         {
+            case 57934: // Tricks of the Trade - [Rogue]
+                spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_INITIAL_AGGRO;
+                break;			
 			case 1543: // Flare - llega al lugar donde se lanza instantaneamente
-                spellInfo->speed = 100;
+                spellInfo->EffectRadiusIndex[0] = EFFECT_RADIUS_5_YARDS;
+                spellInfo->EffectRadiusIndex[1] = EFFECT_RADIUS_5_YARDS; //10 yardas de diametro                
+				spellInfo->speed = 100;
                 break;
             case 24259: // Spell Lock
                 spellInfo->speed = 80;
@@ -3398,6 +3403,12 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
             case 70460: // Coldflame Jets (Traps after Saurfang)
                 spellInfo->DurationIndex = 1;   // 10 seconds
+                break;
+            case 69195: // Pungent Blight (Festergut)
+            case 71219: // Pungent Blight (Festergut)
+            case 73031: // Pungent Blight (Festergut)
+            case 73032: // Pungent Blight (Festergut)
+                spellInfo->InterruptFlags = 0;
                 break;
             case 71413: // Green Ooze Summon (Professor Putricide)
             case 71414: // Orange Ooze Summon (Professor Putricide)
